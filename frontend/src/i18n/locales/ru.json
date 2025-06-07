@@ -1,0 +1,125 @@
+{
+  "common": {
+    "welcome": "Добро пожаловать",
+    "login": "Вход",
+    "logout": "Выход",
+    "register": "Регистрация",
+    "profile": "Профиль",
+    "settings": "Настройки",
+    "language": "Язык",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "create": "Создать",
+    "search": "Поиск",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно"
+  },
+  "auth": {
+    "email": "Электронная почта",
+    "password": "Пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "forgotPassword": "Забыли пароль?",
+    "rememberMe": "Запомнить меня",
+    "loginSuccess": "Успешный вход",
+    "loginError": "Неверный email или пароль",
+    "registerSuccess": "Успешная регистрация",
+    "registerError": "Ошибка регистрации",
+    "companyName": "Название компании",
+    "employeeCount": "Количество сотрудников",
+    "selectCompanySize": "Выберите размер компании",
+    "companySizes": {
+      "less_than_10": "Менее 10",
+      "10_to_50": "10-50 человек",
+      "50_to_100": "50-100 человек",
+      "100_to_500": "100-500 человек",
+      "500_to_1000": "500-1000 человек",
+      "more_than_1000": "Более 1000"
+    },
+    "alreadyHaveAccount": "Уже есть аккаунт?"
+  },
+  "validation": {
+    "required": "{{field}} обязательно",
+    "email": "Неверный формат email",
+    "minLength": "{{field}} должен содержать минимум {{min}} символов",
+    "maxLength": "{{field}} не должен превышать {{max}} символов",
+    "passwordMatch": "Пароли не совпадают"
+  },
+  "receipts": {
+    "title": "Чеки",
+    "new": "Новый чек",
+    "invoiceNumber": "Номер счета",
+    "date": "Дата",
+    "client": "Клиент",
+    "product": "Товар",
+    "quantity": "Количество",
+    "unitPrice": "Цена за единицу",
+    "total": "Итого",
+    "status": {
+      "pending": "В ожидании",
+      "paid": "Оплачено",
+      "cancelled": "Отменено"
+    },
+    "items": {
+      "one": "{{count}} товар",
+      "few": "{{count}} товара",
+      "many": "{{count}} товаров",
+      "other": "{{count}} товаров"
+    }
+  },
+  "directories": {
+    "title": "Справочники",
+    "new": "Новый справочник",
+    "name": "Название",
+    "type": "Тип",
+    "attributes": "Атрибуты",
+    "entries": "Записи",
+    "addEntry": "Добавить запись",
+    "editEntry": "Редактировать запись",
+    "deleteEntry": "Удалить запись"
+  },
+  "companies": {
+    "title": "Компании",
+    "new": "Новая компания",
+    "name": "Название компании",
+    "address": "Адрес",
+    "phone": "Телефон",
+    "email": "Email",
+    "users": "Пользователи",
+    "settings": "Настройки компании",
+    "addNew": "Добавить новую компанию",
+    "editCompany": "Редактировать компанию",
+    "mainInfo": "Основная информация",
+    "addressAndLogo": "Адрес и логотип",
+    "companyDetails": "Детали компании",
+    "additionalContacts": "Дополнительные контакты",
+    "adminEmail": "Email администратора",
+    "employeeCount": "Количество сотрудников",
+    "logo": "URL логотипа",
+    "description": "Описание",
+    "website": "Веб-сайт",
+    "taxId": "ИНН",
+    "registrationNumber": "Регистрационный номер",
+    "industry": "Отрасль",
+    "foundedYear": "Год основания",
+    "contactName": "Имя контакта",
+    "contactValue": "Значение контакта",
+    "employeeCountOptions": {
+      "lessThan10": "Менее 10",
+      "10to50": "10 до 50",
+      "50to100": "50 до 100",
+      "100to500": "100 до 500",
+      "500to1000": "500 до 1000",
+      "moreThan1000": "Более 1000"
+    },
+    "status": "Статус",
+    "statusOptions": {
+      "active": "Активна",
+      "inactive": "Неактивна"
+    },
+    "boundDirectories": "Связанные справочники",
+    "showEmployees": "Показать сотрудников"
+  }
+} 

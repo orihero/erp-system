@@ -1,0 +1,399 @@
+{
+  "info": {
+    "name": "ERP System API",
+    "description": "API collection for the ERP System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "login"]
+            },
+            "description": "Authenticate user and get JWT token"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"user\": {\n        \"id\": 1,\n        \"email\": \"admin@example.com\",\n        \"role\": \"admin\",\n        \"company_id\": 1\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"company_name\": \"New Company\",\n    \"employee_count\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "register"]
+            },
+            "description": "Register a new user and company"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"company_name\": \"New Company\",\n    \"employee_count\": 10\n}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"id\": 2,\n    \"email\": \"newuser@example.com\",\n    \"role\": \"admin\",\n    \"company_id\": 2\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "profile"]
+            },
+            "description": "Get authenticated user's profile"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ]
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"id\": 1,\n    \"email\": \"admin@example.com\",\n    \"role\": \"admin\",\n    \"company_id\": 1\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Companies",
+      "item": [
+        {
+          "name": "Get Companies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/companies?page=1&limit=10&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "companies"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Get list of companies with pagination"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Company A\",\n            \"admin_email\": \"admin@companya.com\",\n            \"employee_count\": 50\n        }\n    ],\n    \"total\": 1,\n    \"page\": 1,\n    \"limit\": 10\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Directories",
+      "item": [
+        {
+          "name": "Get Company Directories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/directories/company",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "directories", "company"]
+            },
+            "description": "Get all directories for the authenticated user's company"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n    {\n        \"id\": 1,\n        \"name\": \"Clients\",\n        \"attributes\": [\n            {\n                \"id\": 1,\n                \"name\": \"Name\",\n                \"type\": \"string\"\n            }\n        ]\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Create Directory Entry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"values\": [\n        {\n            \"attribute_id\": 1,\n            \"value\": \"John Doe\"\n        }\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/directories/1/entries",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "directories", "1", "entries"]
+            },
+            "description": "Create a new entry in a directory"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"values\": [\n        {\n            \"attribute_id\": 1,\n            \"value\": \"John Doe\"\n        }\n    ]\n}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"id\": 1,\n    \"directory_id\": 1,\n    \"values\": [\n        {\n            \"attribute_id\": 1,\n            \"value\": \"John Doe\"\n        }\n    ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Receipts",
+      "item": [
+        {
+          "name": "Create Receipt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"invoice_number\": \"INV-001\",\n    \"date\": \"2024-03-20\",\n    \"client_entry_id\": 1,\n    \"product_name\": \"Product A\",\n    \"quantity\": 2,\n    \"unit_price\": 100,\n    \"payment_status\": \"paid\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/receipts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "receipts"]
+            },
+            "description": "Create a new receipt"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"invoice_number\": \"INV-001\",\n    \"date\": \"2024-03-20\",\n    \"client_entry_id\": 1,\n    \"product_name\": \"Product A\",\n    \"quantity\": 2,\n    \"unit_price\": 100,\n    \"payment_status\": \"paid\"\n}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"id\": 1,\n    \"invoice_number\": \"INV-001\",\n    \"date\": \"2024-03-20\",\n    \"client_entry_id\": 1,\n    \"product_name\": \"Product A\",\n    \"quantity\": 2,\n    \"unit_price\": 100,\n    \"payment_status\": \"paid\",\n    \"total\": 200\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Receipts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/receipts?page=1&limit=10&start_date=2024-03-01&end_date=2024-03-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "receipts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "start_date",
+                  "value": "2024-03-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2024-03-31"
+                }
+              ]
+            },
+            "description": "Get list of receipts with filtering and pagination"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"data\": [\n        {\n            \"id\": 1,\n            \"invoice_number\": \"INV-001\",\n            \"date\": \"2024-03-20\",\n            \"client_entry_id\": 1,\n            \"product_name\": \"Product A\",\n            \"quantity\": 2,\n            \"unit_price\": 100,\n            \"payment_status\": \"paid\",\n            \"total\": 200\n        }\n    ],\n    \"total\": 1,\n    \"page\": 1,\n    \"limit\": 10\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "your_jwt_token_here",
+      "type": "string"
+    }
+  ]
+} 

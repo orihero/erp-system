@@ -1,0 +1,172 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "profile": "Profile",
+    "settings": "Settings",
+    "language": "Language",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "actions": "Actions",
+    "saveChanges": "Save Changes"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "loginSuccess": "Login Successful",
+    "loginError": "Invalid email or password",
+    "registerSuccess": "Registration Successful",
+    "registerError": "Registration Error",
+    "companyName": "Company Name",
+    "employeeCount": "Number of Employees",
+    "selectCompanySize": "Select company size",
+    "companySizes": {
+      "less_than_10": "Less than 10",
+      "10_to_50": "10-50 people",
+      "50_to_100": "50-100 people",
+      "100_to_500": "100-500 people",
+      "500_to_1000": "500-1000 people",
+      "more_than_1000": "More than 1000"
+    },
+    "signup": "Sign Up",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginSuccess": "Login successful",
+    "signupSuccess": "Sign up successful",
+    "signupError": "Error creating account"
+  },
+  "validation": {
+    "required": "{{field}} is required",
+    "email": "Invalid email format",
+    "minLength": "{{field}} must be at least {{min}} characters",
+    "maxLength": "{{field}} must not exceed {{max}} characters",
+    "passwordMatch": "Passwords do not match"
+  },
+  "receipts": {
+    "title": "Receipts",
+    "new": "New Receipt",
+    "invoiceNumber": "Invoice Number",
+    "date": "Date",
+    "client": "Client",
+    "product": "Product",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "total": "Total",
+    "status": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "cancelled": "Cancelled"
+    },
+    "items": {
+      "one": "{{count}} item",
+      "other": "{{count}} items"
+    }
+  },
+  "directories": {
+    "title": "Directories",
+    "new": "New Directory",
+    "name": "Name",
+    "type": "Type",
+    "attributes": "Attributes",
+    "entries": "Entries",
+    "addEntry": "Add Entry",
+    "editEntry": "Edit Entry",
+    "deleteEntry": "Delete Entry",
+    "addNew": "Add New Directory",
+    "editDirectory": "Edit Directory",
+    "deleteConfirm": "Delete Directory",
+    "deleteWarning": "Are you sure you want to delete this directory? This action cannot be undone.",
+    "noDirectories": "No directories found",
+    "status": "Status",
+    "createdAt": "Created At",
+    "iconName": "Icon Name",
+    "fields": "Fields",
+    "fieldName": "Field Name",
+    "fieldType": "Field Type",
+    "addField": "Add Field",
+    "relatedDirectory": "Related Directory",
+    "fieldTypes": {
+      "string": "Text",
+      "number": "Number",
+      "file": "File",
+      "bool": "Boolean",
+      "date": "Date",
+      "time": "Time",
+      "json": "JSON",
+      "datetime": "Date & Time",
+      "relation": "Relation",
+      "text": "Long Text",
+      "decimal": "Decimal",
+      "integer": "Integer"
+    },
+    "types": {
+      "customer": "Customer",
+      "supplier": "Supplier",
+      "employee": "Employee"
+    },
+    "statuses": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch directories",
+      "createFailed": "Failed to create directory",
+      "updateFailed": "Failed to update directory",
+      "deleteFailed": "Failed to delete directory"
+    }
+  },
+  "companies": {
+    "title": "Companies",
+    "new": "New Company",
+    "name": "Company Name",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "users": "Users",
+    "settings": "Company Settings",
+    "addNew": "Add New Company",
+    "editCompany": "Edit Company",
+    "mainInfo": "Main Information",
+    "addressAndLogo": "Address & Logo",
+    "companyDetails": "Company Details",
+    "additionalContacts": "Additional Contacts",
+    "adminEmail": "Admin Email",
+    "employeeCount": "Employee Count",
+    "logo": "Logo URL",
+    "description": "Description",
+    "website": "Website",
+    "taxId": "Tax ID",
+    "registrationNumber": "Registration Number",
+    "industry": "Industry",
+    "foundedYear": "Founded Year",
+    "contactName": "Contact Name",
+    "contactValue": "Contact Value",
+    "employeeCountOptions": {
+      "lessThan10": "Less than 10",
+      "10to50": "10 to 50",
+      "50to100": "50 to 100",
+      "100to500": "100 to 500",
+      "500to1000": "500 to 1000",
+      "moreThan1000": "More than 1000"
+    },
+    "status": "Status",
+    "statusOptions": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "boundDirectories": "Bound Directories",
+    "showEmployees": "Show Employees"
+  }
+}

@@ -1,0 +1,91 @@
+import api from '../config';
+
+export interface DirectoryEntry {
+  id: string;
+  directory_type_id: string;
+  company_id: string;
+  values: Array<{
+    attribute_id: string;
+    value: string | number | boolean;
+  }>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Directory {
+  id: string;
+  name: string;
+  icon_name: string;
+  created_at: string;
+  updated_at: string;
+  is_enabled?: boolean;
+  fields?: DirectoryField[];
+}
+
+export interface DirectoryField {
+  id: string;
+  directory_id: string;
+  name: string;
+  type: string;
+  required: boolean;
+  relation_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const directoriesApi = {
+  // Get all directories
+  getAll: () => 
+    api.get<Directory[]>('/api/directories'),
+
+  // Get directory fields
+  getDirectoryFields: (directoryId: string) => 
+    api.get<DirectoryField[]>(`/api/directories/${directoryId}/fields`),
+
+  // Create a new directory
+  createDirectory: (data: Omit<Directory, 'id' | 'created_at' | 'updated_at'>) => 
+    api.post<Directory>('/api/directories', data),
+
+  // Update a directory
+  updateDirectory: (id: string, data: Partial<Directory>) => 
+    api.put<Directory>(`/api/directories/${id}`, data),
+
+  // Delete a directory
+  deleteDirectory: (id: string) => 
+    api.delete(`/api/directories/${id}`),
+
+  // Get directory entries with pagination and filtering
+  getDirectoryEntries: (directoryTypeId: string, params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    filters?: Record<string, any>;
+  }) => 
+    api.get<{
+      entries: DirectoryEntry[];
+      pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        total_pages: number;
+      };
+    }>(`/api/directories/${directoryTypeId}/entries`, { params }),
+
+  // Create a new directory entry
+  createDirectoryEntry: (directoryTypeId: string, values: Array<{
+    attribute_id: string;
+    value: string | number | boolean;
+  }>) => 
+    api.post<DirectoryEntry>(`/api/directories/${directoryTypeId}/entries`, { values }),
+
+  // Update a directory entry
+  updateDirectoryEntry: (directoryTypeId: string, entryId: string, values: Array<{
+    attribute_id: string;
+    value: string | number | boolean;
+  }>) => 
+    api.put<DirectoryEntry>(`/api/directories/${directoryTypeId}/entries/${entryId}`, { values }),
+
+  // Delete a directory entry
+  deleteDirectoryEntry: (directoryTypeId: string, entryId: string) => 
+    api.delete(`/api/directories/${directoryTypeId}/entries/${entryId}`)
+};

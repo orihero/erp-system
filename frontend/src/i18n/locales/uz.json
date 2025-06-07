@@ -1,0 +1,123 @@
+{
+  "common": {
+    "welcome": "Xush kelibsiz",
+    "login": "Kirish",
+    "logout": "Chiqish",
+    "register": "Ro'yxatdan o'tish",
+    "profile": "Profil",
+    "settings": "Sozlamalar",
+    "language": "Til",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "delete": "O'chirish",
+    "edit": "Tahrirlash",
+    "create": "Yaratish",
+    "search": "Qidirish",
+    "loading": "Yuklanmoqda...",
+    "error": "Xato",
+    "success": "Muvaffaqiyatli"
+  },
+  "auth": {
+    "email": "Elektron pochta",
+    "password": "Parol",
+    "confirmPassword": "Parolni tasdiqlang",
+    "forgotPassword": "Parolni unutdingizmi?",
+    "rememberMe": "Meni eslab qol",
+    "loginSuccess": "Muvaffaqiyatli kirdingiz",
+    "loginError": "Noto'g'ri email yoki parol",
+    "registerSuccess": "Muvaffaqiyatli ro'yxatdan o'tdingiz",
+    "registerError": "Ro'yxatdan o'tishda xatolik yuz berdi",
+    "companyName": "Kompaniya nomi",
+    "employeeCount": "Xodimlar soni",
+    "selectCompanySize": "Kompaniya hajmini tanlang",
+    "companySizes": {
+      "less_than_10": "10 tadan kam",
+      "10_to_50": "10-50 kishi",
+      "50_to_100": "50-100 kishi",
+      "100_to_500": "100-500 kishi",
+      "500_to_1000": "500-1000 kishi",
+      "more_than_1000": "1000 tadan ko'p"
+    },
+    "alreadyHaveAccount": "Akkauntingiz bormi?"
+  },
+  "validation": {
+    "required": "{{field}} to'ldirilishi shart",
+    "email": "Noto'g'ri email formati",
+    "minLength": "{{field}} kamida {{min}} belgidan iborat bo'lishi kerak",
+    "maxLength": "{{field}} {{max}} belgidan oshmasligi kerak",
+    "passwordMatch": "Parollar mos kelmadi"
+  },
+  "receipts": {
+    "title": "Cheklar",
+    "new": "Yangi chek",
+    "invoiceNumber": "Chek raqami",
+    "date": "Sana",
+    "client": "Mijoz",
+    "product": "Mahsulot",
+    "quantity": "Miqdor",
+    "unitPrice": "Birlik narxi",
+    "total": "Jami",
+    "status": {
+      "pending": "Kutilmoqda",
+      "paid": "To'langan",
+      "cancelled": "Bekor qilingan"
+    },
+    "items": {
+      "one": "{{count}} dona",
+      "other": "{{count}} dona"
+    }
+  },
+  "directories": {
+    "title": "Ma'lumotnomalar",
+    "new": "Yangi ma'lumotnoma",
+    "name": "Nomi",
+    "type": "Turi",
+    "attributes": "Xususiyatlar",
+    "entries": "Yozuvlar",
+    "addEntry": "Yozuv qo'shish",
+    "editEntry": "Yozuvni tahrirlash",
+    "deleteEntry": "Yozuvni o'chirish"
+  },
+  "companies": {
+    "title": "Kompaniyalar",
+    "new": "Yangi kompaniya",
+    "name": "Kompaniya nomi",
+    "address": "Manzil",
+    "phone": "Telefon",
+    "email": "Email",
+    "users": "Foydalanuvchilar",
+    "settings": "Kompaniya sozlamalari",
+    "addNew": "Yangi kompaniya qo'shish",
+    "editCompany": "Kompaniyani tahrirlash",
+    "mainInfo": "Asosiy ma'lumotlar",
+    "addressAndLogo": "Manzil va logotip",
+    "companyDetails": "Kompaniya tafsilotlari",
+    "additionalContacts": "Qo'shimcha kontaktlar",
+    "adminEmail": "Administrator emaili",
+    "employeeCount": "Xodimlar soni",
+    "logo": "Logotip URL manzili",
+    "description": "Tavsif",
+    "website": "Veb-sayt",
+    "taxId": "STIR",
+    "registrationNumber": "Ro'yxatga olish raqami",
+    "industry": "Sohasi",
+    "foundedYear": "Tashkil topgan yili",
+    "contactName": "Kontakt nomi",
+    "contactValue": "Kontakt qiymati",
+    "employeeCountOptions": {
+      "lessThan10": "10 tadan kam",
+      "10to50": "10 dan 50 gacha",
+      "50to100": "50 dan 100 gacha",
+      "100to500": "100 dan 500 gacha",
+      "500to1000": "500 dan 1000 gacha",
+      "moreThan1000": "1000 tadan ko'p"
+    },
+    "status": "Holati",
+    "statusOptions": {
+      "active": "Faol",
+      "inactive": "Faol emas"
+    },
+    "boundDirectories": "Bog'langan ma'lumotnomalar",
+    "showEmployees": "Xodimlarni ko'rsatish"
+  }
+} 
