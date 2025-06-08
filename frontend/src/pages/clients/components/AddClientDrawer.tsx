@@ -1,22 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Drawer, Box, Typography, IconButton, TextField, Button, Select, MenuItem, Chip, OutlinedInput } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import { Icon } from '@iconify/react';
+import { rolesApi, UserRole } from '@/api/services/roles';
 
-const roleOptions = [
-  { value: 'cashier', label: 'Cashier' },
-  { value: 'accountant', label: 'Accountant' },
-  { value: 'inventory_manager', label: 'Inventory Manager' },
-  { value: 'store_manager', label: 'Store Manager' },
-  { value: 'production_supervisor', label: 'Production Supervisor' },
-  { value: 'sales_manager', label: 'Sales Manager' },
-  { value: 'hr_manager', label: 'HR Manager' },
-  { value: 'quality_controller', label: 'Quality Controller' },
-  { value: 'logistics_coordinator', label: 'Logistics Coordinator' },
-  { value: 'customer_service', label: 'Customer Service' },
-  { value: 'admin', label: 'Admin' },
-  { value: 'super_admin', label: 'Super Admin' },
-];
 const statusOptions = [
   { value: 'active', label: 'Active' },
   { value: 'inactive', label: 'Inactive' },
@@ -36,6 +23,11 @@ const AddClientDrawer: React.FC<AddClientDrawerProps> = ({ open, onClose }) => {
     status: 'active',
     company: '', // Set this to the current company if needed
   });
+  const [roleOptions, setRoleOptions] = useState<UserRole[]>([]);
+
+  useEffect(() => {
+    rolesApi.getAll().then(res => setRoleOptions(res.data));
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -99,7 +91,7 @@ const AddClientDrawer: React.FC<AddClientDrawerProps> = ({ open, onClose }) => {
                 {(selected as string[]).map((value) => (
                   <Chip
                     key={value}
-                    label={roleOptions.find(r => r.value === value)?.label || value}
+                    label={roleOptions.find(r => r.name === value)?.description || value}
                     onDelete={() => handleRoleDelete(value)}
                   />
                 ))}
@@ -108,9 +100,9 @@ const AddClientDrawer: React.FC<AddClientDrawerProps> = ({ open, onClose }) => {
             fullWidth
             required
           >
-            {roleOptions.map(option => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
+            {roleOptions.map(role => (
+              <MenuItem key={role.id} value={role.name}>
+                {role.description || role.name}
               </MenuItem>
             ))}
           </Select>

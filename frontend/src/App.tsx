@@ -13,6 +13,12 @@ import Clients from './pages/clients/index';
 import Directories from './pages/directories';
 import Companies from './pages/companies/index';
 import CompanyDetail from './pages/companies/CompanyDetail';
+import Modules from './pages/modules/Modules';
+import CashierDashboard from './pages/cashier/Dashboard';
+import Receipts from './pages/cashier/Receipts';
+import DailySales from './pages/cashier/DailySales';
+import Products from './pages/cashier/Products';
+import Customers from './pages/cashier/Customers';
 
 // admin@example.com / password123
 
@@ -74,6 +80,21 @@ const AppRoutes = () => {
       <Route path="/companies/:companyId" element={
         <PrivateRoute>
           <CompanyDetail />
+        </PrivateRoute>
+      } />
+      <Route path="/modules" element={
+        <PrivateRoute>
+          <Modules />
+        </PrivateRoute>
+      } />
+      <Route path="/cashier" element={
+        <PrivateRoute>
+          <Route index element={<Navigate to="/cashier/dashboard" replace />} />
+          <Route path="dashboard" element={<CashierDashboard />} />
+          <Route path="receipts" element={<Receipts />} />
+          <Route path="daily-sales" element={<DailySales />} />
+          <Route path="products" element={<Products />} />
+          <Route path="customers" element={<Customers />} />
         </PrivateRoute>
       } />
     </Routes>

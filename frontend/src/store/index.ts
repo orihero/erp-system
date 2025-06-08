@@ -1,13 +1,22 @@
-import { configureStore } from '@reduxjs/toolkit';
-import createSagaMiddleware from 'redux-saga';
-import { rootSaga } from './sagas/rootSaga';
-
-import companyDirectoriesReducer from './slices/companyDirectoriesSlice';
-import authReducer from './slices/authSlice';
-import notificationReducer from './slices/notificationSlice';
-import usersReducer from './slices/usersSlice';
-import directoriesReducer from './slices/directoriesSlice';
-import companiesReducer from './slices/companiesSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import createSagaMiddleware from "redux-saga";
+import { all } from "redux-saga/effects";
+import authReducer from "./slices/authSlice";
+import notificationReducer from "./slices/notificationSlice";
+import usersReducer from "./slices/usersSlice";
+import directoriesReducer from "./slices/directoriesSlice";
+import companiesReducer from "./slices/companiesSlice";
+import companyDirectoriesReducer from "./slices/companyDirectoriesSlice";
+import modulesReducer from "./slices/modulesSlice";
+import rolesReducer from "./slices/rolesSlice";
+import appStateReducer from "./slices/appStateSlice";
+import { authSaga } from "./sagas/authSaga";
+import { usersSaga } from "./sagas/usersSaga";
+import { directoriesSaga } from "./sagas/directoriesSaga";
+import { companiesSaga } from "./sagas/companiesSaga";
+import { companyDirectoriesSaga } from "./sagas/companyDirectoriesSaga";
+import { modulesSaga } from "./sagas/modulesSaga";
+import { rolesSaga } from "./sagas/rolesSaga";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -18,13 +27,28 @@ export const store = configureStore({
     users: usersReducer,
     directories: directoriesReducer,
     companies: companiesReducer,
-    companyDirectories: companyDirectoriesReducer
+    companyDirectories: companyDirectoriesReducer,
+    modules: modulesReducer,
+    roles: rolesReducer,
+    appState: appStateReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(sagaMiddleware)
+    getDefaultMiddleware().concat(sagaMiddleware),
 });
+
+function* rootSaga() {
+  yield all([
+    authSaga(),
+    usersSaga(),
+    directoriesSaga(),
+    companiesSaga(),
+    companyDirectoriesSaga(),
+    modulesSaga(),
+    rolesSaga(),
+  ]);
+}
 
 sagaMiddleware.run(rootSaga);
 
 export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch; 
+export type AppDispatch = typeof store.dispatch;

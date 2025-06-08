@@ -35,5 +35,5 @@ export const companiesApi = {
   editCompany: (id: string, data: Partial<Company>) => api.put<Company>(`/api/admin/companies/${id}`, data),
   deleteCompany: (id: string) => api.delete(`/api/admin/companies/${id}`),
   getCompanyEmployees: (companyId: string, params?: { page?: number; limit?: number; search?: string }) =>
-    api.get(`/api/admin/companies/${companyId}/employees`, { params }),
+    api.get(`/api/companies/${companyId}/employees`, { params }),
 }; 

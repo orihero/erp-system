@@ -1,5 +1,271 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
+Frontend Project Rules
+
+This section outlines the key architectural and structural guidelines for the frontend codebase of the ERP system.
+
+This document outlines the key architectural and structural guidelines for the frontend codebase of the ERP system, intended to be used with Cursor AI to ensure consistency and maintainability when developing new features or modifying existing ones.
+
+1. Introduction
+
+The frontend of the ERP system is built using React, Redux Toolkit, and Redux Saga. The project follows a clear separation of concerns to manage state, handle side effects, interact with APIs, and render the user interface. Adhering to these rules will help maintain a predictable and scalable codebase.
+
+2. Core Principles
+
+•
+State Management: Redux Toolkit is used for centralized state management. State should be defined and managed within Redux slices.
+
+•
+Side Effects: All side effects, including asynchronous operations like API calls, interactions with browser storage (localStorage, sessionStorage), and navigation, must be handled within Redux Sagas.
+
+•
+API Communication: All interactions with the backend API should be encapsulated within service files located in the src/api/services directory.
+
+•
+User Interface: React components are responsible for rendering the UI and dispatching actions to the Redux store. Components should ideally be presentational and avoid containing business logic or direct API calls.
+
+3. Directory Structure
+
+The frontend/src directory contains the main application code. Key directories and their purposes are:
+
+•
+api/: Contains files related to API communication.
+
+•
+config.ts: Configuration for the API client (e.g., Axios instance).
+
+•
+services/: Contains service files, each responsible for interacting with a specific part of the backend API (e.g., auth.service.ts, companies.ts). All API requests should originate from these files.
+
+
+
+•
+assets/: Static assets like images.
+
+•
+components/: Reusable React components. Components here should be as generic as possible.
+
+•
+hooks/: Custom React hooks.
+
+•
+i18n/: Internationalization files.
+
+•
+pages/: Page-specific components and logic. These components often connect to the Redux store and dispatch actions.
+
+•
+store/: Redux store configuration, slices, and sagas.
+
+•
+sagas/: Contains Redux Saga files. Each file should handle side effects related to a specific feature or slice (e.g., authSaga.ts, companiesSaga.ts). All side effects, including API calls initiated by dispatching actions, should be managed here.
+
+•
+slices/: Contains Redux Toolkit slices. Each slice defines the initial state, reducers, and actions for a specific part of the application state (e.g., authSlice.ts, companiesSlice.ts).
+
+
+
+•
+utils/: Utility functions.
+
+4. API Requests
+
+•
+All API request logic must reside within the service files in src/api/services/. These files should export functions that utilize the configured API client (e.g., Axios) to make HTTP requests.
+
+•
+Components or Sagas should import and call these service functions to interact with the API.
+
+•
+Direct API calls from components or other parts of the application are strictly prohibited.
+
+5. Side Effects
+
+•
+Redux Sagas are the designated place for managing all side effects.
+
+•
+When a component needs to trigger a side effect (e.g., fetching data after a button click, navigating to a different page after a successful login), it should dispatch a Redux action.
+
+•
+A corresponding Saga should listen for this action and perform the necessary side effect, which might involve calling an API service, interacting with browser storage, or dispatching further actions.
+
+•
+Avoid performing side effects directly within React components (e.g., using useEffect for data fetching without dispatching a Redux action that is then handled by a Saga) or Redux reducers.
+
+6. State Management with Redux Toolkit
+
+•
+Define application state using createSlice from Redux Toolkit.
+
+•
+Reducers should be pure functions that only update the state based on the action payload. They must not contain any side effects.
+
+•
+Use createAsyncThunk within slices for simple asynchronous operations if a Saga is not strictly necessary, but for complex flows involving multiple steps, retries, or conditional logic, Sagas are preferred.
+
+7. Components
+
+•
+React components should primarily focus on rendering the UI based on props and data from the Redux store (accessed via useSelector).
+
+•
+Components should dispatch actions (using useDispatch) to trigger state changes or side effects.
+
+•
+Keep components as functional and stateless as possible. Use hooks to manage local component state when necessary, but global application state should be in Redux.
+
+8. Example Flow: User Login
+
+1.
+A login form component dispatches a loginStart action with user credentials when the form is submitted.
+
+2.
+The authSaga listens for the loginStart action.
+
+3.
+The authSaga calls the authService.login() function, passing the credentials.
+
+4.
+The authService.login() function makes the actual API request to the backend.
+
+5.
+Upon receiving a response from the API, the authService.login() function returns the data to the authSaga.
+
+6.
+The authSaga then dispatches either loginSuccess (with user data and token) or loginFailure (with an error message) actions based on the API response.
+
+7.
+The authSlice reducers handle the loginSuccess or loginFailure actions to update the authentication state in the Redux store.
+
+8.
+Components connected to the auth state update accordingly (e.g., redirecting the user to the dashboard on success, displaying an error message on failure).
+
+9.
+The authSaga also handles side effects like storing the token in localStorage or sessionStorage and showing notifications by dispatching the showNotification action.
+
+By following these guidelines, the frontend codebase will remain organized, testable, and easier for Cursor AI to understand and assist with.
+
+Backend Project Rules
+
+This section outlines the key architectural and structural guidelines for the backend codebase of the ERP system.
+
+This document outlines the key architectural and structural guidelines for the backend codebase of the ERP system, intended to be used with Cursor AI to ensure consistency and maintainability when developing new features or modifying existing ones.
+
+1. Introduction
+
+The backend of the ERP system is a Node.js application built with Express and Sequelize. It follows a structured approach to handle API requests, interact with the database, and manage business logic. Adhering to these rules will promote code organization, testability, and scalability.
+
+2. Core Principles
+
+•
+API Handling: API endpoints are defined in route files and handled by controller functions.
+
+•
+Business Logic: Business logic should primarily reside within controller functions or dedicated service/factory classes if the logic is complex and reusable.
+
+•
+Data Persistence: Database interactions are managed using Sequelize models and abstracted through factory classes.
+
+•
+Middleware: Cross-cutting concerns like authentication, authorization, and request logging are handled by middleware.
+
+3. Directory Structure
+
+The backend/ directory contains the main application code. Key directories and their purposes are:
+
+•
+controllers/: Contains controller files. Each file is responsible for handling requests for a specific resource or set of related resources. Controllers contain the main logic for processing requests, interacting with services/factories, and sending responses.
+
+•
+db/: Database related files, including schema initialization.
+
+•
+factories/: Contains factory classes. These classes encapsulate logic for creating, retrieving, updating, and deleting data using Sequelize models. They act as an abstraction layer over direct model interactions.
+
+•
+middleware/: Contains middleware functions used for request processing before reaching the route handlers (e.g., authentication, authorization).
+
+•
+models/: Contains Sequelize model definitions, representing the database tables.
+
+•
+routes/: Contains route definition files. Each file defines the API endpoints for a specific resource and maps them to the appropriate controller functions.
+
+•
+seeders/: Database seed files.
+
+•
+index.js: The main application entry point, responsible for setting up the Express application, middleware, and importing routes.
+
+4. API Request Handling Flow
+
+1.
+An incoming API request is received by the Express application (index.js).
+
+2.
+Middleware functions (e.g., authentication) process the request.
+
+3.
+The request is routed to the appropriate route definition file based on the URL (routes/).
+
+4.
+The route definition maps the request to a specific controller function (controllers/).
+
+5.
+The controller function executes the necessary business logic, which may involve calling factory methods to interact with the database.
+
+6.
+Factory methods use Sequelize models (models/) to perform database operations.
+
+7.
+The controller function formats the response data and sends it back to the client.
+
+5. Controllers
+
+•
+Controllers should contain the core logic for handling incoming requests.
+
+•
+They are responsible for validating request data, calling appropriate service or factory methods, and formatting the response.
+
+•
+Controllers should be kept relatively lean, delegating complex business logic to dedicated service or factory classes.
+
+•
+Avoid direct database interaction within controllers; always go through factory or service methods.
+
+6. Factories and Models
+
+•
+Sequelize models (models/) define the structure of the database tables and provide an interface for basic CRUD operations.
+
+•
+Factory classes (factories/) should encapsulate more complex database interactions and business logic related to specific models. They provide a higher-level abstraction over Sequelize models.
+
+•
+All database read and write operations should go through these factory classes.
+
+7. Routes
+
+•
+Route files (routes/) are solely responsible for defining API endpoints and mapping them to controller functions.
+
+•
+They should not contain any business logic or database interaction code.
+
+•
+Keep route files clean and focused on defining the API surface.
+
+8. Middleware
+
+•
+Middleware functions (middleware/) are used for tasks that need to be executed for multiple routes, such as authentication, logging, and error handling.
+
+•
+Each middleware should have a single responsibility.
+
+

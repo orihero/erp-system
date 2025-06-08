@@ -5,6 +5,8 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
   headers: {
     'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
   },
 });
 
@@ -14,6 +16,13 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Add timestamp to prevent caching for module requests
+    if (config.url?.includes('/api/modules')) {
+      config.params = {
+        ...config.params,
+        _t: new Date().getTime(),
+      };
     }
     return config;
   },

@@ -1,32 +1,13 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Avatar, IconButton, CircularProgress, TableFooter, TablePagination, Box, Button, InputBase, Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Drawer, Select, Chip, OutlinedInput } from '@mui/material';
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Avatar, IconButton, CircularProgress, TableFooter, TablePagination, Box, Button, InputBase, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { fetchUsersStart, deleteUserStart, editUserStart, User } from '../../../store/slices/usersSlice';
-import type { SelectChangeEvent } from '@mui/material/Select';
+import EditUserDrawer from './EditUserDrawer';
 
 interface ClientsTableProps {
   setDrawerOpen: (open: boolean) => void;
 }
-
-const roleOptions = [
-  { value: 'cashier', label: 'Cashier' },
-  { value: 'accountant', label: 'Accountant' },
-  { value: 'inventory_manager', label: 'Inventory Manager' },
-  { value: 'store_manager', label: 'Store Manager' },
-  { value: 'production_supervisor', label: 'Production Supervisor' },
-  { value: 'sales_manager', label: 'Sales Manager' },
-  { value: 'hr_manager', label: 'HR Manager' },
-  { value: 'quality_controller', label: 'Quality Controller' },
-  { value: 'logistics_coordinator', label: 'Logistics Coordinator' },
-  { value: 'customer_service', label: 'Customer Service' },
-  { value: 'admin', label: 'Admin' },
-  { value: 'super_admin', label: 'Super Admin' },
-];
-const statusOptions = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-];
 
 const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
   const dispatch = useAppDispatch();
@@ -36,7 +17,6 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
-  const [editForm, setEditForm] = useState<Partial<User>>({});
 
   useEffect(() => {
     dispatch(fetchUsersStart({ page, limit, search }));
@@ -79,47 +59,16 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
 
   const handleEditClick = (user: User) => {
     setUserToEdit(user);
-    setEditForm({
-      firstname: user.firstname,
-      lastname: user.lastname,
-      email: user.email,
-      roles: user.roles || (user.role ? [user.role] : []),
-      status: user.status,
-    });
     setEditModalOpen(true);
   };
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
-    const { name, value } = e.target;
-    setEditForm(prev => ({
-      ...prev,
-      [name!]: name === 'roles' ? (typeof value === 'string' ? value.split(',') : value) : value
-    }));
-  };
-  const handleEditSave = () => {
-    if (userToEdit) {
-      dispatch(editUserStart({ id: userToEdit.id, data: editForm }));
-      setEditModalOpen(false);
-      setUserToEdit(null);
-    }
+  const handleEditSave = (id: string, data: Partial<User>) => {
+    dispatch(editUserStart({ id, data }));
+    setEditModalOpen(false);
+    setUserToEdit(null);
   };
   const handleEditCancel = () => {
     setEditModalOpen(false);
     setUserToEdit(null);
-  };
-
-  const handleRolesChange = (event: SelectChangeEvent<string[]>) => {
-    const { value } = event.target;
-    setEditForm(prev => ({
-      ...prev,
-      roles: typeof value === 'string' ? value.split(',') : value,
-    }));
-  };
-
-  const handleRoleDelete = (roleToDelete: string) => {
-    setEditForm(prev => ({
-      ...prev,
-      roles: (prev.roles || []).filter(role => role !== roleToDelete)
-    }));
   };
 
   if (loading) {
@@ -246,73 +195,12 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
         </DialogActions>
       </Dialog>
       {/* Edit User Drawer */}
-      <Drawer
-        anchor="right"
+      <EditUserDrawer
         open={editModalOpen}
+        user={userToEdit}
         onClose={handleEditCancel}
-        PaperProps={{
-          sx: {
-            width: 420,
-            maxWidth: '100vw',
-            borderTopLeftRadius: 24,
-            borderBottomLeftRadius: 24,
-            boxShadow: '0 4px 32px 0 rgba(0,0,0,0.10)',
-          },
-        }}
-      >
-        <Box sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-            <Typography variant="h5" fontWeight={700}>Edit Client</Typography>
-            <IconButton onClick={handleEditCancel}>
-              <Icon icon="ph:x" width={28} />
-            </IconButton>
-          </Box>
-          <form style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24 }} onSubmit={e => { e.preventDefault(); handleEditSave(); }}>
-            <TextField label="First Name" name="firstname" value={editForm.firstname || ''} onChange={handleEditChange} fullWidth required />
-            <TextField label="Last Name" name="lastname" value={editForm.lastname || ''} onChange={handleEditChange} fullWidth required />
-            <TextField label="Email" name="email" value={editForm.email || ''} onChange={handleEditChange} fullWidth required type="email" />
-            <Select
-              multiple
-              name="roles"
-              value={editForm.roles || []}
-              onChange={handleRolesChange}
-              input={<OutlinedInput label="Roles" />}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {(selected as string[]).map((value) => (
-                    <Chip
-                      key={value}
-                      label={roleOptions.find(r => r.value === value)?.label || value}
-                      onDelete={() => handleRoleDelete(value)}
-                    />
-                  ))}
-                </Box>
-              )}
-              fullWidth
-              required
-            >
-              {roleOptions.map(option => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </Select>
-            <TextField
-              label="Company"
-              value={userToEdit?.company?.name || ''}
-              fullWidth
-              disabled
-            />
-            <TextField select label="Status" name="status" value={editForm.status || ''} onChange={handleEditChange} fullWidth required>
-              {statusOptions.map(option => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
-            </TextField>
-            <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-              <Button onClick={handleEditCancel} variant="outlined" sx={{ borderRadius: 999, textTransform: 'none' }}>Cancel</Button>
-              <Button type="submit" variant="contained" sx={{ borderRadius: 999, textTransform: 'none', bgcolor: '#3b82f6' }}>Save Changes</Button>
-            </Box>
-          </form>
-        </Box>
-      </Drawer>
+        onSave={handleEditSave}
+      />
     </Box>
   );
 };

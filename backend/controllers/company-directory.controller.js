@@ -5,21 +5,12 @@ const companyDirectoryController = {
   // Create a new company directory
   create: async (req, res) => {
     try {
-      const { company_id, directory_id, values } = req.body;
+      const { company_id, directory_id } = req.body;
       
       const companyDirectory = await CompanyDirectory.create({
         company_id,
         directory_id
       });
-
-      if (values && values.length > 0) {
-        await Promise.all(values.map(value =>
-          DirectoryValue.create({
-            ...value,
-            company_directory_id: companyDirectory.id
-          })
-        ));
-      }
 
       const createdCompanyDirectory = await CompanyDirectory.findByPk(companyDirectory.id, {
         include: [
@@ -30,10 +21,6 @@ const companyDirectoryController = {
               model: DirectoryField,
               as: 'fields'
             }]
-          },
-          {
-            model: DirectoryValue,
-            as: 'values'
           }
         ]
       });
@@ -70,10 +57,6 @@ const companyDirectoryController = {
               model: DirectoryField,
               as: 'fields'
             }]
-          },
-          {
-            model: DirectoryValue,
-            as: 'values'
           }
         ],
         order: [['created_at', 'DESC']]
@@ -81,6 +64,7 @@ const companyDirectoryController = {
 
       res.json(companyDirectories);
     } catch (error) {
+      console.error('Error in findAll:', error);
       res.status(500).json({ message: error.message });
     }
   },
@@ -97,10 +81,6 @@ const companyDirectoryController = {
               model: DirectoryField,
               as: 'fields'
             }]
-          },
-          {
-            model: DirectoryValue,
-            as: 'values'
           }
         ]
       });
@@ -118,26 +98,10 @@ const companyDirectoryController = {
   // Update a company directory
   update: async (req, res) => {
     try {
-      const { values } = req.body;
       const companyDirectory = await CompanyDirectory.findByPk(req.params.id);
 
       if (!companyDirectory) {
         return res.status(404).json({ message: 'Company directory not found' });
-      }
-
-      if (values) {
-        // Delete existing values
-        await DirectoryValue.destroy({
-          where: { company_directory_id: companyDirectory.id }
-        });
-
-        // Create new values
-        await Promise.all(values.map(value =>
-          DirectoryValue.create({
-            ...value,
-            company_directory_id: companyDirectory.id
-          })
-        ));
       }
 
       const updatedCompanyDirectory = await CompanyDirectory.findByPk(companyDirectory.id, {
@@ -149,10 +113,6 @@ const companyDirectoryController = {
               model: DirectoryField,
               as: 'fields'
             }]
-          },
-          {
-            model: DirectoryValue,
-            as: 'values'
           }
         ]
       });
@@ -172,6 +132,14 @@ const companyDirectoryController = {
         return res.status(404).json({ message: 'Company directory not found' });
       }
 
+      // Delete all directory values associated with this company directory
+      await DirectoryValue.destroy({
+        where: {
+          company_directory_id: companyDirectory.id
+        }
+      });
+
+      // Now delete the company directory
       await companyDirectory.destroy();
       res.json({ message: 'Company directory deleted successfully' });
     } catch (error) {

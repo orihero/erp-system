@@ -121,7 +121,12 @@ router.get("/profile", authenticateToken, async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
+    // Fetch roles for this user and company
+    const roles = await UserFactory.getUserRoles(user.id, user.company_id);
+    res.json({
+      ...user.toJSON(),
+      roles: roles.map(role => role.name)
+    });
   } catch (error) {
     console.error("Error fetching user profile:", error);
     res.status(500).json({ error: "Failed to fetch user profile" });
@@ -188,7 +193,12 @@ router.get("/me", authenticateToken, async (req, res) => {
 // Get all users (admin only)
 router.get("/", authenticateToken, checkRole(["super_admin", "admin"]), async (req, res) => {
   try {
-    const users = await userFactory.findAll();
+    // Parse page and limit from query string, with defaults
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const search = req.query.search || "";
+
+    const users = await userFactory.findAll({ page, limit, search });
     res.json(users);
   } catch (error) {
     console.error("Error getting users:", error);
@@ -210,11 +220,42 @@ router.post("/", authenticateToken, checkRole(["super_admin", "admin"]), async (
 // Update user (admin only)
 router.put("/:id", authenticateToken, checkRole(["super_admin", "admin"]), async (req, res) => {
   try {
-    const user = await UserFactory.update(req.params.id, req.body);
-    res.json(user);
+    const { roles, ...userData } = req.body;
+    const user = await userFactory.update(req.params.id, userData);
+
+    // Update roles if provided
+    if (Array.isArray(roles)) {
+      // Remove all current roles for this user in this company
+      await models.UserRoleAssignment.destroy({
+        where: { user_id: req.params.id, company_id: user.company_id }
+      });
+      // Add new roles
+      for (const roleName of roles) {
+        const role = await models.UserRole.findOne({ where: { name: roleName } });
+        if (role) {
+          await models.UserRoleAssignment.create({
+            user_id: req.params.id,
+            role_id: role.id,
+            company_id: user.company_id
+          });
+        }
+      }
+    }
+
+    // Fetch updated roles to return in response
+    const updatedRoles = await models.UserRoleAssignment.findAll({
+      where: { user_id: req.params.id, company_id: user.company_id },
+      include: [{ model: models.UserRole, as: 'role' }]
+    });
+    const roleNames = updatedRoles.map(assignment => assignment.role.name);
+
+    res.json({ ...user.toJSON(), roles: roleNames });
   } catch (error) {
     console.error("Error updating user:", error);
-    res.status(500).json({ message: "Internal server error" });
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+    res.status(500).json({ error: error.message || "Internal server error" });
   }
 });
 

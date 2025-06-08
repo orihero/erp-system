@@ -138,6 +138,423 @@
       ]
     },
     {
+      "name": "Modules",
+      "item": [
+        {
+          "name": "Get All Modules",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/modules",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "modules"]
+            },
+            "description": "Get all available modules"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n    {\n        \"id\": \"1\",\n        \"name\": \"Cashier\",\n        \"icon_name\": \"solar:shop-2-linear\",\n        \"is_enabled\": true,\n        \"created_at\": \"2024-03-20T00:00:00Z\",\n        \"updated_at\": \"2024-03-20T00:00:00Z\"\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Company Modules",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/modules/company/{{companyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "modules", "company", "{{companyId}}"]
+            },
+            "description": "Get modules for a specific company"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n    {\n        \"id\": \"1\",\n        \"name\": \"Cashier\",\n        \"icon_name\": \"solar:shop-2-linear\",\n        \"is_enabled\": true,\n        \"created_at\": \"2024-03-20T00:00:00Z\",\n        \"updated_at\": \"2024-03-20T00:00:00Z\"\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Toggle Module",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/modules/company/{{companyId}}/toggle/{{moduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "modules", "company", "{{companyId}}", "toggle", "{{moduleId}}"]
+            },
+            "description": "Toggle module enabled status for a company"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"message\": \"Module toggled successfully\",\n    \"is_enabled\": true\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Directories",
+      "item": [
+        {
+          "name": "Get All Directories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/directories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "directories"]
+            },
+            "description": "Get all directories"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n    {\n        \"id\": \"1\",\n        \"name\": \"Clients\",\n        \"icon_name\": \"solar:users-group-rounded-linear\",\n        \"created_at\": \"2024-03-20T00:00:00Z\",\n        \"updated_at\": \"2024-03-20T00:00:00Z\",\n        \"is_enabled\": true\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Directory Fields",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/directories/{{directoryId}}/fields",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "directories", "{{directoryId}}", "fields"]
+            },
+            "description": "Get fields for a specific directory"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n    {\n        \"id\": \"1\",\n        \"directory_id\": \"1\",\n        \"name\": \"Name\",\n        \"type\": \"string\",\n        \"required\": true,\n        \"created_at\": \"2024-03-20T00:00:00Z\",\n        \"updated_at\": \"2024-03-20T00:00:00Z\"\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Create Directory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"New Directory\",\n    \"icon_name\": \"solar:folder-linear\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/directories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "directories"]
+            },
+            "description": "Create a new directory"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"New Directory\",\n    \"icon_name\": \"solar:folder-linear\"\n}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"id\": \"2\",\n    \"name\": \"New Directory\",\n    \"icon_name\": \"solar:folder-linear\",\n    \"created_at\": \"2024-03-20T00:00:00Z\",\n    \"updated_at\": \"2024-03-20T00:00:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Directory Entries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/directories/{{directoryId}}/entries?page=1&limit=10&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "directories", "{{directoryId}}", "entries"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Get directory entries with pagination and filtering"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"entries\": [\n        {\n            \"id\": \"1\",\n            \"directory_type_id\": \"1\",\n            \"company_id\": \"1\",\n            \"values\": [\n                {\n                    \"attribute_id\": \"1\",\n                    \"value\": \"John Doe\"\n                }\n            ],\n            \"created_at\": \"2024-03-20T00:00:00Z\",\n            \"updated_at\": \"2024-03-20T00:00:00Z\"\n        }\n    ],\n    \"pagination\": {\n        \"total\": 1,\n        \"page\": 1,\n        \"limit\": 10,\n        \"total_pages\": 1\n    }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=1&limit=10&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Get list of users with pagination and search"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"users\": [\n        {\n            \"id\": \"1\",\n            \"email\": \"admin@example.com\",\n            \"firstname\": \"Admin\",\n            \"lastname\": \"User\",\n            \"role\": \"admin\",\n            \"status\": \"active\",\n            \"company_id\": \"1\",\n            \"company\": {\n                \"name\": \"Example Company\"\n            }\n        }\n    ],\n    \"pagination\": {\n        \"total\": 1,\n        \"page\": 1,\n        \"limit\": 10,\n        \"total_pages\": 1\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Edit User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"updated@example.com\",\n    \"firstname\": \"Updated\",\n    \"lastname\": \"User\",\n    \"role\": \"user\",\n    \"status\": \"active\",\n    \"company_id\": \"1\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}"]
+            },
+            "description": "Update user information"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"updated@example.com\",\n    \"firstname\": \"Updated\",\n    \"lastname\": \"User\",\n    \"role\": \"user\",\n    \"status\": \"active\",\n    \"company_id\": \"1\"\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"id\": \"1\",\n    \"email\": \"updated@example.com\",\n    \"firstname\": \"Updated\",\n    \"lastname\": \"User\",\n    \"role\": \"user\",\n    \"status\": \"active\",\n    \"company_id\": \"1\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}"]
+            },
+            "description": "Delete a user"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "DELETE"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"message\": \"User deleted successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Companies",
       "item": [
         {
@@ -151,9 +568,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/companies?page=1&limit=10&search=",
+              "raw": "{{baseUrl}}/api/admin/companies?page=1&limit=10",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "companies"],
+              "path": ["api", "admin", "companies"],
               "query": [
                 {
                   "key": "page",
@@ -162,10 +579,6 @@
                 {
                   "key": "limit",
                   "value": "10"
-                },
-                {
-                  "key": "search",
-                  "value": ""
                 }
               ]
             },
@@ -185,17 +598,59 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Company A\",\n            \"admin_email\": \"admin@companya.com\",\n            \"employee_count\": 50\n        }\n    ],\n    \"total\": 1,\n    \"page\": 1,\n    \"limit\": 10\n}"
+              "body": "{\n    \"companies\": [\n        {\n            \"id\": \"1\",\n            \"name\": \"Example Company\",\n            \"email\": \"contact@example.com\",\n            \"employee_count\": 50,\n            \"status\": \"active\",\n            \"logo\": \"https://example.com/logo.png\",\n            \"address\": \"123 Main St\",\n            \"description\": \"Example company description\",\n            \"website\": \"https://example.com\",\n            \"phone\": \"+1234567890\",\n            \"tax_id\": \"TAX123\",\n            \"registration_number\": \"REG456\",\n            \"industry\": \"Technology\",\n            \"founded_year\": 2020,\n            \"contacts\": {\n                \"sales\": \"sales@example.com\",\n                \"support\": \"support@example.com\"\n            }\n        }\n    ],\n    \"pagination\": {\n        \"total\": 1,\n        \"page\": 1,\n        \"limit\": 10,\n        \"total_pages\": 1\n    }\n}"
             }
           ]
-        }
-      ]
-    },
-    {
-      "name": "Directories",
-      "item": [
+        },
         {
-          "name": "Get Company Directories",
+          "name": "Add Company",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"New Company\",\n    \"email\": \"contact@newcompany.com\",\n    \"employee_count\": 25,\n    \"status\": \"active\",\n    \"address\": \"456 New St\",\n    \"description\": \"New company description\",\n    \"website\": \"https://newcompany.com\",\n    \"phone\": \"+0987654321\",\n    \"tax_id\": \"TAX789\",\n    \"registration_number\": \"REG012\",\n    \"industry\": \"Finance\",\n    \"founded_year\": 2024,\n    \"contacts\": {\n        \"sales\": \"sales@newcompany.com\",\n        \"support\": \"support@newcompany.com\"\n    }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/companies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "companies"]
+            },
+            "description": "Create a new company"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"New Company\",\n    \"email\": \"contact@newcompany.com\",\n    \"employee_count\": 25,\n    \"status\": \"active\",\n    \"address\": \"456 New St\",\n    \"description\": \"New company description\",\n    \"website\": \"https://newcompany.com\",\n    \"phone\": \"+0987654321\",\n    \"tax_id\": \"TAX789\",\n    \"registration_number\": \"REG012\",\n    \"industry\": \"Finance\",\n    \"founded_year\": 2024,\n    \"contacts\": {\n        \"sales\": \"sales@newcompany.com\",\n        \"support\": \"support@newcompany.com\"\n    }\n}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"id\": \"2\",\n    \"name\": \"New Company\",\n    \"email\": \"contact@newcompany.com\",\n    \"employee_count\": 25,\n    \"status\": \"active\",\n    \"address\": \"456 New St\",\n    \"description\": \"New company description\",\n    \"website\": \"https://newcompany.com\",\n    \"phone\": \"+0987654321\",\n    \"tax_id\": \"TAX789\",\n    \"registration_number\": \"REG012\",\n    \"industry\": \"Finance\",\n    \"founded_year\": 2024,\n    \"contacts\": {\n        \"sales\": \"sales@newcompany.com\",\n        \"support\": \"support@newcompany.com\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Company Employees",
           "request": {
             "method": "GET",
             "header": [
@@ -205,11 +660,25 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/directories/company",
+              "raw": "{{baseUrl}}/api/companies/{{companyId}}/employees?page=1&limit=10&search=",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "directories", "company"]
+              "path": ["api", "companies", "{{companyId}}", "employees"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
             },
-            "description": "Get all directories for the authenticated user's company"
+            "description": "Get employees for a specific company"
           },
           "response": [
             {
@@ -225,54 +694,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "[\n    {\n        \"id\": 1,\n        \"name\": \"Clients\",\n        \"attributes\": [\n            {\n                \"id\": 1,\n                \"name\": \"Name\",\n                \"type\": \"string\"\n            }\n        ]\n    }\n]"
-            }
-          ]
-        },
-        {
-          "name": "Create Directory Entry",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"values\": [\n        {\n            \"attribute_id\": 1,\n            \"value\": \"John Doe\"\n        }\n    ]\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/directories/1/entries",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "directories", "1", "entries"]
-            },
-            "description": "Create a new entry in a directory"
-          },
-          "response": [
-            {
-              "name": "Success Response",
-              "originalRequest": {
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"values\": [\n        {\n            \"attribute_id\": 1,\n            \"value\": \"John Doe\"\n        }\n    ]\n}"
-                }
-              },
-              "status": "Created",
-              "code": 201,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n    \"id\": 1,\n    \"directory_id\": 1,\n    \"values\": [\n        {\n            \"attribute_id\": 1,\n            \"value\": \"John Doe\"\n        }\n    ]\n}"
+              "body": "{\n    \"employees\": [\n        {\n            \"id\": \"1\",\n            \"email\": \"employee@example.com\",\n            \"firstname\": \"John\",\n            \"lastname\": \"Doe\",\n            \"role\": \"employee\",\n            \"status\": \"active\"\n        }\n    ],\n    \"pagination\": {\n        \"total\": 1,\n        \"page\": 1,\n        \"limit\": 10,\n        \"total_pages\": 1\n    }\n}"
             }
           ]
         }
@@ -393,6 +815,26 @@
     {
       "key": "token",
       "value": "your_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "companyId",
+      "value": "your_company_id_here",
+      "type": "string"
+    },
+    {
+      "key": "moduleId",
+      "value": "your_module_id_here",
+      "type": "string"
+    },
+    {
+      "key": "directoryId",
+      "value": "your_directory_id_here",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "your_user_id_here",
       "type": "string"
     }
   ]

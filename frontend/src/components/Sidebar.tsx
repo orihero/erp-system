@@ -2,38 +2,71 @@ import React from 'react';
 import { Box, List, ListItemButton, ListItemIcon, ListItemText, Paper } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store';
 
-const menuItems = [
-  {
-    label: 'Dashboard',
-    icon: 'solar:home-2-linear',
-    path: '/dashboard',
-  },
-  {
-    label: 'Clients',
-    icon: 'solar:users-group-rounded-linear',
-    path: '/clients',
-  },
-  {
-    label: 'Directories',
-    icon: 'solar:folder-outline',
-    path: '/directories',
-  },
-  {
-    label: 'Companies',
-    icon: 'solar:case-round-minimalistic-outline',
-    path: '/companies',
-  },
-];
-
-// Mock user role (replace with Redux/store selector as needed)
-const userRole = 'super_admin';
+// Define navigation items for each module
+const moduleNavigationItems = {
+  cashier: [
+    {
+      label: 'Dashboard',
+      icon: 'solar:home-2-linear',
+      path: '/cashier/dashboard',
+    },
+    {
+      label: 'Receipts',
+      icon: 'quill:paper',
+      path: '/cashier/receipts',
+    },
+    {
+      label: 'Products',
+      icon: 'solar:box-linear',
+      path: '/cashier/products',
+    },
+    {
+      label: 'Customers',
+      icon: 'solar:users-group-rounded-linear',
+      path: '/cashier/customers',
+    },
+  ],
+  default: [
+    {
+      label: 'Dashboard',
+      icon: 'solar:home-2-linear',
+      path: '/dashboard',
+    },
+    {
+      label: 'Clients',
+      icon: 'solar:users-group-rounded-linear',
+      path: '/clients',
+    },
+    {
+      label: 'Directories',
+      icon: 'solar:folder-linear',
+      path: '/directories',
+    },
+    {
+      label: 'Companies',
+      icon: 'solar:buildings-linear',
+      path: '/companies',
+    },
+    {
+      label: 'Modules',
+      icon: 'solar:widget-linear',
+      path: '/modules',
+    },
+  ],
+};
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  // In a real app, filter menuItems based on userRole
-  const items = userRole === 'super_admin' ? menuItems : [];
+  const currentModule = useSelector((state: RootState) => state.appState.currentModule);
+
+  // Get navigation items based on the current module
+  const navigationItems = currentModule?.name.toLowerCase() === 'cashier' 
+    ? moduleNavigationItems.cashier 
+    : moduleNavigationItems.default;
 
   return (
     <Box
@@ -66,7 +99,7 @@ const Sidebar: React.FC = () => {
         }}
       >
         <List sx={{ width: '100%', p: 0 }}>
-          {items.map((item) => (
+          {navigationItems.map((item) => (
             <ListItemButton
               key={item.label}
               sx={{

@@ -44,8 +44,6 @@ const directoryController = {
         }
       } : {};
 
-      console.log('Finding directories with where clause:', where);
-
       const directories = await Directory.findAll({
         where,
         include: [{
@@ -55,7 +53,6 @@ const directoryController = {
         order: [['created_at', 'DESC']]
       });
 
-      console.log('Found directories:', JSON.stringify(directories, null, 2));
       res.json(directories);
     } catch (error) {
       console.error('Error in findAll:', error);

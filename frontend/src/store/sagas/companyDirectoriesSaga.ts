@@ -13,7 +13,7 @@ import {
 
 function* fetchCompanyDirectoriesSaga(action: PayloadAction<{ companyId: string }>): Generator {
   try {
-    const [allDirsRes, companyDirsRes] = yield call(Promise.all, [
+    const [allDirsRes, companyDirsRes] = yield call([Promise, 'all'], [
       directoriesApi.getAll(),
       companyDirectoriesApi.getCompanyDirectories(action.payload.companyId)
     ]);
@@ -23,7 +23,8 @@ function* fetchCompanyDirectoriesSaga(action: PayloadAction<{ companyId: string 
       const companyDir = companyDirsRes.data.find((cd: CompanyDirectoryResponse) => cd.directory_id === dir.id);
       return {
         ...dir,
-        is_enabled: !!companyDir
+        is_enabled: !!companyDir,
+        company_directory_id: companyDir?.id // Store the company directory ID for later use
       };
     });
 
@@ -33,7 +34,8 @@ function* fetchCompanyDirectoriesSaga(action: PayloadAction<{ companyId: string 
       icon_name: entry.directory.icon_name,
       created_at: entry.created_at,
       updated_at: entry.updated_at,
-      is_enabled: true
+      is_enabled: true,
+      company_directory_id: entry.id
     }));
 
     yield put(fetchCompanyDirectoriesSuccess({
@@ -47,7 +49,7 @@ function* fetchCompanyDirectoriesSaga(action: PayloadAction<{ companyId: string 
 
 function* toggleCompanyDirectorySaga(action: PayloadAction<{
   companyId: string;
-  directory: Directory;
+  directory: Directory & { company_directory_id?: string };
   isEnabled: boolean;
 }>): Generator {
   try {
@@ -55,14 +57,17 @@ function* toggleCompanyDirectorySaga(action: PayloadAction<{
 
     if (isEnabled) {
       // Add directory to company
-      yield call(companyDirectoriesApi.addDirectoryToCompany, companyId, directory.id, [
-        { attribute_id: 'name', value: directory.name },
-        { attribute_id: 'icon_name', value: directory.icon_name }
-      ]);
+      yield call(companyDirectoriesApi.addDirectoryToCompany, companyId, directory.id, []);
     } else {
-      // Remove directory from company
-      yield call(companyDirectoriesApi.removeDirectoryFromCompany, directory.id);
+      // Remove directory from company using company_directory_id
+      if (!directory.company_directory_id) {
+        throw new Error('Company directory ID not found');
+      }
+      yield call(companyDirectoriesApi.removeDirectoryFromCompany, directory.company_directory_id);
     }
+
+    // Refetch company directories after successful toggle
+    yield put(fetchCompanyDirectories({ companyId }));
 
     yield put(toggleCompanyDirectorySuccess({
       directory,

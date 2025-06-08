@@ -1,28 +1,36 @@
 import { Icon } from '@iconify/react';
 import { Avatar, Box, IconButton, Menu, MenuItem, Paper, Tab, Tabs, Typography } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/store/slices/authSlice';
-
-const navTabs = [
-  'Dashboard',
-  'Patients',
-  'Appointments',
-  'Docs',
-  'Study materials',
-];
+import { fetchModulesStart } from '@/store/slices/modulesSlice';
+import { setCurrentModule } from '@/store/slices/appStateSlice';
+import type { RootState } from '@/store';
+import type { Module } from '@/api/services/modules';
 
 export default function DashboardHeader() {
-  const [tab, setTab] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state: any) => state.auth.user);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const companyId = user?.company?.id;
+  const enabledModules = useSelector((state: RootState) =>
+    (state.modules.modules as Module[]).filter((m) => m.is_enabled)
+  );
+  const currentModule = useSelector((state: RootState) => state.appState.currentModule);
+  const isOwner = user?.roles.includes('owner');
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTab(newValue);
+  useEffect(() => {
+    if (isOwner && companyId) {
+      dispatch(fetchModulesStart(companyId));
+    }
+  }, [dispatch, isOwner, companyId]);
+
+  const handleModuleChange = (_: React.SyntheticEvent, newValue: number) => {
+    const selectedModule = enabledModules[newValue];
+    dispatch(setCurrentModule(selectedModule));
   };
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -65,41 +73,43 @@ export default function DashboardHeader() {
             Symptra
           </Typography>
         </Box>
-        {/* Center: Nav Tabs in pill container */}
-        <Box sx={{ bgcolor: '#eef2f5', borderRadius: 999, px: 1, py: 0.5, display: 'flex', alignItems: 'center', minWidth: 500 }}>
-          <Tabs
-            value={tab}
-            onChange={handleTabChange}
-            sx={{ minHeight: 0, "&.Mui-selected": { color: '#fff' } }}
-            slotProps={{ indicator: { style: { display: 'none' }, } }}
-          >
-            {navTabs.map((label, idx) => (
-              <Tab
-                key={label}
-                label={label}
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  fontSize: 16,
-                  color: '#222',
-                  bgcolor: 'transparent',
-                  borderRadius: 999,
-                  px: 3,
-                  minHeight: 40,
-                  mr: 0.5,
-                  transition: 'all 0.2s',
-                  '&.Mui-selected': {
-                    color: '#fff',
-                    bgcolor: '#1a1e1c',
-                  },
-                  '&:hover': {
-                    bgcolor: tab === idx ? '#1a1e1c' : '#ececec',
-                  },
-                }}
-              />
-            ))}
-          </Tabs>
-        </Box>
+        {/* Center: Nav Tabs in pill container, only for owner */}
+        {isOwner && (
+          <Box sx={{ bgcolor: '#eef2f5', borderRadius: 999, px: 1, py: 0.5, display: 'flex', alignItems: 'center', width: 'fit-content' }}>
+            <Tabs
+              value={currentModule ? enabledModules.findIndex(m => m.id === currentModule.id) : 0}
+              onChange={handleModuleChange}
+              sx={{ minHeight: 0, "&.Mui-selected": { color: '#fff' } }}
+              slotProps={{ indicator: { style: { display: 'none' }, } }}
+            >
+              {enabledModules.map((mod, idx) => (
+                <Tab
+                  key={mod.id}
+                  label={mod.name}
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    fontSize: 16,
+                    color: '#222',
+                    bgcolor: 'transparent',
+                    borderRadius: 999,
+                    px: 3,
+                    minHeight: 40,
+                    mr: 0.5,
+                    transition: 'all 0.2s',
+                    '&.Mui-selected': {
+                      color: '#fff',
+                      bgcolor: '#1a1e1c',
+                    },
+                    '&:hover': {
+                      bgcolor: currentModule?.id === mod.id ? '#1a1e1c' : '#ececec',
+                    },
+                  }}
+                />
+              ))}
+            </Tabs>
+          </Box>
+        )}
         {/* Right: Icons and User in bubbles */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box sx={{ bgcolor: '#eef2f5', borderRadius: 999, p: 0.5, display: 'flex', alignItems: 'center', mr: 1 }}>
@@ -113,9 +123,9 @@ export default function DashboardHeader() {
             </IconButton>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 999, px: 2, py: 0.5 }}>
-            <Avatar src={user?.avatar || undefined} sx={{ width: 40, height: 40, mr: 1 }} />
+            <Avatar sx={{ width: 40, height: 40, mr: 1 }} />
             <Box sx={{ textAlign: 'right', mr: 1 }}>
-              <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{user ? `${user.firstname || ''} ${user.lastname || ''}` : 'User'}</Typography>
+              <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{user ? user.name || 'User' : 'User'}</Typography>
               <Typography sx={{ fontSize: 12, color: '#888', textAlign: 'left' }}>{user?.email || ''}</Typography>
             </Box>
             <IconButton onClick={handleMenu} size="small" sx={{ color: '#222' }}>

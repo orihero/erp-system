@@ -6,7 +6,7 @@ const morgan = require("morgan");
 const fs = require("fs");
 const path = require("path");
 const { initializeDatabase } = require("./db/schema");
-const statisticsRouter = require('./routes/statistics');
+const routes = require('./routes');
 
 // Load environment variables
 dotenv.config();
@@ -40,14 +40,8 @@ app.use(limiter);
 app.use(morgan("dev")); // Console logging
 app.use(morgan("combined", { stream: accessLogStream })); // File logging
 
-// Routes
-app.use("/api/users", require("./routes/users"));
-app.use("/api/admin/companies", require("./routes/superadmin/companies"));
-app.use("/api/superadmin", require("./routes/superadmin"));
-app.use("/api/modules", require("./routes/superadmin/modules"));
-app.use("/api/receipts", require("./routes/receipts"));
-app.use('/api/statistics', statisticsRouter);
-app.use('/api/directories', require('./routes/directory.routes'));
+// Mount all routes
+app.use('/api', routes);
 
 // Basic route for testing
 app.get("/", (req, res) => {

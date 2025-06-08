@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -6,12 +6,15 @@ import {
   Switch,
   FormControlLabel,
   CircularProgress,
-  Alert,
-  Chip
+  Alert
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
 import type { Company } from '@/api/services/companies';
-import { modulesApi, type Module } from '@/api/services/modules';
+import type { Module } from '@/api/services/modules';
+import { Icon } from '@iconify/react';
+import { RootState } from '@/store';
+import { fetchModulesStart, toggleModuleStart } from '@/store/slices/modulesSlice';
 
 interface ModulesTabProps {
   company: Company;
@@ -19,68 +22,15 @@ interface ModulesTabProps {
 
 const ModulesTab: React.FC<ModulesTabProps> = ({ company }) => {
   const { t } = useTranslation();
-  const [allModules, setAllModules] = useState<Module[]>([]);
-  const [companyModules, setCompanyModules] = useState<Module[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [updating, setUpdating] = useState<Record<string, boolean>>({});
+  const dispatch = useDispatch();
+  const { modules, loading, error, updating } = useSelector((state: RootState) => state.modules);
 
   useEffect(() => {
-    const fetchModules = async () => {
-      try {
-        setLoading(true);
-        const [allModulesRes, companyModulesRes] = await Promise.all([
-          modulesApi.getAllModules(),
-          modulesApi.getCompanyModules(company.id)
-        ]);
+    dispatch(fetchModulesStart(company.id));
+  }, [dispatch, company.id]);
 
-        // Merge the data to show all modules with their enabled status
-        const mergedModules = allModulesRes.data.map(module => {
-          const companyModule = companyModulesRes.data.find(cm => cm.id === module.id);
-          return {
-            ...module,
-            is_enabled: companyModule?.is_enabled || false
-          };
-        });
-
-        setAllModules(mergedModules);
-        setCompanyModules(companyModulesRes.data);
-        setError(null);
-      } catch (err) {
-        setError(t('companies.modules.error', 'Failed to load modules'));
-        console.error('Error loading modules:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchModules();
-  }, [company.id, t]);
-
-  const handleToggleModule = async (module: Module) => {
-    try {
-      setUpdating(prev => ({ ...prev, [module.id]: true }));
-      const response = await modulesApi.toggleModule(company.id, module.id);
-      
-      // Update the module's enabled status in the local state
-      setAllModules(prev => prev.map(m => 
-        m.id === module.id 
-          ? { ...m, is_enabled: response.data.is_enabled }
-          : m
-      ));
-
-      // Update company modules list
-      if (response.data.is_enabled) {
-        setCompanyModules(prev => [...prev, { ...module, is_enabled: true }]);
-      } else {
-        setCompanyModules(prev => prev.filter(m => m.id !== module.id));
-      }
-    } catch (err) {
-      setError(t('companies.modules.toggleError', 'Failed to toggle module'));
-      console.error('Error toggling module:', err);
-    } finally {
-      setUpdating(prev => ({ ...prev, [module.id]: false }));
-    }
+  const handleToggleModule = (module: Module) => {
+    dispatch(toggleModuleStart({ companyId: company.id, moduleId: module.id }));
   };
 
   if (loading) {
@@ -104,7 +54,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({ company }) => {
       )}
 
       <Paper sx={{ p: 2 }}>
-        {allModules.map(module => (
+        {modules.map(module => (
           <Box key={module.id} mb={2}>
             <FormControlLabel
               control={
@@ -116,12 +66,12 @@ const ModulesTab: React.FC<ModulesTabProps> = ({ company }) => {
               }
               label={
                 <Box display="flex" alignItems="center">
-                  <Chip
-                    icon={<i className={`fas fa-${module.icon_name}`} />}
-                    label={module.name}
-                    size="small"
-                    sx={{ mr: 1 }}
-                  />
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Icon icon={module.icon_name} width={20} height={20} />
+                    <Typography variant="body2">
+                      {module.name}
+                    </Typography>
+                  </Box>
                   {updating[module.id] && (
                     <CircularProgress size={16} sx={{ ml: 1 }} />
                   )}
@@ -130,7 +80,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({ company }) => {
             />
           </Box>
         ))}
-        {allModules.length === 0 && (
+        {modules.length === 0 && (
           <Typography color="text.secondary" align="center">
             {t('companies.modules.noModules', 'No modules available')}
           </Typography>

@@ -1,4 +1,4 @@
-const { pool } = require('../../db/schema');
+const { pool } = require('../db/schema');
 
 // Execute query with timeout
 const executeQueryWithTimeout = async (query, params, timeout = 10000) => {

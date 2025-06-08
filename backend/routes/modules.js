@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, checkRole } = require('../../middleware/auth');
-const { Module, Company, CompanyModule } = require('../../models');
+const { authenticateToken, checkRole } = require('../middleware/auth');
+const { Module, Company, CompanyModule } = require('../models');
 
 // Apply authentication to all routes
 router.use(authenticateToken);
@@ -19,6 +19,7 @@ router.get('/', async (req, res) => {
 
 // Get modules for a specific company
 router.get('/company/:companyId', async (req, res) => {
+  console.log('companyId', req.params.companyId);
   try {
     const companyModules = await CompanyModule.findAll({
       where: { company_id: req.params.companyId },
@@ -29,10 +30,14 @@ router.get('/company/:companyId', async (req, res) => {
       }]
     });
 
+    console.log('companyModules', companyModules);
+
     const modules = companyModules.map(cm => ({
       ...cm.module.toJSON(),
       is_enabled: cm.is_enabled
     }));
+
+    console.log('modules', modules);
 
     res.json(modules);
   } catch (error) {
