@@ -5,10 +5,12 @@ module.exports = (sequelize) => {
   class ReportStructure extends Model {
     static associate(models) {
       // Define associations here
-      ReportStructure.belongsTo(models.User, {
-        foreignKey: 'createdBy',
-        as: 'creator'
-      });
+      if (models.User) {
+        ReportStructure.belongsTo(models.User, {
+          foreignKey: 'createdBy',
+          as: 'creator'
+        });
+      }
     }
   }
 
@@ -48,7 +50,7 @@ module.exports = (sequelize) => {
       type: DataTypes.UUID,
       allowNull: true,
       references: {
-        model: 'Users',
+        model: 'users',
         key: 'id'
       }
     }

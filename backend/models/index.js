@@ -69,6 +69,7 @@ db.DirectoryField.hasMany(db.DirectoryValue, {
   as: 'values2'
 });
 
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
