@@ -19,6 +19,7 @@ import Receipts from './pages/cashier/Receipts';
 import DailySales from './pages/cashier/DailySales';
 import Products from './pages/cashier/Products';
 import Customers from './pages/cashier/Customers';
+import Reports from './pages/reports/Reports';
 
 // admin@example.com / password123
 
@@ -85,6 +86,11 @@ const AppRoutes = () => {
       <Route path="/modules" element={
         <PrivateRoute>
           <Modules />
+        </PrivateRoute>
+      } />
+      <Route path="/reports" element={
+        <PrivateRoute>
+          <Reports />
         </PrivateRoute>
       } />
       <Route path="/cashier" element={

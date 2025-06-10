@@ -55,6 +55,11 @@ const moduleNavigationItems = {
       icon: 'solar:widget-linear',
       path: '/modules',
     },
+    {
+      label: 'Reports',
+      icon: 'solar:chart-2-linear',
+      path: '/reports',
+    },
   ],
 };
 
