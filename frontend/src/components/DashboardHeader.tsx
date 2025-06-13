@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/store/slices/authSlice';
-import { fetchModulesStart } from '@/store/slices/modulesSlice';
+import { fetchModulesStart, selectEnabledModules } from '@/store/slices/modulesSlice';
 import { setCurrentModule } from '@/store/slices/appStateSlice';
 import type { RootState } from '@/store';
 import type { Module } from '@/api/services/modules';
@@ -16,9 +16,7 @@ export default function DashboardHeader() {
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const companyId = user?.company?.id;
-  const enabledModules = useSelector((state: RootState) =>
-    (state.modules.modules as Module[]).filter((m) => m.is_enabled)
-  );
+  const enabledModules = useSelector(selectEnabledModules);
   const currentModule = useSelector((state: RootState) => state.appState.currentModule);
   const isOwner = user?.roles.includes('owner');
 
@@ -140,4 +138,4 @@ export default function DashboardHeader() {
       </Paper>
     </Box>
   );
-} 
+}

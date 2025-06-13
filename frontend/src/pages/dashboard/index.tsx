@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Button, IconButton, InputBase, Paper } from '@mui/material';
+import { Box, Button, IconButton, InputBase, Paper } from '@mui/material';
 import { Icon } from '@iconify/react';
 import StatCard from './components/StatCard';
 
@@ -34,8 +34,8 @@ const Dashboard: React.FC = () => {
   const topTreatments = stats.topTreatments || [];
 
   return (
-    <div className="py-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+   <Box sx={{p: 4, width: '100%'}}>
+      <div className="">
         {/* Welcome and Controls Card */}
         <div style={{ width: '100%', marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div style={{ fontWeight: 700, fontSize: 28, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -137,7 +137,7 @@ const Dashboard: React.FC = () => {
           </StatCard>
         </div>
       </div>
-    </div>
+    </Box>
   );
 };
 

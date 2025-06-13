@@ -337,15 +337,31 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('directory_values');
-    await queryInterface.dropTable('company_directories');
-    await queryInterface.dropTable('directory_fields');
-    await queryInterface.dropTable('directories');
-    await queryInterface.dropTable('modules');
-    await queryInterface.dropTable('user_role_assignments');
-    await queryInterface.dropTable('users');
-    await queryInterface.dropTable('role_permissions');
-    await queryInterface.dropTable('user_roles');
-    await queryInterface.dropTable('companies');
+    // Using transaction to ensure all operations succeed or fail together
+    const transaction = await queryInterface.sequelize.transaction();
+    
+    try {
+      // Drop tables in reverse order of creation to handle dependencies
+      await queryInterface.dropTable('directory_values', { transaction });
+      await queryInterface.dropTable('company_directories', { transaction });
+      await queryInterface.dropTable('directory_fields', { transaction });
+      await queryInterface.dropTable('directories', { transaction });
+      await queryInterface.dropTable('user_role_assignments', { transaction });
+      await queryInterface.dropTable('role_permissions', { transaction });
+      await queryInterface.dropTable('users', { transaction });
+      await queryInterface.dropTable('modules', { transaction });
+      await queryInterface.dropTable('user_roles', { transaction });
+      await queryInterface.dropTable('companies', { transaction });
+      
+      // Drop any ENUM types that were created
+      await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_users_status";', { transaction });
+      await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_companies_employee_count";', { transaction });
+      
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Migration rollback failed:', error);
+      throw error;
+    }
   }
-}; 
+};

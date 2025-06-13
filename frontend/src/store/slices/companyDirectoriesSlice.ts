@@ -11,6 +11,11 @@ interface CompanyDirectoriesState {
   loading: boolean;
   error: string | null;
   updating: Record<string, boolean>;
+  directoriesByModuleId: Record<string, Directory[]>;
+  directoriesByModuleLoading: Record<string, boolean>;
+  directoriesByModuleError: Record<string, string | null>;
+  binding: boolean;
+  bindingError: string | null;
 }
 
 const initialState: CompanyDirectoriesState = {
@@ -18,7 +23,12 @@ const initialState: CompanyDirectoriesState = {
   companyDirectories: [],
   loading: false,
   error: null,
-  updating: {}
+  updating: {},
+  directoriesByModuleId: {},
+  directoriesByModuleLoading: {},
+  directoriesByModuleError: {},
+  binding: false,
+  bindingError: null,
 };
 
 const companyDirectoriesSlice = createSlice({
@@ -40,6 +50,18 @@ const companyDirectoriesSlice = createSlice({
     fetchCompanyDirectoriesFailure: (state, action: PayloadAction<string>) => {
       state.loading = false;
       state.error = action.payload;
+    },
+    fetchCompanyModuleDirectories: (state, action: PayloadAction<{ companyId: string; companyModuleId: string }>) => {
+      state.directoriesByModuleLoading[action.payload.companyModuleId] = true;
+      state.directoriesByModuleError[action.payload.companyModuleId] = null;
+    },
+    fetchCompanyModuleDirectoriesSuccess: (state, action: PayloadAction<{ companyModuleId: string; directories: Directory[] }>) => {
+      state.directoriesByModuleLoading[action.payload.companyModuleId] = false;
+      state.directoriesByModuleId[action.payload.companyModuleId] = action.payload.directories;
+    },
+    fetchCompanyModuleDirectoriesFailure: (state, action: PayloadAction<{ companyModuleId: string; error: string }>) => {
+      state.directoriesByModuleLoading[action.payload.companyModuleId] = false;
+      state.directoriesByModuleError[action.payload.companyModuleId] = action.payload.error;
     },
     toggleCompanyDirectory: (state, action: PayloadAction<{
       companyId: string;
@@ -75,6 +97,18 @@ const companyDirectoriesSlice = createSlice({
       const { directoryId, error } = action.payload;
       state.updating[directoryId] = false;
       state.error = error;
+    },
+    bindDirectoriesToModule: (state, action: PayloadAction<{ companyId: string; companyModuleId: string; directoryIds: string[] }>) => {
+      state.binding = true;
+      state.bindingError = null;
+    },
+    bindDirectoriesToModuleSuccess: (state) => {
+      state.binding = false;
+      state.bindingError = null;
+    },
+    bindDirectoriesToModuleFailure: (state, action: PayloadAction<string>) => {
+      state.binding = false;
+      state.bindingError = action.payload;
     }
   }
 });
@@ -83,9 +117,15 @@ export const {
   fetchCompanyDirectories,
   fetchCompanyDirectoriesSuccess,
   fetchCompanyDirectoriesFailure,
+  fetchCompanyModuleDirectories,
+  fetchCompanyModuleDirectoriesSuccess,
+  fetchCompanyModuleDirectoriesFailure,
   toggleCompanyDirectory,
   toggleCompanyDirectorySuccess,
-  toggleCompanyDirectoryFailure
+  toggleCompanyDirectoryFailure,
+  bindDirectoriesToModule,
+  bindDirectoriesToModuleSuccess,
+  bindDirectoriesToModuleFailure
 } = companyDirectoriesSlice.actions;
 
 export default companyDirectoriesSlice.reducer; 

@@ -16,6 +16,7 @@ const authenticateToken = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
+    console.log(req.user);
     next();
   } catch (error) {
     console.error('Error authenticating token:', error);
@@ -33,7 +34,9 @@ const checkRole = (allowedRoles) => {
 
       const userRoles = await UserFactory.getUserRoles(req.user.id, req.user.company_id);
       const hasRole = userRoles.some(role => allowedRoles.includes(role.name));
-
+      console.log(userRoles);
+      console.log(allowedRoles);
+      console.log(hasRole);
       if (!hasRole) {
         return res.status(403).json({ message: 'Insufficient permissions' });
       }

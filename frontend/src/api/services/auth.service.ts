@@ -1,4 +1,5 @@
 import api from '../config';
+import { User } from './types';
 
 export type LoginCredentials = {
   email: string;
@@ -10,17 +11,17 @@ export type LoginResponse = {
   user: User;
 };
 
-export type User = {
-  id: number;
-  email: string;
-  role: string;
-  company_id: number;
-};
-
 class AuthService {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const { data } = await api.post<LoginResponse>('/api/users/login', credentials);
-    return data;
+    try {
+      const response = await api.post<LoginResponse>('/api/users/login', credentials);
+      console.log('Auth Service - Login response:', response.data);
+      console.log('Auth Service - User roles:', response.data.user.roles);
+      return response.data;
+    } catch (error) {
+      console.error('Auth Service - Login error:', error);
+      throw error;
+    }
   }
 
   async getProfile(): Promise<User> {

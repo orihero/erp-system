@@ -30,16 +30,7 @@ router.get('/company/:companyId', async (req, res) => {
       }]
     });
 
-    console.log('companyModules', companyModules);
-
-    const modules = companyModules.map(cm => ({
-      ...cm.module.toJSON(),
-      is_enabled: cm.is_enabled
-    }));
-
-    console.log('modules', modules);
-
-    res.json(modules);
+    res.json(companyModules);
   } catch (error) {
     console.error('Error fetching company modules:', error);
     res.status(500).json({ error: 'Failed to fetch company modules' });

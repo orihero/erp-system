@@ -1,41 +1,44 @@
 import React from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { Icon } from '@iconify/react';
+import { useTranslation } from 'react-i18next';
 
 const Receipts: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
-    <Box sx={{ p: 4, width: '100%' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4" fontWeight={700}>
-          Receipts
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 600, color: '#1a1e1c' }}>
+          {t('Receipts')}
         </Typography>
         <Button
           variant="contained"
-          startIcon={<Icon icon="ph:plus" />}
+          startIcon={<Icon icon="solar:add-circle-bold" />}
           sx={{
-            borderRadius: 999,
-            textTransform: 'none',
-            bgcolor: '#3b82f6',
-            '&:hover': {
-              bgcolor: '#2563eb',
-            },
+            bgcolor: '#1a1e1c',
+            '&:hover': { bgcolor: '#2c3230' },
+            borderRadius: 2,
+            px: 3,
+            py: 1,
           }}
         >
-          New Receipt
+          {t('New Receipt')}
         </Button>
       </Box>
 
       <Paper
+        elevation={0}
         sx={{
           p: 3,
-          borderRadius: 4,
+          borderRadius: 2,
           bgcolor: '#fff',
           boxShadow: '0 4px 24px 0 rgba(0,0,0,0.04)',
         }}
       >
-        {/* Receipts table will be added here */}
+        {/* Receipts list will go here */}
         <Typography variant="body1" color="text.secondary">
-          Receipts table coming soon...
+          {t('No receipts found')}
         </Typography>
       </Paper>
     </Box>

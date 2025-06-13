@@ -1,4 +1,4 @@
-const { CompanyDirectory, Directory, DirectoryField, DirectoryValue } = require('../models');
+const { CompanyDirectory, Directory, DirectoryField, DirectoryValue, CompanyModule } = require('../models');
 const { Op } = require('sequelize');
 
 const companyDirectoryController = {
@@ -32,39 +32,40 @@ const companyDirectoryController = {
   },
 
   // Get all company directories
-  findAll: async (req, res) => {
+  getAll: async (req, res) => {
     try {
-      const { company_id, search } = req.query;
+      const { company_id, search, module_id } = req.query;
       const where = {};
 
       if (company_id) {
         where.company_id = company_id;
       }
 
+      if (module_id) {
+        where.module_id = module_id;
+      }
+
       if (search) {
-        where['$directory.name$'] = {
-          [Op.iLike]: `%${search}%`
-        };
+        where[Op.or] = [
+          { '$directory.name$': { [Op.iLike]: `%${search}%` } }
+        ];
       }
 
       const companyDirectories = await CompanyDirectory.findAll({
         where,
-        include: [
-          {
-            model: Directory,
-            as: 'directory',
-            include: [{
-              model: DirectoryField,
-              as: 'fields'
-            }]
-          }
-        ],
+include: [
+  {
+    model: Directory,
+    as: 'directory',
+    attributes: ['id', 'name', 'icon_name']
+  }
+],
         order: [['created_at', 'DESC']]
       });
 
       res.json(companyDirectories);
     } catch (error) {
-      console.error('Error in findAll:', error);
+      console.error('Error fetching company directories:', error);
       res.status(500).json({ message: error.message });
     }
   },
@@ -145,7 +146,71 @@ const companyDirectoryController = {
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
+  },
+
+  // Bulk bind directories to a module for a company
+  bulkBind: async (req, res) => {
+    try {
+      const { company_id, module_id, directory_ids } = req.body;
+      console.log('[bulkBind] Input:', { company_id, module_id, directory_ids });
+      
+      if (!company_id || !module_id || !Array.isArray(directory_ids)) {
+        console.log('[bulkBind] Invalid input');
+        return res.status(400).json({ message: 'company_id, module_id, and directory_ids are required.' });
+      }
+
+      // Verify that the module_id exists
+      const companyModule = await CompanyModule.findOne({
+        where: {
+          company_id,
+          id: module_id
+        }
+      });
+
+      if (!companyModule) {
+        console.log('[bulkBind] Invalid module_id');
+        return res.status(400).json({
+          message: 'Invalid module_id or it does not belong to the specified company'
+        });
+      }
+
+      // Use the actual module_id from the found record
+      const actualModuleId = companyModule.id;
+
+      const results = [];
+      for (const directory_id of directory_ids) {
+        try {
+          // Check if the binding already exists
+          const existing = await CompanyDirectory.findOne({
+            where: { company_id, module_id: actualModuleId, directory_id }
+          });
+
+          if (existing) {
+            console.log(`[bulkBind] Already exists:`, { company_id, module_id: actualModuleId, directory_id });
+            results.push({ directory_id, status: 'exists' });
+            continue;
+          }
+
+          // Create new binding
+          const companyDirectory = await CompanyDirectory.create({
+            company_id,
+            module_id: actualModuleId,
+            directory_id
+          });
+
+          results.push({ directory_id, status: 'created', id: companyDirectory.id });
+        } catch (error) {
+          console.error(`[bulkBind] Error processing directory ${directory_id}:`, error);
+          results.push({ directory_id, status: 'error', error: error.message });
+        }
+      }
+
+      res.json({ message: 'Bulk bind completed', results });
+    } catch (error) {
+      console.error('[bulkBind] Error:', error);
+      res.status(500).json({ message: error.message });
+    }
   }
 };
 
-module.exports = companyDirectoryController; 
+module.exports = companyDirectoryController;

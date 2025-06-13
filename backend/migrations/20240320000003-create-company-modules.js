@@ -44,6 +44,26 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('company_modules');
+    // Remove the unique index first
+    try {
+      await queryInterface.removeIndex('company_modules', 'company_modules_unique');
+    } catch (error) {
+      console.log('Note: Unique index may have already been removed or does not exist', error.message);
+    }
+    
+    // Remove foreign key constraint from company_directories that references company_modules
+    try {
+      await queryInterface.removeConstraint('company_directories', 'company_directories_company_module_id_fkey');
+    } catch (error) {
+      console.log('Note: Foreign key constraint may have already been removed or does not exist', error.message);
+    }
+    
+    // Drop the company_modules table
+    try {
+      await queryInterface.dropTable('company_modules');
+    } catch (error) {
+      console.error('Failed to drop table company_modules:', error.message);
+      throw error;
+    }
   }
-}; 
+};

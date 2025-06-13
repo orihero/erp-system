@@ -242,12 +242,45 @@ module.exports = {
 
     const companyId = companies[0].id;
 
+    // Get a company_module_id for the company (use the first available module for demo)
+    let companyModules = await queryInterface.sequelize.query(
+      'SELECT id FROM company_modules WHERE company_id = :companyId LIMIT 1;',
+      {
+        replacements: { companyId },
+        type: queryInterface.sequelize.QueryTypes.SELECT
+      }
+    );
+    let companyModuleId;
+    if (companyModules.length === 0) {
+      // No company_modules exist, create one using the first available module
+      const modules = await queryInterface.sequelize.query(
+        'SELECT id FROM modules LIMIT 1;',
+        { type: queryInterface.sequelize.QueryTypes.SELECT }
+      );
+      if (modules.length === 0) {
+        throw new Error('No modules found. Please create a module first.');
+      }
+      const moduleId = modules[0].id;
+      const newCompanyModuleId = uuidv4();
+      await queryInterface.bulkInsert('company_modules', [{
+        id: newCompanyModuleId,
+        company_id: companyId,
+        module_id: moduleId,
+        created_at: now,
+        updated_at: now
+      }]);
+      companyModuleId = newCompanyModuleId;
+    } else {
+      companyModuleId = companyModules[0].id;
+    }
+
     // Create Company Directories
     const companyDirectories = await queryInterface.bulkInsert('company_directories', [
       {
         id: uuidv4(),
         company_id: companyId,
         directory_id: clientsDir.id,
+        module_id: companyModuleId,
         created_at: now,
         updated_at: now
       },
@@ -255,6 +288,7 @@ module.exports = {
         id: uuidv4(),
         company_id: companyId,
         directory_id: contractsDir.id,
+        module_id: companyModuleId,
         created_at: now,
         updated_at: now
       },
@@ -262,6 +296,7 @@ module.exports = {
         id: uuidv4(),
         company_id: companyId,
         directory_id: carsDir.id,
+        module_id: companyModuleId,
         created_at: now,
         updated_at: now
       },
@@ -269,6 +304,7 @@ module.exports = {
         id: uuidv4(),
         company_id: companyId,
         directory_id: employeesDir.id,
+        module_id: companyModuleId,
         created_at: now,
         updated_at: now
       }
@@ -280,11 +316,50 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     );
 
-    // Create demo values for each company directory
+    // Create demo records for each company directory
     const clientDir = companyDirs.find(d => d.directory_id === clientsDir.id);
     const contractDir = companyDirs.find(d => d.directory_id === contractsDir.id);
     const carDir = companyDirs.find(d => d.directory_id === carsDir.id);
     const employeeDir = companyDirs.find(d => d.directory_id === employeesDir.id);
+
+    // Create Directory Records for each Company Directory
+    await queryInterface.bulkInsert('directory_records', [
+      {
+        id: uuidv4(),
+        company_directory_id: clientDir.id,
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        company_directory_id: contractDir.id,
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        company_directory_id: carDir.id,
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        company_directory_id: employeeDir.id,
+        created_at: now,
+        updated_at: now
+      }
+    ]);
+
+    // Get the created directory records
+    const directoryRecords = await queryInterface.sequelize.query(
+      'SELECT * FROM directory_records ORDER BY created_at ASC;',
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    );
+
+    const clientRecord = directoryRecords.find(r => r.company_directory_id === clientDir.id);
+    const contractRecord = directoryRecords.find(r => r.company_directory_id === contractDir.id);
+    const carRecord = directoryRecords.find(r => r.company_directory_id === carDir.id);
+    const employeeRecord = directoryRecords.find(r => r.company_directory_id === employeeDir.id);
 
     // Get field IDs
     const clientFields = fields.filter(f => f.directory_id === clientsDir.id);
@@ -292,12 +367,12 @@ module.exports = {
     const carFields = fields.filter(f => f.directory_id === carsDir.id);
     const employeeFields = fields.filter(f => f.directory_id === employeesDir.id);
 
-    // Create demo values
+    // Create demo values linked to Directory Records
     await queryInterface.bulkInsert('directory_values', [
       // Client values
       {
         id: uuidv4(),
-        company_directory_id: clientDir.id,
+        directory_record_id: clientRecord.id,
         field_id: clientFields.find(f => f.name === 'name').id,
         value: 'UzAuto Motors',
         created_at: now,
@@ -305,7 +380,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: clientDir.id,
+        directory_record_id: clientRecord.id,
         field_id: clientFields.find(f => f.name === 'contact_person').id,
         value: 'John Doe',
         created_at: now,
@@ -313,7 +388,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: clientDir.id,
+        directory_record_id: clientRecord.id,
         field_id: clientFields.find(f => f.name === 'address').id,
         value: 'Tashkent, Uzbekistan',
         created_at: now,
@@ -323,7 +398,7 @@ module.exports = {
       // Contract values
       {
         id: uuidv4(),
-        company_directory_id: contractDir.id,
+        directory_record_id: contractRecord.id,
         field_id: contractFields.find(f => f.name === 'name').id,
         value: 'Supply Contract 2024',
         created_at: now,
@@ -331,7 +406,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: contractDir.id,
+        directory_record_id: contractRecord.id,
         field_id: contractFields.find(f => f.name === 'content').id,
         value: 'Annual supply contract for automotive parts',
         created_at: now,
@@ -339,7 +414,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: contractDir.id,
+        directory_record_id: contractRecord.id,
         field_id: contractFields.find(f => f.name === 'start_date').id,
         value: '2024-01-01',
         created_at: now,
@@ -347,7 +422,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: contractDir.id,
+        directory_record_id: contractRecord.id,
         field_id: contractFields.find(f => f.name === 'end_date').id,
         value: '2024-12-31',
         created_at: now,
@@ -355,7 +430,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: contractDir.id,
+        directory_record_id: contractRecord.id,
         field_id: contractFields.find(f => f.name === 'amount').id,
         value: '1000000.00',
         created_at: now,
@@ -363,7 +438,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: contractDir.id,
+        directory_record_id: contractRecord.id,
         field_id: contractFields.find(f => f.name === 'requisites').id,
         value: JSON.stringify({
           bank: 'NBU',
@@ -377,7 +452,7 @@ module.exports = {
       // Car values
       {
         id: uuidv4(),
-        company_directory_id: carDir.id,
+        directory_record_id: carRecord.id,
         field_id: carFields.find(f => f.name === 'name').id,
         value: 'Chevrolet Cobalt 01A123AA',
         created_at: now,
@@ -387,7 +462,7 @@ module.exports = {
       // Employee values
       {
         id: uuidv4(),
-        company_directory_id: employeeDir.id,
+        directory_record_id: employeeRecord.id,
         field_id: employeeFields.find(f => f.name === 'firstname').id,
         value: 'Aziz',
         created_at: now,
@@ -395,7 +470,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: employeeDir.id,
+        directory_record_id: employeeRecord.id,
         field_id: employeeFields.find(f => f.name === 'lastname').id,
         value: 'Karimov',
         created_at: now,
@@ -403,7 +478,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: employeeDir.id,
+        directory_record_id: employeeRecord.id,
         field_id: employeeFields.find(f => f.name === 'phone').id,
         value: '+998901234567',
         created_at: now,
@@ -411,7 +486,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: employeeDir.id,
+        directory_record_id: employeeRecord.id,
         field_id: employeeFields.find(f => f.name === 'address').id,
         value: 'Tashkent, Yunusabad',
         created_at: now,
@@ -419,7 +494,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: employeeDir.id,
+        directory_record_id: employeeRecord.id,
         field_id: employeeFields.find(f => f.name === 'salary').id,
         value: '5000000.00',
         created_at: now,
@@ -427,7 +502,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        company_directory_id: employeeDir.id,
+        directory_record_id: employeeRecord.id,
         field_id: employeeFields.find(f => f.name === 'role').id,
         value: 'Driver',
         created_at: now,
@@ -443,4 +518,4 @@ module.exports = {
     await queryInterface.bulkDelete('directory_fields', null, {});
     await queryInterface.bulkDelete('directories', null, {});
   }
-}; 
+};

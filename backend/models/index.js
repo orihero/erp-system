@@ -59,9 +59,14 @@ db.Directory.hasMany(db.DirectoryField, {
   as: 'relatedFields'
 });
 
-db.CompanyDirectory.hasMany(db.DirectoryValue, {
+db.CompanyDirectory.hasMany(db.DirectoryRecord, {
   foreignKey: 'company_directory_id',
-  as: 'values1'
+  as: 'directoryRecords'
+});
+
+db.DirectoryRecord.hasMany(db.DirectoryValue, {
+  foreignKey: 'directory_record_id',
+  as: 'recordValues'
 });
 
 db.DirectoryField.hasMany(db.DirectoryValue, {
@@ -73,4 +78,4 @@ db.DirectoryField.hasMany(db.DirectoryValue, {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-module.exports = db; 
+module.exports = db;

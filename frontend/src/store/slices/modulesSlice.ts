@@ -85,4 +85,15 @@ export const {
   updateModuleFailure
 } = modulesSlice.actions;
 
-export default modulesSlice.reducer; 
+// Selectors
+import { createSelector } from '@reduxjs/toolkit';
+import type { RootState } from '@/store';
+
+export const selectModules = (state: RootState) => state.modules.modules;
+
+export const selectEnabledModules = createSelector(
+  [selectModules],
+  (modules) => modules.filter((module) => module.is_enabled)
+);
+
+export default modulesSlice.reducer;

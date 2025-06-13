@@ -99,6 +99,62 @@ module.exports = {
         }
       ];
 
+      // Create cashiers
+      const cashiers = [
+        {
+          id: uuidv4(),
+          email: 'cashier1@demo.com',
+          password: await bcrypt.hash('password123', 10),
+          firstname: 'John',
+          lastname: 'Smith',
+          status: 'active',
+          company_id: createdCompanies[0].id,
+          last_login: null,
+          created_at: now,
+          updated_at: now
+        },
+        {
+          id: uuidv4(),
+          email: 'cashier2@demo.com',
+          password: await bcrypt.hash('password123', 10),
+          firstname: 'Sarah',
+          lastname: 'Johnson',
+          status: 'active',
+          company_id: createdCompanies[1].id,
+          last_login: null,
+          created_at: now,
+          updated_at: now
+        }
+      ];
+
+      // Create salesmen
+      const salesmen = [
+        {
+          id: uuidv4(),
+          email: 'salesman1@demo.com',
+          password: await bcrypt.hash('password123', 10),
+          firstname: 'Mike',
+          lastname: 'Brown',
+          status: 'active',
+          company_id: createdCompanies[0].id,
+          last_login: null,
+          created_at: now,
+          updated_at: now
+        },
+        {
+          id: uuidv4(),
+          email: 'salesman2@demo.com',
+          password: await bcrypt.hash('password123', 10),
+          firstname: 'Lisa',
+          lastname: 'Davis',
+          status: 'active',
+          company_id: createdCompanies[1].id,
+          last_login: null,
+          created_at: now,
+          updated_at: now
+        }
+      ];
+
       // Create 100 Uzbek users
       const uzbekUsers = Array.from({ length: 100 }, () => {
         const companyIndex = Math.floor(Math.random() * createdCompanies.length);
@@ -117,7 +173,7 @@ module.exports = {
       });
 
       // Combine all users
-      const users = [superAdmin, ...companyAdmins, ...uzbekUsers];
+      const users = [superAdmin, ...companyAdmins, ...cashiers, ...salesmen, ...uzbekUsers];
       await queryInterface.bulkInsert('users', users);
 
       // Get the created users
@@ -147,8 +203,10 @@ module.exports = {
       const adminRole = roles.find(r => r.name === 'admin');
       const managerRole = roles.find(r => r.name === 'manager');
       const userRole = roles.find(r => r.name === 'user');
+      const cashierRole = roles.find(r => r.name === 'cashier');
+      const salesmanRole = roles.find(r => r.name === 'salesman');
 
-      if (!superAdminRole || !adminRole || !managerRole || !userRole) {
+      if (!superAdminRole || !adminRole || !managerRole || !userRole || !cashierRole || !salesmanRole) {
         console.log('Required roles not found. Please run the user roles seeder first.');
         return;
       }
@@ -198,17 +256,59 @@ module.exports = {
         updated_at: now
       });
 
+      // Assign cashier roles
+      roleAssignments.push({
+        id: uuidv4(),
+        user_id: createdUsers.find(u => u.email === 'cashier1@demo.com').id,
+        role_id: cashierRole.id,
+        company_id: createdCompanies[0].id,
+        created_at: now,
+        updated_at: now
+      });
+
+      roleAssignments.push({
+        id: uuidv4(),
+        user_id: createdUsers.find(u => u.email === 'cashier2@demo.com').id,
+        role_id: cashierRole.id,
+        company_id: createdCompanies[1].id,
+        created_at: now,
+        updated_at: now
+      });
+
+      // Assign salesman roles
+      roleAssignments.push({
+        id: uuidv4(),
+        user_id: createdUsers.find(u => u.email === 'salesman1@demo.com').id,
+        role_id: salesmanRole.id,
+        company_id: createdCompanies[0].id,
+        created_at: now,
+        updated_at: now
+      });
+
+      roleAssignments.push({
+        id: uuidv4(),
+        user_id: createdUsers.find(u => u.email === 'salesman2@demo.com').id,
+        role_id: salesmanRole.id,
+        company_id: createdCompanies[1].id,
+        created_at: now,
+        updated_at: now
+      });
+
       // Assign roles to Uzbek users
-      const uzbekCreatedUsers = createdUsers.filter(u => !['superadmin@demo.com', 'admin1@demo.com', 'admin2@demo.com'].includes(u.email));
+      const uzbekCreatedUsers = createdUsers.filter(u => !['superadmin@demo.com', 'admin1@demo.com', 'admin2@demo.com', 'cashier1@demo.com', 'cashier2@demo.com', 'salesman1@demo.com', 'salesman2@demo.com'].includes(u.email));
       
       // Distribute roles among Uzbek users
       uzbekCreatedUsers.forEach((user, index) => {
         let roleId;
-        // 10% managers, 20% admins, 70% regular users
+        // 10% managers, 20% admins, 20% cashiers, 20% salesmen, 30% regular users
         if (index % 10 === 0) {
           roleId = managerRole.id;
         } else if (index % 5 === 0) {
           roleId = adminRole.id;
+        } else if (index % 5 === 1) {
+          roleId = cashierRole.id;
+        } else if (index % 5 === 2) {
+          roleId = salesmanRole.id;
         } else {
           roleId = userRole.id;
         }

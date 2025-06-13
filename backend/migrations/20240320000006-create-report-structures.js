@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('ReportStructures', {
+    await queryInterface.createTable('report_structures', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
@@ -47,7 +47,7 @@ module.exports = {
     });
 
     // Add index for the name field
-    await queryInterface.addIndex('ReportStructures', ['name'], {
+    await queryInterface.addIndex('report_structures', ['name'], {
       unique: true,
       name: 'report_structures_name_unique'
     });
@@ -55,9 +55,9 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     // Remove the index first
-    await queryInterface.removeIndex('ReportStructures', 'report_structures_name_unique');
+    await queryInterface.removeIndex('report_structures', 'report_structures_name_unique');
     
     // Drop the table
-    await queryInterface.dropTable('ReportStructures');
+    await queryInterface.dropTable('report_structures');
   }
-}; 
+};

@@ -1,44 +1,38 @@
 import api from '../config';
-import { Directory } from './directories';
 
 export interface CompanyDirectoryResponse {
   id: string;
   company_id: string;
   directory_id: string;
+  module_id: string;
   created_at: string;
   updated_at: string;
   directory: {
     id: string;
     name: string;
-    icon_name: string;
+    description: string;
+    icon_name?: string;
   };
-  values: Array<{
-    attribute_id: string;
-    value: string;
-  }>;
-}
-
-export interface CompanyDirectory extends Directory {
-  is_enabled: boolean;
 }
 
 export const companyDirectoriesApi = {
-  // Get all directories for a company
-  getCompanyDirectories: (companyId: string) => 
-    api.get<CompanyDirectoryResponse[]>(`/api/company-directories?company_id=${companyId}`),
+  getAll: (companyId?: string, moduleId?: string) =>
+    api.get<CompanyDirectoryResponse[]>(`/api/company-directories?company_id=${companyId}&module_id=${moduleId}`),
 
-  // Add a directory to a company
-  addDirectoryToCompany: (companyId: string, directoryId: string, values: Array<{
-    attribute_id: string;
-    value: string;
-  }>) => 
-    api.post<CompanyDirectoryResponse>('/api/company-directories', {
-      company_id: companyId,
-      directory_id: directoryId,
-      values
-    }),
+  create: (data: {
+    company_id: string;
+    module_id: string;
+    directory_id: string;
+  }) =>
+    api.post<CompanyDirectoryResponse>('/api/company-directories', data),
 
-  // Remove a directory from a company
-  removeDirectoryFromCompany: (directoryId: string) => 
-    api.delete(`/api/company-directories/${directoryId}`)
+  bulkBind: (data: {
+    company_id: string;
+    module_id: string;
+    directory_ids: string[];
+  }) =>
+    api.post<CompanyDirectoryResponse[]>('/api/company-directories/bulk-bind', data),
+
+  delete: (id: string) =>
+    api.delete(`/api/company-directories/${id}`)
 }; 

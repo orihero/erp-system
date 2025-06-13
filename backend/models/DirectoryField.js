@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       DirectoryField.hasMany(models.DirectoryValue, {
         foreignKey: 'field_id',
-        as: 'values'
+        as: 'fieldValues'
       });
     }
   }
@@ -92,4 +92,4 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   return DirectoryField;
-}; 
+};

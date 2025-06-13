@@ -1,4 +1,4 @@
-import { call, put, takeLatest } from 'redux-saga/effects';
+import { call, put, takeLatest, all } from 'redux-saga/effects';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { directoriesApi, type Directory } from '@/api/services/directories';
 import { companyDirectoriesApi, type CompanyDirectoryResponse } from '@/api/services/companyDirectories';
@@ -6,16 +6,22 @@ import {
   fetchCompanyDirectories,
   fetchCompanyDirectoriesSuccess,
   fetchCompanyDirectoriesFailure,
+  fetchCompanyModuleDirectories,
+  fetchCompanyModuleDirectoriesSuccess,
+  fetchCompanyModuleDirectoriesFailure,
   toggleCompanyDirectory,
   toggleCompanyDirectorySuccess,
-  toggleCompanyDirectoryFailure
+  toggleCompanyDirectoryFailure,
+  bindDirectoriesToModule,
+  bindDirectoriesToModuleSuccess,
+  bindDirectoriesToModuleFailure
 } from '../slices/companyDirectoriesSlice';
 
 function* fetchCompanyDirectoriesSaga(action: PayloadAction<{ companyId: string }>): Generator {
   try {
-    const [allDirsRes, companyDirsRes] = yield call([Promise, 'all'], [
-      directoriesApi.getAll(),
-      companyDirectoriesApi.getCompanyDirectories(action.payload.companyId)
+    const [allDirsRes, companyDirsRes] = yield all([
+      call(directoriesApi.getAll),
+      call(companyDirectoriesApi.getAll, action.payload.companyId)
     ]);
 
     // Merge the data to show all directories with their enabled status
@@ -47,6 +53,33 @@ function* fetchCompanyDirectoriesSaga(action: PayloadAction<{ companyId: string 
   }
 }
 
+// New: fetch directories for a company module
+function* fetchCompanyModuleDirectoriesSaga(action: PayloadAction<{ companyId: string; companyModuleId: string }>): Generator {
+  try {
+    // Call the API to get directories for the company module
+    const res = yield call(companyDirectoriesApi.getAll, action.payload.companyId, action.payload.companyModuleId);
+    // The response is an array of CompanyDirectoryResponse
+    const directories = res.data.map((entry: CompanyDirectoryResponse) => ({
+      id: entry.directory.id,
+      name: entry.directory.name,
+      icon_name: entry.directory.icon_name,
+      created_at: entry.created_at,
+      updated_at: entry.updated_at,
+      is_enabled: true,
+      company_directory_id: entry.id
+    }));
+    yield put(fetchCompanyModuleDirectoriesSuccess({
+      companyModuleId: action.payload.companyModuleId,
+      directories
+    }));
+  } catch (error) {
+    yield put(fetchCompanyModuleDirectoriesFailure({
+      companyModuleId: action.payload.companyModuleId,
+      error: error instanceof Error ? error.message : 'Failed to fetch module directories'
+    }));
+  }
+}
+
 function* toggleCompanyDirectorySaga(action: PayloadAction<{
   companyId: string;
   directory: Directory & { company_directory_id?: string };
@@ -57,13 +90,17 @@ function* toggleCompanyDirectorySaga(action: PayloadAction<{
 
     if (isEnabled) {
       // Add directory to company
-      yield call(companyDirectoriesApi.addDirectoryToCompany, companyId, directory.id, []);
+      yield call(companyDirectoriesApi.create, {
+        company_id: companyId,
+        directory_id: directory.id,
+        module_id: ''
+      });
     } else {
       // Remove directory from company using company_directory_id
       if (!directory.company_directory_id) {
         throw new Error('Company directory ID not found');
       }
-      yield call(companyDirectoriesApi.removeDirectoryFromCompany, directory.company_directory_id);
+      yield call(companyDirectoriesApi.delete, directory.company_directory_id);
     }
 
     // Refetch company directories after successful toggle
@@ -81,7 +118,25 @@ function* toggleCompanyDirectorySaga(action: PayloadAction<{
   }
 }
 
+function* bindDirectoriesToModuleSaga(action: PayloadAction<{ companyId: string; companyModuleId: string; directoryIds: string[] }>): Generator {
+  try {
+    const { companyId, companyModuleId, directoryIds } = action.payload;
+    yield call(companyDirectoriesApi.bulkBind, {
+      company_id: companyId,
+      module_id: companyModuleId,
+      directory_ids: directoryIds
+    });
+    yield put(bindDirectoriesToModuleSuccess());
+    // Refresh company directories after binding
+    yield put(fetchCompanyDirectories({ companyId }));
+  } catch (error) {
+    yield put(bindDirectoriesToModuleFailure(error instanceof Error ? error.message : 'Failed to bind directories'));
+  }
+}
+
 export function* companyDirectoriesSaga() {
   yield takeLatest(fetchCompanyDirectories.type, fetchCompanyDirectoriesSaga);
+  yield takeLatest(fetchCompanyModuleDirectories.type, fetchCompanyModuleDirectoriesSaga);
   yield takeLatest(toggleCompanyDirectory.type, toggleCompanyDirectorySaga);
-} 
+  yield takeLatest(bindDirectoriesToModule.type, bindDirectoriesToModuleSaga);
+}

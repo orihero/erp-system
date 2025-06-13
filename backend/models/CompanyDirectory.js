@@ -13,9 +13,13 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'directory_id',
         as: 'directory'
       });
+      CompanyDirectory.belongsTo(models.CompanyModule, {
+        foreignKey: 'module_id',
+        as: 'companyModule'
+      });
       CompanyDirectory.hasMany(models.DirectoryValue, {
         foreignKey: 'company_directory_id',
-        as: 'values'
+        as: 'directoryValues'
       });
     }
   }
@@ -41,6 +45,14 @@ module.exports = (sequelize, DataTypes) => {
         model: 'directories',
         key: 'id'
       }
+    },
+    module_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'company_modules',
+        key: 'id'
+      }
     }
   }, {
     sequelize,
@@ -51,4 +63,4 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   return CompanyDirectory;
-}; 
+};

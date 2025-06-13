@@ -5,9 +5,9 @@ module.exports = (sequelize, DataTypes) => {
   class DirectoryValue extends Model {
     static associate(models) {
       // Define associations here
-      DirectoryValue.belongsTo(models.CompanyDirectory, {
-        foreignKey: 'company_directory_id',
-        as: 'companyDirectory'
+      DirectoryValue.belongsTo(models.DirectoryRecord, {
+        foreignKey: 'directory_record_id',
+        as: 'directoryRecord'
       });
       DirectoryValue.belongsTo(models.DirectoryField, {
         foreignKey: 'field_id',
@@ -49,11 +49,11 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true
     },
-    company_directory_id: {
+    directory_record_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'company_directories',
+        model: 'directory_records',
         key: 'id'
       }
     },
@@ -78,4 +78,4 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   return DirectoryValue;
-}; 
+};

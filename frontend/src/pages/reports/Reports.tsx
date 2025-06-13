@@ -1,106 +1,81 @@
-import React, { useState } from 'react';
-import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Grid } from '@mui/material';
-import { Report } from '../../types/report';
-import ReportConfig from './components/ReportConfig';
-import ReportList from './components/ReportList';
+import React from 'react';
+import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
+import { Icon } from '@iconify/react';
+import { useNavigate } from 'react-router-dom';
 
 const Reports: React.FC = () => {
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newReport, setNewReport] = useState({
-    name: '',
-    description: ''
-  });
+  const navigate = useNavigate();
+
+  const reportTypes = [
+    {
+      title: 'Financial Reports',
+      icon: 'solar:chart-2-linear',
+      description: 'View and analyze financial data, including revenue, expenses, and profit margins.',
+      type: 'financial'
+    },
+    {
+      title: 'Inventory Reports',
+      icon: 'solar:box-linear',
+      description: 'Track inventory levels, stock movements, and product performance.',
+      type: 'inventory'
+    },
+    {
+      title: 'Sales Reports',
+      icon: 'solar:chart-line-linear',
+      description: 'Analyze sales performance, customer trends, and revenue metrics.',
+      type: 'sales'
+    }
+  ];
 
   const handleCreateReport = () => {
-    const report: Report = {
-      id: Date.now().toString(),
-      name: newReport.name,
-      description: newReport.description,
-      type: 'custom',
-      dataSources: [],
-      filters: [],
-      structure: {
-        spreadsheet: {
-          cells: {},
-          formulas: {}
-        },
-        charts: [],
-        pivots: []
-      }
-    };
-    setSelectedReport(report);
-    setIsCreateDialogOpen(false);
-    setNewReport({ name: '', description: '' });
+    window.open('/reports/create/fullscreen', '_blank');
   };
 
   return (
-    <Box sx={{ flexGrow: 1, p: 3 }}>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={4} lg={3}>
-          <Box sx={{ mb: 2 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              onClick={() => setIsCreateDialogOpen(true)}
-            >
-              Create Report Structure
-            </Button>
-          </Box>
-          <ReportList
-            onSelectReport={setSelectedReport}
-            selectedReportId={selectedReport?.id}
-          />
-        </Grid>
-        <Grid item xs={12} md={8} lg={9}>
-          {selectedReport ? (
-            <ReportConfig
-              reportId={selectedReport.id}
-              onSave={(config) => {
-                setSelectedReport((prev: Report | null) => prev ? { ...prev, ...config } : null);
-              }}
-            />
-          ) : (
-            <Box sx={{ p: 3, textAlign: 'center' }}>
-              Select a report or create a new one to get started
-            </Box>
-          )}
-        </Grid>
-      </Grid>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1">
+          Reports
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<Icon icon="solar:add-circle-linear" />}
+          onClick={handleCreateReport}
+        >
+          Create Report Structure
+        </Button>
+      </Box>
 
-      <Dialog open={isCreateDialogOpen} onClose={() => setIsCreateDialogOpen(false)}>
-        <DialogTitle>Create New Report</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Report Name"
-            fullWidth
-            value={newReport.name}
-            onChange={(e) => setNewReport(prev => ({ ...prev, name: e.target.value }))}
-          />
-          <TextField
-            margin="dense"
-            label="Description"
-            fullWidth
-            multiline
-            rows={4}
-            value={newReport.description}
-            onChange={(e) => setNewReport(prev => ({ ...prev, description: e.target.value }))}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsCreateDialogOpen(false)}>Cancel</Button>
-          <Button 
-            onClick={handleCreateReport}
-            variant="contained"
-            disabled={!newReport.name.trim()}
-          >
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Grid container spacing={3}>
+        {reportTypes.map((report) => (
+          <Grid item key={report.type} xs={12} sm={6} md={4}>
+            <Card
+              sx={{
+                height: '100%',
+                cursor: 'pointer',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: 4,
+                },
+              }}
+              onClick={() => navigate(`/reports/${report.type}`)}
+            >
+              <CardContent>
+                <Box sx={{ textAlign: 'center', mb: 2 }}>
+                  <Icon icon={report.icon} width={48} height={48} />
+                </Box>
+                <Typography variant="h6" component="h2" gutterBottom>
+                  {report.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {report.description}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 };

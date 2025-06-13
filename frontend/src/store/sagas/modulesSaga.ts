@@ -1,16 +1,17 @@
-import { takeLatest, put, call } from 'redux-saga/effects';
-import { PayloadAction } from '@reduxjs/toolkit';
-import { modulesApi } from '@/api/services/modules';
 import type { Module } from '@/api/services/modules';
+import { modulesApi } from '@/api/services/modules';
+import { PayloadAction } from '@reduxjs/toolkit';
+import { call, put, takeLatest } from 'redux-saga/effects';
+import { fetchCompanyModuleDirectoriesStart } from '../slices/companyModuleDirectoriesSlice';
 import {
+  fetchModulesFailure,
   fetchModulesStart,
   fetchModulesSuccess,
-  fetchModulesFailure,
-  toggleModuleStart,
   toggleModuleFailure,
+  toggleModuleStart,
+  updateModuleFailure,
   updateModuleStart,
-  updateModuleSuccess,
-  updateModuleFailure
+  updateModuleSuccess
 } from '../slices/modulesSlice';
 
 interface ToggleModulePayload {
@@ -64,23 +65,8 @@ function* toggleModule(action: PayloadAction<ToggleModulePayload>): Generator {
     // First toggle the module
     yield call(modulesApi.toggleModule, companyId, moduleId);
     
-    // Then fetch the updated company modules
-    const [allModulesRes, companyModulesRes] = yield call([Promise, 'all'], [
-      modulesApi.getAll(),
-      modulesApi.getCompanyModules(companyId)
-    ]);
-
-    // Merge the data to show all modules with their enabled status
-    const mergedModules = allModulesRes.data.map((module: Module) => {
-      const companyModule = companyModulesRes.data.find((cm: Module) => cm.id === module.id);
-      return {
-        ...module,
-        is_enabled: companyModule?.is_enabled || false
-      };
-    });
-
-    // Update the state with the new data
-    yield put(fetchModulesSuccess(mergedModules));
+    // Then trigger a refresh of the company module directories data using the correct action
+    yield put(fetchCompanyModuleDirectoriesStart(companyId));
   } catch (error) {
     console.error('Error toggling module:', error);
     yield put(toggleModuleFailure({ 
@@ -114,4 +100,4 @@ export function* modulesSaga() {
   });
   yield takeLatest(toggleModuleStart.type, toggleModule);
   yield takeLatest(updateModuleStart.type, updateModule);
-} 
+}
