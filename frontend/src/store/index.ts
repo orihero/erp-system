@@ -11,6 +11,7 @@ import modulesReducer from "./slices/modulesSlice";
 import rolesReducer from "./slices/rolesSlice";
 import appStateReducer from "./slices/appStateSlice";
 import companyModuleDirectoriesReducer from "./slices/companyModuleDirectoriesSlice";
+import directoryRecordsReducer from "./slices/directoryRecordsSlice";
 import { authSaga } from "./sagas/authSaga";
 import { usersSaga } from "./sagas/usersSaga";
 import { directoriesSaga } from "./sagas/directoriesSaga";
@@ -19,6 +20,7 @@ import { companyDirectoriesSaga } from "./sagas/companyDirectoriesSaga";
 import { modulesSaga } from "./sagas/modulesSaga";
 import { rolesSaga } from "./sagas/rolesSaga";
 import { companyModuleDirectoriesSaga } from "./sagas/companyModuleDirectoriesSaga";
+import directoryRecordsSaga from "./sagas/directoryRecordsSaga";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -34,6 +36,7 @@ export const store = configureStore({
     roles: rolesReducer,
     appState: appStateReducer,
     companyModuleDirectories: companyModuleDirectoriesReducer,
+    directoryRecords: directoryRecordsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(sagaMiddleware),
@@ -49,6 +52,7 @@ function* rootSaga() {
     modulesSaga(),
     rolesSaga(),
     companyModuleDirectoriesSaga(),
+    directoryRecordsSaga(),
   ]);
 }
 

@@ -1,10 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
+import { useSelector, useDispatch } from 'react-redux';
+import type { RootState } from '@/store';
+import DirectoryRecordsTable from '@/pages/directories/components/DirectoryRecordsTable';
+
+// Placeholder for the company directory ID for receipts
+// This should be replaced with the actual ID from the backend for the Receipts directory under the Cashier module
+const RECEIPTS_DIRECTORY_ID = 'placeholder-receipts-directory-id';
 
 const Receipts: React.FC = () => {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  // Note: Additional logic to fetch or set the correct companyDirectoryId for receipts
+  // can be added here if dynamic retrieval is needed.
 
   return (
     <Box sx={{ p: 3 }}>
@@ -36,13 +48,10 @@ const Receipts: React.FC = () => {
           boxShadow: '0 4px 24px 0 rgba(0,0,0,0.04)',
         }}
       >
-        {/* Receipts list will go here */}
-        <Typography variant="body1" color="text.secondary">
-          {t('No receipts found')}
-        </Typography>
+        <DirectoryRecordsTable companyDirectoryId={RECEIPTS_DIRECTORY_ID} />
       </Paper>
     </Box>
   );
 };
 
-export default Receipts; 
+export default Receipts;

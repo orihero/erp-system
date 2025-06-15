@@ -64,15 +64,12 @@ db.CompanyDirectory.hasMany(db.DirectoryRecord, {
   as: 'directoryRecords'
 });
 
-db.DirectoryRecord.hasMany(db.DirectoryValue, {
-  foreignKey: 'directory_record_id',
-  as: 'recordValues'
-});
-
 db.DirectoryField.hasMany(db.DirectoryValue, {
   foreignKey: 'field_id',
   as: 'values2'
 });
+
+// Note: Ensure no references to company_directory_id for DirectoryValue. It should use directory_record_id to link to DirectoryRecord.
 
 
 db.sequelize = sequelize;

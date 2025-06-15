@@ -10,6 +10,7 @@ const modulesRouter = require("./modules");
 const companiesRouter = require("./companies");
 const rolesRouter = require("./roles");
 const reportStructureRoutes = require("./reportStructureRoutes");
+const directoryRecordRoutes = require("./directoryRecord.routes");
 
 // Mount routes 
 router.use("/directories", directoryRoutes);
@@ -22,5 +23,6 @@ router.use("/modules", modulesRouter);
 router.use("/companies", companiesRouter);
 router.use("/roles", rolesRouter);
 router.use("/report-structures", reportStructureRoutes);
+router.use("/directory-records", directoryRecordRoutes);
 
 module.exports = router;

@@ -69,23 +69,23 @@ export const directoriesApi = {
         limit: number;
         total_pages: number;
       };
-    }>(`/api/directories/${directoryTypeId}/entries`, { params }),
+    }>(`/api/directory-records/directory/${directoryTypeId}`, { params }),
 
   // Create a new directory entry
   createDirectoryEntry: (directoryTypeId: string, values: Array<{
     attribute_id: string;
     value: string | number | boolean;
   }>) => 
-    api.post<DirectoryEntry>(`/api/directories/${directoryTypeId}/entries`, { values }),
+    api.post<DirectoryEntry>(`/api/directory-records`, { company_directory_id: directoryTypeId, values }),
 
   // Update a directory entry
   updateDirectoryEntry: (directoryTypeId: string, entryId: string, values: Array<{
     attribute_id: string;
     value: string | number | boolean;
   }>) => 
-    api.put<DirectoryEntry>(`/api/directories/${directoryTypeId}/entries/${entryId}`, { values }),
+    api.put<DirectoryEntry>(`/api/directory-records/${entryId}`, { company_directory_id: directoryTypeId, values }),
 
   // Delete a directory entry
   deleteDirectoryEntry: (directoryTypeId: string, entryId: string) => 
-    api.delete(`/api/directories/${directoryTypeId}/entries/${entryId}`)
+    api.delete(`/api/directory-records/${entryId}`)
 };

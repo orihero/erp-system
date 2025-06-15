@@ -3,14 +3,20 @@ import { Directory, DirectoryField } from '../../api/services/directories';
 
 interface DirectoriesState {
   directories: Directory[];
+  fields: Record<string, DirectoryField[]>;
   loading: boolean;
   error: string | null;
+  fieldsLoading: Record<string, boolean>;
+  fieldsError: Record<string, string | null>;
 }
 
 const initialState: DirectoriesState = {
   directories: [],
+  fields: {},
   loading: false,
   error: null,
+  fieldsLoading: {},
+  fieldsError: {},
 };
 
 const directoriesSlice = createSlice({
@@ -72,6 +78,19 @@ const directoriesSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    fetchDirectoryFieldsStart: (state, action: PayloadAction<string>) => {
+      state.fieldsLoading[action.payload] = true;
+      state.fieldsError[action.payload] = null;
+    },
+    fetchDirectoryFieldsSuccess: (state, action: PayloadAction<{ directoryId: string; fields: DirectoryField[] }>) => {
+      state.fields[action.payload.directoryId] = action.payload.fields;
+      state.fieldsLoading[action.payload.directoryId] = false;
+      state.fieldsError[action.payload.directoryId] = null;
+    },
+    fetchDirectoryFieldsFailure: (state, action: PayloadAction<{ directoryId: string; error: string }>) => {
+      state.fieldsLoading[action.payload.directoryId] = false;
+      state.fieldsError[action.payload.directoryId] = action.payload.error;
+    },
   },
 });
 
@@ -88,6 +107,9 @@ export const {
   createDirectoryStart,
   createDirectorySuccess,
   createDirectoryFailure,
+  fetchDirectoryFieldsStart,
+  fetchDirectoryFieldsSuccess,
+  fetchDirectoryFieldsFailure,
 } = directoriesSlice.actions;
 
-export default directoriesSlice.reducer; 
+export default directoriesSlice.reducer;

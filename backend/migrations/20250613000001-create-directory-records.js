@@ -48,7 +48,7 @@ module.exports = {
     // Add back company_directory_id column to directory_values table
     await queryInterface.addColumn('directory_values', 'company_directory_id', {
       type: Sequelize.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'company_directories',
         key: 'id'

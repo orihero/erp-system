@@ -10,6 +10,7 @@ import Signup from './pages/signup/Signup';
 import Dashboard from './pages/dashboard';
 import Clients from './pages/clients';
 import Directories from './pages/directories';
+import DirectoryRecords from './pages/directories/DirectoryRecords';
 import Companies from './pages/companies';
 import Modules from './pages/modules/Modules';
 import Reports from './pages/reports/Reports';
@@ -60,6 +61,14 @@ const AppRoutes: React.FC = () => {
           <PrivateRoute>
             <Layout>
               <Directories />
+            </Layout>
+          </PrivateRoute>
+        } />
+
+        <Route path="/directories/:directoryId" element={
+          <PrivateRoute>
+            <Layout>
+              <DirectoryRecords />
             </Layout>
           </PrivateRoute>
         } />
@@ -125,6 +134,14 @@ const AppRoutes: React.FC = () => {
           <PrivateRoute>
             <CashierLayout>
               <CashierDirectories />
+            </CashierLayout>
+          </PrivateRoute>
+        } />
+
+        <Route path="/cashier/directories/:directoryId" element={
+          <PrivateRoute>
+            <CashierLayout>
+              <DirectoryRecords />
             </CashierLayout>
           </PrivateRoute>
         } />

@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       DirectoryRecord.hasMany(models.DirectoryValue, {
         foreignKey: 'directory_record_id',
-        as: 'directoryRecordValues'
+        as: 'recordValues'
       });
     }
   }

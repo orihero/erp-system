@@ -149,7 +149,27 @@ const directoryController = {
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
+  },
+  
+  // Get fields of a directory
+  getFields: async (req, res) => {
+    try {
+      const directory = await Directory.findByPk(req.params.id, {
+        include: [{
+          model: DirectoryField,
+          as: 'fields'
+        }]
+      });
+
+      if (!directory) {
+        return res.status(404).json({ message: 'Directory not found' });
+      }
+
+      res.json(directory.fields);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
   }
 };
 
-module.exports = directoryController; 
+module.exports = directoryController;

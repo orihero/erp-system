@@ -16,8 +16,14 @@ export interface CompanyDirectoryResponse {
 }
 
 export const companyDirectoriesApi = {
-  getAll: (companyId?: string, moduleId?: string) =>
-    api.get<CompanyDirectoryResponse[]>(`/api/company-directories?company_id=${companyId}&module_id=${moduleId}`),
+  getAll: (companyId?: string, moduleId?: string) => {
+    let url = '/api/company-directories';
+    const params = [];
+    if (companyId) params.push(`company_id=${companyId}`);
+    if (moduleId) params.push(`module_id=${moduleId}`);
+    if (params.length > 0) url += `?${params.join('&')}`;
+    return api.get<CompanyDirectoryResponse[]>(url);
+  },
 
   create: (data: {
     company_id: string;
@@ -35,4 +41,4 @@ export const companyDirectoriesApi = {
 
   delete: (id: string) =>
     api.delete(`/api/company-directories/${id}`)
-}; 
+};
