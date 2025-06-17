@@ -7,7 +7,6 @@ import { logout } from '@/store/slices/authSlice';
 import { fetchModulesStart, selectEnabledModules } from '@/store/slices/modulesSlice';
 import { setCurrentModule } from '@/store/slices/appStateSlice';
 import type { RootState } from '@/store';
-import type { Module } from '@/api/services/modules';
 
 export default function DashboardHeader() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -57,10 +56,13 @@ export default function DashboardHeader() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        position: 'relative',
-        zIndex: 2,
+        position: 'fixed',
+        top: 0,
+        zIndex: 1100,
         mx: 'auto',
-        mt: 1
+        mt: 1,
+        left: 0,
+        right: 0,
       }}>
         {/* Left: Logo & App Name */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -80,7 +82,7 @@ export default function DashboardHeader() {
               sx={{ minHeight: 0, "&.Mui-selected": { color: '#fff' } }}
               slotProps={{ indicator: { style: { display: 'none' }, } }}
             >
-              {enabledModules.map((mod, idx) => (
+              {enabledModules.map((mod) => (
                 <Tab
                   key={mod.id}
                   label={mod.name}

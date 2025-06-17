@@ -1,31 +1,75 @@
-import React, { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Chip } from '@mui/material';
-import { Icon } from '@iconify/react';
-import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store';
-import { fetchDirectoryRecords } from '@/store/slices/directoryRecordsSlice';
-import { fetchDirectoryFieldsStart } from '@/store/slices/directoriesSlice';
+import { Icon } from '@iconify/react';
+import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+
+interface DirectoryField {
+  id: string;
+  name: string;
+  type: string;
+  directory_id: string;
+  relation_id: string | null;
+}
+
+interface DirectoryRecordValue {
+  id: string;
+  field_id: string;
+  value: string | number | boolean;
+  field: DirectoryField;
+}
+
+interface DirectoryRecord {
+  id: string;
+  company_directory_id: string;
+  recordValues: DirectoryRecordValue[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 const DirectoryRecordsTable: React.FC<{ companyDirectoryId: string | undefined }> = ({ companyDirectoryId }) => {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
-  const user = useSelector((state: RootState) => state.auth.user);
   const records = useSelector((state: RootState) => state.directoryRecords.records);
   const loading = useSelector((state: RootState) => state.directoryRecords.loading);
   const error = useSelector((state: RootState) => state.directoryRecords.error);
   const fields = useSelector((state: RootState) => state.directories.fields);
-  const fieldsLoading = useSelector((state: RootState) => state.directories.fieldsLoading);
-  const fieldsError = useSelector((state: RootState) => state.directories.fieldsError);
 
-  useEffect(() => {
-    if (companyDirectoryId) {
-      dispatch(fetchDirectoryRecords({ companyDirectoryId }));
-      if (!fields[companyDirectoryId] && !fieldsLoading[companyDirectoryId as string]) {
-        dispatch(fetchDirectoryFieldsStart(companyDirectoryId));
-      }
+  console.log('=== DirectoryRecordsTable Debug ===');
+  console.log('Company Directory ID:', companyDirectoryId);
+  console.log('Fields:', fields);
+  console.log('Records:', records);
+
+  // Determine the fields to display
+  const displayFields = companyDirectoryId && fields[companyDirectoryId] && fields[companyDirectoryId].length > 0 
+    ? fields[companyDirectoryId] 
+    : Object.values(fields).flat().length > 0 
+      ? Object.values(fields).flat() 
+      : [];
+
+  console.log('Display Fields:', displayFields);
+
+  const renderFieldValue = (record: any, fieldId: string) => {
+    console.log(`Rendering value for record ${record.id}, field ${fieldId}:`, {
+      recordValues: record.recordValues,
+      fieldId,
+      foundValue: record.recordValues?.find((v: any) => v.field_id === fieldId)
+    });
+
+    if (!record.recordValues || !Array.isArray(record.recordValues)) {
+      console.log('No recordValues array found for record:', record.id);
+      return '-';
     }
-  }, [companyDirectoryId, dispatch, fields, fieldsLoading]);
+    
+    const valueObj = record.recordValues.find((v: any) => v.field_id === fieldId);
+    if (!valueObj) {
+      console.log('No value found for field:', fieldId);
+      return '-';
+    }
+    
+    console.log('Found value:', valueObj.value);
+    return String(valueObj.value);
+  };
 
   return (
     <Box sx={{ width: '100%', mb: 4 }}>
@@ -34,28 +78,24 @@ const DirectoryRecordsTable: React.FC<{ companyDirectoryId: string | undefined }
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: 600 }}>{t('directories.records.id')}</TableCell>
-              {companyDirectoryId && fields[companyDirectoryId as string] && fields[companyDirectoryId as string].length > 0 ? (
-                fields[companyDirectoryId as string].map((field) => (
-                  <TableCell key={field.id} sx={{ fontWeight: 600 }}>
-                    {field.name}
-                  </TableCell>
-                ))
-              ) : (
-                <TableCell sx={{ fontWeight: 600 }}>{t('directories.records.fields')}</TableCell>
-              )}
+              {displayFields.map((field) => (
+                <TableCell key={field.id} sx={{ fontWeight: 600 }}>
+                  {field.name}
+                </TableCell>
+              ))}
               <TableCell sx={{ fontWeight: 600, textAlign: 'right' }}>{t('directories.records.actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-              <TableCell colSpan={companyDirectoryId && fields[companyDirectoryId as string] && fields[companyDirectoryId as string].length > 0 ? fields[companyDirectoryId as string].length + 2 : 3} sx={{ textAlign: 'center', color: 'text.secondary' }}>
+                <TableCell colSpan={displayFields.length + 2} sx={{ textAlign: 'center', color: 'text.secondary' }}>
                   {t('directories.records.loading')}
                 </TableCell>
               </TableRow>
             ) : error ? (
               <TableRow>
-              <TableCell colSpan={companyDirectoryId && fields[companyDirectoryId as string] && fields[companyDirectoryId as string].length > 0 ? fields[companyDirectoryId as string].length + 2 : 3} sx={{ textAlign: 'center', color: 'error.main' }}>
+                <TableCell colSpan={displayFields.length + 2} sx={{ textAlign: 'center', color: 'error.main' }}>
                   {t('directories.records.error')}: {error}
                 </TableCell>
               </TableRow>
@@ -63,19 +103,11 @@ const DirectoryRecordsTable: React.FC<{ companyDirectoryId: string | undefined }
               records.map((record) => (
                 <TableRow key={record.id} hover>
                   <TableCell>{record.id}</TableCell>
-                  {companyDirectoryId && fields[companyDirectoryId as string] && fields[companyDirectoryId as string].length > 0 ? (
-                    fields[companyDirectoryId as string].map((field) => (
-                      <TableCell key={field.id}>
-                        {(record.values as Record<string, any>)[field.id.toString()] !== undefined ? String((record.values as Record<string, any>)[field.id.toString()]) : '-'}
-                      </TableCell>
-                    ))
-                  ) : (
-                    <TableCell>
-                      {Object.values(record.values).map((value, index) => (
-                        <Chip key={index} label={String(value)} sx={{ mr: 1, mb: 1 }} />
-                      ))}
+                  {displayFields.map((field) => (
+                    <TableCell key={field.id}>
+                      {renderFieldValue(record, field.id.toString())}
                     </TableCell>
-                  )}
+                  ))}
                   <TableCell sx={{ textAlign: 'right' }}>
                     <IconButton size="small" sx={{ mr: 1 }}>
                       <Icon icon="ph:pencil-simple" />
@@ -88,7 +120,7 @@ const DirectoryRecordsTable: React.FC<{ companyDirectoryId: string | undefined }
               ))
             ) : (
               <TableRow>
-              <TableCell colSpan={companyDirectoryId && fields[companyDirectoryId as string] && fields[companyDirectoryId as string].length > 0 ? fields[companyDirectoryId as string].length + 2 : 3} sx={{ textAlign: 'center', color: 'text.secondary' }}>
+                <TableCell colSpan={displayFields.length + 2} sx={{ textAlign: 'center', color: 'text.secondary' }}>
                   {t('directories.records.noRecords')}
                 </TableCell>
               </TableRow>

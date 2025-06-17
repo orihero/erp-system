@@ -25,6 +25,7 @@ const AddDirectoryDrawer: React.FC<AddDirectoryDrawerProps> = ({ open, onClose }
   const [form, setForm] = useState({
     name: '',
     icon_name: '',
+    directory_type: 'Company',
   });
   const [fields, setFields] = useState<DirectoryField[]>([]);
 
@@ -66,6 +67,20 @@ const AddDirectoryDrawer: React.FC<AddDirectoryDrawerProps> = ({ open, onClose }
         <form style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24 }} onSubmit={handleSubmit}>
           <TextField label={t('directories.name')} name="name" value={form.name} onChange={handleChange} fullWidth required />
           <TextField label={t('directories.iconName')} name="icon_name" value={form.icon_name} onChange={handleChange} fullWidth required />
+          <TextField
+            select
+            label={t('directories.type')}
+            name="directory_type"
+            value={form.directory_type}
+            onChange={handleChange}
+            fullWidth
+            required
+            SelectProps={{ native: true }}
+          >
+            <option value="Module">Module</option>
+            <option value="Company">Company</option>
+            <option value="System">System</option>
+          </TextField>
           <DirectoryFieldsEditor fields={fields} onFieldsChange={setFields} />
           <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
             <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 999, textTransform: 'none' }}>

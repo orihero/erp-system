@@ -36,6 +36,14 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: true
       }
     },
+    directory_type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isIn: [["Module", "Company", "System"]],
+        notEmpty: true
+      }
+    },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,

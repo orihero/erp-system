@@ -31,14 +31,14 @@ class DirectoryRecordFactory {
         console.log('Attempting to create DirectoryValue records for DirectoryRecord:', record.id);
         console.log('Values to be created:', values.map((v) => ({
           directory_record_id: record.id,
-          directory_field_id: v.attribute_id || v.fieldId,
+          directory_field_id: v.field_id,
           value: v.value,
         })));
         try {
           await DirectoryValue.bulkCreate(
             values.map((v) => ({
               directory_record_id: record.id,
-              directory_field_id: v.attribute_id || v.fieldId, // Handle both attribute_id and fieldId for compatibility
+              field_id: v.field_id, // Handle both attribute_id and fieldId for compatibility
               value: v.value,
             })),
             { 
@@ -62,7 +62,7 @@ class DirectoryRecordFactory {
     const offset = (page - 1) * limit;
 
     const recordWhere = {
-      "$DirectoryRecord.company_directory_id$": companyDirectoryId, // Условие для DirectoryRecord
+      company_directory_id: companyDirectoryId
     };
 
     const include = [

@@ -1,40 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Button, Typography } from '@mui/material';
-import { Icon } from '@iconify/react';
-import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store';
-import DirectoryRecordsTable from './components/DirectoryRecordsTable';
-import AddDirectoryRecordDrawer from './components/AddDirectoryRecordDrawer';
 import { fetchCompanyDirectories } from '@/store/slices/companyDirectoriesSlice';
 import { fetchDirectoryRecords } from '@/store/slices/directoryRecordsSlice';
+import { fetchDirectoryFieldsStart } from '@/store/slices/directoriesSlice';
+import { Icon } from '@iconify/react';
+import { Box, Button, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import AddDirectoryRecordDrawer from './components/AddDirectoryRecordDrawer';
+import DirectoryRecordsTable from './components/DirectoryRecordsTable';
 
 const DirectoryRecords: React.FC = () => {
   const { t } = useTranslation();
   const { directoryId } = useParams<{ directoryId: string }>();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
   const { companyDirectories } = useSelector((state: RootState) => state.companyDirectories);
+  const records = useSelector((state: RootState) => state.directoryRecords.records);
 
+  const directory = companyDirectories.find(dir => dir.id === directoryId) as any;
+  console.log('====================================');
+  console.log({ records });
+  console.log('====================================');
   useEffect(() => {
     if (user && user.company_id) {
       dispatch(fetchCompanyDirectories(user.company_id));
     } else if (user && user.company && user.company.id) {
       dispatch(fetchCompanyDirectories(user.company.id));
     }
-    if (directoryId) {
-      dispatch(fetchDirectoryRecords({ companyDirectoryId: directoryId }));
-    }
-  }, [user, directoryId, dispatch]);
+  }, [user, dispatch]);
 
-  const directory = companyDirectories.find(dir => dir.id === directoryId);
+  useEffect(() => {
+    if (directoryId && companyDirectories.length > 0) {
+
+
+      dispatch(fetchDirectoryRecords({ companyDirectoryId: directory.company_directory_id }));
+      dispatch(fetchDirectoryFieldsStart(directory.id));
+    } else {
+      console.log('DirectoryRecords - No matching directory found for ID:', directoryId);
+    }
+  }, [directoryId, companyDirectories, dispatch]);
 
   console.log('====================================');
   console.log({ companyDirectories, directory });
   console.log('====================================');
+  // Note: Added type assertion 'as any' to handle company_directory_id which might not be in the type definition.
 
   return (
     <Box sx={{ p: 4, width: '100%' }}>
@@ -59,12 +71,12 @@ const DirectoryRecords: React.FC = () => {
         </Button>
       </Box>
 
-      <DirectoryRecordsTable companyDirectoryId={directory?.id} />
+      <DirectoryRecordsTable companyDirectoryId={(directory as any)?.company_directory_id} />
 
       <AddDirectoryRecordDrawer
         open={isAddDrawerOpen}
         onClose={() => setIsAddDrawerOpen(false)}
-        companyDirectoryId={directory?.id}
+        companyDirectoryId={(directory as any)?.company_directory_id}
         directoryId={directoryId}
       />
     </Box>

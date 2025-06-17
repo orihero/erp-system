@@ -17,9 +17,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'module_id',
         as: 'companyModule'
       });
-      CompanyDirectory.hasMany(models.DirectoryValue, {
+      CompanyDirectory.hasMany(models.DirectoryRecord, {
         foreignKey: 'company_directory_id',
-        as: 'directoryValues'
+        as: 'directoryRecords'
       });
     }
   }

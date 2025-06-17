@@ -16,6 +16,7 @@ export interface Directory {
   id: string;
   name: string;
   icon_name: string;
+  directory_type: string;
   created_at: string;
   updated_at: string;
   is_enabled?: boolean;

@@ -59,10 +59,7 @@ db.Directory.hasMany(db.DirectoryField, {
   as: 'relatedFields'
 });
 
-db.CompanyDirectory.hasMany(db.DirectoryRecord, {
-  foreignKey: 'company_directory_id',
-  as: 'directoryRecords'
-});
+ // Removed duplicate association to avoid alias conflict with CompanyDirectory.js
 
 db.DirectoryField.hasMany(db.DirectoryValue, {
   foreignKey: 'field_id',

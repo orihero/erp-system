@@ -6,12 +6,22 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const now = new Date();
 
+    // Predefine UUIDs for new directories
+    const receiptsDirId = uuidv4();
+    const terminalDirId = uuidv4();
+    const bankStatementDirId = uuidv4();
+    const measurementsDirId = uuidv4();
+    const currencyDirId = uuidv4();
+    const taxCodesDirId = uuidv4();
+    const unitsDirId = uuidv4();
+
     // Create Directories
     await queryInterface.bulkInsert('directories', [
       {
         id: uuidv4(),
         name: 'Clients',
         icon_name: 'material-symbols:business',
+        directory_type: 'Company',
         created_at: now,
         updated_at: now
       },
@@ -19,6 +29,7 @@ module.exports = {
         id: uuidv4(),
         name: 'Contracts',
         icon_name: 'material-symbols:description',
+        directory_type: 'Company',
         created_at: now,
         updated_at: now
       },
@@ -26,6 +37,7 @@ module.exports = {
         id: uuidv4(),
         name: 'Cars',
         icon_name: 'material-symbols:directions-car',
+        directory_type: 'Company',
         created_at: now,
         updated_at: now
       },
@@ -33,6 +45,63 @@ module.exports = {
         id: uuidv4(),
         name: 'Employees',
         icon_name: 'material-symbols:people',
+        directory_type: 'Company',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: receiptsDirId,
+        name: 'Receipts',
+        icon_name: 'material-symbols:receipt',
+        directory_type: 'Module',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: terminalDirId,
+        name: 'Terminal',
+        icon_name: 'material-symbols:point-of-sale',
+        directory_type: 'Module',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: bankStatementDirId,
+        name: 'Bank Statement',
+        icon_name: 'material-symbols:account-balance',
+        directory_type: 'Module',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: measurementsDirId,
+        name: 'Measurements',
+        icon_name: 'material-symbols:straighten',
+        directory_type: 'System',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: currencyDirId,
+        name: 'Currency',
+        icon_name: 'material-symbols:attach-money',
+        directory_type: 'System',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: taxCodesDirId,
+        name: 'Tax Codes',
+        icon_name: 'material-symbols:percent',
+        directory_type: 'System',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: unitsDirId,
+        name: 'Units',
+        icon_name: 'material-symbols:square-foot',
+        directory_type: 'System',
         created_at: now,
         updated_at: now
       }
@@ -218,6 +287,180 @@ module.exports = {
         id: uuidv4(),
         directory_id: employeesDir.id,
         name: 'role',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+
+      // Receipts fields
+      {
+        id: uuidv4(),
+        directory_id: receiptsDirId,
+        name: 'receipt_number',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: receiptsDirId,
+        name: 'date',
+        type: 'date',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: receiptsDirId,
+        name: 'amount',
+        type: 'decimal',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: receiptsDirId,
+        name: 'customer_name',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+
+      // Terminal fields
+      {
+        id: uuidv4(),
+        directory_id: terminalDirId,
+        name: 'terminal_id',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: terminalDirId,
+        name: 'location',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: terminalDirId,
+        name: 'status',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+
+      // Bank Statement fields
+      {
+        id: uuidv4(),
+        directory_id: bankStatementDirId,
+        name: 'statement_date',
+        type: 'date',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: bankStatementDirId,
+        name: 'account_number',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: bankStatementDirId,
+        name: 'balance',
+        type: 'decimal',
+        created_at: now,
+        updated_at: now
+      },
+
+      // Measurements fields
+      {
+        id: uuidv4(),
+        directory_id: measurementsDirId,
+        name: 'measurement_name',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: measurementsDirId,
+        name: 'symbol',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+
+      // Currency fields
+      {
+        id: uuidv4(),
+        directory_id: currencyDirId,
+        name: 'currency_code',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: currencyDirId,
+        name: 'currency_name',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: currencyDirId,
+        name: 'symbol',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+
+      // Tax Codes fields
+      {
+        id: uuidv4(),
+        directory_id: taxCodesDirId,
+        name: 'tax_code',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: taxCodesDirId,
+        name: 'description',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: taxCodesDirId,
+        name: 'rate',
+        type: 'decimal',
+        created_at: now,
+        updated_at: now
+      },
+
+      // Units fields
+      {
+        id: uuidv4(),
+        directory_id: unitsDirId,
+        name: 'unit_name',
+        type: 'string',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: unitsDirId,
+        name: 'abbreviation',
         type: 'string',
         created_at: now,
         updated_at: now

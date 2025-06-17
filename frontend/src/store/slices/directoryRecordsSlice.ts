@@ -62,7 +62,7 @@ const directoryRecordsSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    addDirectoryRecord: (state, action: PayloadAction<{ companyDirectoryId: string; values: Array<{ attribute_id: string; value: string | number | boolean }> }>) => {
+    addDirectoryRecord: (state, action: PayloadAction<{ companyDirectoryId: string; values: Array<{ field_id: string; value: string | number | boolean }> }>) => {
       state.adding = true;
       state.addError = null;
     },
@@ -74,7 +74,7 @@ const directoryRecordsSlice = createSlice({
       state.adding = false;
       state.addError = action.payload;
     },
-    updateDirectoryRecord: (state, action: PayloadAction<{ companyDirectoryId: string; recordId: string; values: Array<{ attribute_id: string; value: string | number | boolean }> }>) => {
+    updateDirectoryRecord: (state, action: PayloadAction<{ companyDirectoryId: string; recordId: string; values: Array<{ field_id: string; value: string | number | boolean }> }>) => {
       const { recordId } = action.payload;
       state.updating[recordId] = true;
       state.updateError[recordId] = null;

@@ -43,8 +43,8 @@ const AddDirectoryRecordDrawer: React.FC<{ open: boolean; onClose: () => void; c
 
     const handleSubmit = () => {
         if (companyDirectoryId) {
-            const values = Object.entries(formData).map(([attribute_id, value]) => ({
-                attribute_id,
+            const values = Object.entries(formData).map(([field_id, value]) => ({
+                field_id,
                 value
             }));
             dispatch(addDirectoryRecord({ companyDirectoryId, values }));

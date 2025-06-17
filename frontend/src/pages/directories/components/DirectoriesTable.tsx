@@ -129,6 +129,7 @@ const DirectoriesTable: React.FC = () => {
             <TableRow>
               <TableCell>{t('directories.name')}</TableCell>
               <TableCell>{t('directories.iconName')}</TableCell>
+              <TableCell>{t('directories.type')}</TableCell>
               <TableCell>{t('directories.createdAt')}</TableCell>
               <TableCell align="right">{t('common.actions')}</TableCell>
             </TableRow>
@@ -136,13 +137,13 @@ const DirectoriesTable: React.FC = () => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={4} align="center">
+                <TableCell colSpan={5} align="center">
                   <CircularProgress />
                 </TableCell>
               </TableRow>
             ) : directories.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} align="center">
+                <TableCell colSpan={5} align="center">
                   {t('directories.noDirectories')}
                 </TableCell>
               </TableRow>
@@ -153,6 +154,7 @@ const DirectoriesTable: React.FC = () => {
                   <TableRow key={directory.id}>
                     <TableCell>{directory.name}</TableCell>
                     <TableCell>{directory.icon_name}</TableCell>
+                    <TableCell>{directory.directory_type}</TableCell>
                     <TableCell>{new Date(directory.created_at).toLocaleDateString()}</TableCell>
                     <TableCell align="right">
                       <IconButton
