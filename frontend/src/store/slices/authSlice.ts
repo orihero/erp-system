@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { User } from "../../api/services/auth.service";
+import type { User } from "../../api/services/types";
+import { authService } from "../../api/services/auth.service";
 
 interface AuthState {
   user: User | null;
@@ -8,6 +9,7 @@ interface AuthState {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
+  permissions: string[];
 }
 
 interface SignupPayload {
@@ -33,6 +35,7 @@ const initialState: AuthState = {
   isAuthenticated: !!getStoredToken(),
   loading: false,
   error: null,
+  permissions: authService.getUserPermissions(),
 };
 
 const authSlice = createSlice({
@@ -52,23 +55,28 @@ const authSlice = createSlice({
     },
     loginSuccess: (
       state,
-      action: PayloadAction<{ user: User; token: string }>
+      action: PayloadAction<{ user: User; token: string; permissions?: string[] }>
     ) => {
       state.loading = false;
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.error = null;
+      if (action.payload.permissions) {
+        state.permissions = action.payload.permissions;
+      }
     },
     loginFailure: (state, action: PayloadAction<string>) => {
       state.loading = false;
       state.error = action.payload;
+      state.permissions = [];
     },
     logout: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
       state.error = null;
+      state.permissions = [];
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
     },

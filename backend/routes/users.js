@@ -3,8 +3,10 @@ const router = express.Router();
 const UserFactory = require("../factories/UserFactory");
 const CompanyFactory = require("../factories/CompanyFactory");
 const { authenticateToken, checkRole } = require("../middleware/auth");
+const { authorize } = require("../middleware/permissionMiddleware");
 const jwt = require("jsonwebtoken");
 const models = require("../models");
+const { User } = models;
 
 const userFactory = new UserFactory(models);
 
@@ -191,20 +193,25 @@ router.get("/me", authenticateToken, async (req, res) => {
 });
 
 // Get all users (admin only)
-router.get("/", authenticateToken, checkRole(["super_admin", "admin"]), async (req, res) => {
-  try {
-    // Parse page and limit from query string, with defaults
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
-    const search = req.query.search || "";
+router.get("/", 
+  authenticateToken, 
+  authorize('read', () => 'uuid_of_users_module'),
+  checkRole(["super_admin", "admin"]), 
+  async (req, res) => {
+    try {
+      // Parse page and limit from query string, with defaults
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const search = req.query.search || "";
 
-    const users = await userFactory.findAll({ page, limit, search });
-    res.json(users);
-  } catch (error) {
-    console.error("Error getting users:", error);
-    res.status(500).json({ message: "Internal server error" });
+      const users = await userFactory.findAll({ page, limit, search });
+      res.json(users);
+    } catch (error) {
+      console.error("Error getting users:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
   }
-});
+);
 
 // Create user (admin only)
 router.post("/", authenticateToken, checkRole(["super_admin", "admin"]), async (req, res) => {
@@ -218,46 +225,59 @@ router.post("/", authenticateToken, checkRole(["super_admin", "admin"]), async (
 });
 
 // Update user (admin only)
-router.put("/:id", authenticateToken, checkRole(["super_admin", "admin"]), async (req, res) => {
-  try {
-    const { roles, ...userData } = req.body;
-    const user = await userFactory.update(req.params.id, userData);
+router.put("/:id", 
+  authenticateToken, 
+  authorize(
+    'edit', 
+    () => 'uuid_of_users_module',
+    null,
+    async (req) => {
+      const user = await User.findByPk(req.params.id);
+      return user;
+    }
+  ),
+  checkRole(["super_admin", "admin"]), 
+  async (req, res) => {
+    try {
+      const { roles, ...userData } = req.body;
+      const user = await userFactory.update(req.params.id, userData);
 
-    // Update roles if provided
-    if (Array.isArray(roles)) {
-      // Remove all current roles for this user in this company
-      await models.UserRoleAssignment.destroy({
-        where: { user_id: req.params.id, company_id: user.company_id }
-      });
-      // Add new roles
-      for (const roleName of roles) {
-        const role = await models.UserRole.findOne({ where: { name: roleName } });
-        if (role) {
-          await models.UserRoleAssignment.create({
-            user_id: req.params.id,
-            role_id: role.id,
-            company_id: user.company_id
-          });
+      // Update roles if provided
+      if (Array.isArray(roles)) {
+        // Remove all current roles for this user in this company
+        await models.UserRoleAssignment.destroy({
+          where: { user_id: req.params.id, company_id: user.company_id }
+        });
+        // Add new roles
+        for (const roleName of roles) {
+          const role = await models.UserRole.findOne({ where: { name: roleName } });
+          if (role) {
+            await models.UserRoleAssignment.create({
+              user_id: req.params.id,
+              role_id: role.id,
+              company_id: user.company_id
+            });
+          }
         }
       }
-    }
 
-    // Fetch updated roles to return in response
-    const updatedRoles = await models.UserRoleAssignment.findAll({
-      where: { user_id: req.params.id, company_id: user.company_id },
-      include: [{ model: models.UserRole, as: 'role' }]
-    });
-    const roleNames = updatedRoles.map(assignment => assignment.role.name);
+      // Fetch updated roles to return in response
+      const updatedRoles = await models.UserRoleAssignment.findAll({
+        where: { user_id: req.params.id, company_id: user.company_id },
+        include: [{ model: models.UserRole, as: 'role' }]
+      });
+      const roleNames = updatedRoles.map(assignment => assignment.role.name);
 
-    res.json({ ...user.toJSON(), roles: roleNames });
-  } catch (error) {
-    console.error("Error updating user:", error);
-    if (error.name === "SequelizeUniqueConstraintError") {
-      return res.status(400).json({ error: "Email already exists" });
+      res.json({
+        ...user.toJSON(),
+        roles: roleNames
+      });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
-    res.status(500).json({ error: error.message || "Internal server error" });
   }
-});
+);
 
 // Delete user (admin only)
 router.delete("/:id", authenticateToken, checkRole(["super_admin", "admin"]), async (req, res) => {

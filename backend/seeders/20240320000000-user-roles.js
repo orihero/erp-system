@@ -77,47 +77,7 @@ module.exports = {
         },
         {
           id: uuidv4(),
-          name: 'user',
-          description: 'Regular user with basic access',
-          is_system: true,
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          name: 'Owner',
-          description: 'Company owner with full access to all features',
-          is_system: true,
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          name: 'Admin',
-          description: 'Administrator with access to most features',
-          is_system: true,
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          name: 'Manager',
-          description: 'Manager with access to department features',
-          is_system: true,
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          name: 'Employee',
-          description: 'Regular employee with basic access',
-          is_system: true,
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          name: 'Cashier',
+          name: 'cashier',
           description: 'Cashier with access to sales and payment features',
           is_system: true,
           created_at: now,
@@ -125,8 +85,16 @@ module.exports = {
         },
         {
           id: uuidv4(),
-          name: 'Salesman',
+          name: 'salesman',
           description: 'Sales representative with access to sales and customer features',
+          is_system: true,
+          created_at: now,
+          updated_at: now
+        },
+        {
+          id: uuidv4(),
+          name: 'user',
+          description: 'Regular user with basic access',
           is_system: true,
           created_at: now,
           updated_at: now
@@ -149,11 +117,11 @@ module.exports = {
       const superAdminRole = createdRoles.find(r => r.name === 'super_admin');
       const adminRole = createdRoles.find(r => r.name === 'admin');
       const managerRole = createdRoles.find(r => r.name === 'manager');
+      const cashierRole = createdRoles.find(r => r.name === 'cashier');
+      const salesmanRole = createdRoles.find(r => r.name === 'salesman');
       const userRole = createdRoles.find(r => r.name === 'user');
-      const cashierRole = createdRoles.find(r => r.name === 'Cashier');
-      const salesmanRole = createdRoles.find(r => r.name === 'Salesman');
 
-      if (!superAdminRole || !adminRole || !managerRole || !userRole || !cashierRole || !salesmanRole) {
+      if (!superAdminRole || !adminRole || !managerRole || !cashierRole || !salesmanRole || !userRole) {
         throw new Error('Some roles were not created successfully');
       }
 
@@ -251,53 +219,20 @@ module.exports = {
           created_at: now,
           updated_at: now
         },
-        // User permissions
-        {
-          id: uuidv4(),
-          role_id: userRole.id,
-          module: 'profile',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: userRole.id,
-          module: 'reports',
-          action: 'view',
-          created_at: now,
-          updated_at: now
-        },
         // Cashier permissions
         {
           id: uuidv4(),
           role_id: cashierRole.id,
+          module: 'cashier',
+          action: 'manage',
+          created_at: now,
+          updated_at: now
+        },
+        {
+          id: uuidv4(),
+          role_id: cashierRole.id,
           module: 'sales',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: cashierRole.id,
-          module: 'payments',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: cashierRole.id,
-          module: 'inventory',
-          action: 'view',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: cashierRole.id,
-          module: 'reports',
-          action: 'view',
+          action: 'create',
           created_at: now,
           updated_at: now
         },
@@ -318,19 +253,20 @@ module.exports = {
           created_at: now,
           updated_at: now
         },
+        // User permissions
         {
           id: uuidv4(),
-          role_id: salesmanRole.id,
-          module: 'inventory',
+          role_id: userRole.id,
+          module: 'dashboard',
           action: 'view',
           created_at: now,
           updated_at: now
         },
         {
           id: uuidv4(),
-          role_id: salesmanRole.id,
-          module: 'reports',
-          action: 'view',
+          role_id: userRole.id,
+          module: 'profile',
+          action: 'manage',
           created_at: now,
           updated_at: now
         }

@@ -1,27 +1,38 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAppSelector } from '../../store/hooks';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
+import { usePermissions } from '../../hooks/usePermissions';
 
 interface PrivateRouteProps {
-  children: React.ReactNode;
+  requiredPermissionType: string;
+  moduleId?: string;
+  children?: React.ReactNode;
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
+const PrivateRoute: React.FC<PrivateRouteProps> = ({
+  requiredPermissionType,
+  moduleId,
+  children,
+}) => {
+  const isLoggedIn = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const { check } = usePermissions();
   const location = useLocation();
 
-  // If still loading, you might want to show a loading spinner
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  // If not authenticated, redirect to login
-  if (!isAuthenticated) {
-    // Use replace to prevent adding to history stack
+  if (!isLoggedIn) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return <>{children}</>;
+  const hasPermission = check({ 
+    requiredType: requiredPermissionType,
+    moduleId: moduleId 
+  });
+
+  if (!hasPermission) {
+    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+  }
+
+  return children ? <>{children}</> : <Outlet />;
 };
 
-export default PrivateRoute; 
+export default PrivateRoute;

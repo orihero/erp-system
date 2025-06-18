@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { fetchUsersStart, deleteUserStart, editUserStart, User } from '../../../store/slices/usersSlice';
 import EditUserDrawer from './EditUserDrawer';
+import { usePermissions } from '../../../hooks/usePermissions';
 
 interface ClientsTableProps {
   setDrawerOpen: (open: boolean) => void;
@@ -17,6 +18,11 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
+  const { check } = usePermissions();
+
+  // Check permissions
+  const canEditClients = check({ requiredType: 'edit' });
+  const canDeleteClients = check({ requiredType: 'delete' });
 
   useEffect(() => {
     dispatch(fetchUsersStart({ page, limit, search }));
@@ -45,13 +51,15 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
     setUserToDelete(user);
     setDeleteDialogOpen(true);
   };
+
   const handleDeleteConfirm = () => {
     if (userToDelete) {
-      dispatch(deleteUserStart(userToDelete.id));
+      dispatch(deleteUserStart());
       setDeleteDialogOpen(false);
       setUserToDelete(null);
     }
   };
+
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
     setUserToDelete(null);
@@ -61,11 +69,13 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
     setUserToEdit(user);
     setEditModalOpen(true);
   };
+
   const handleEditSave = (id: string, data: Partial<User>) => {
-    dispatch(editUserStart({ id, data }));
+    dispatch(editUserStart());
     setEditModalOpen(false);
     setUserToEdit(null);
   };
+
   const handleEditCancel = () => {
     setEditModalOpen(false);
     setUserToEdit(null);
@@ -151,10 +161,20 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
                 </TableCell>
                 <TableCell>{user.company?.name || ''}</TableCell>
                 <TableCell align="right">
-                  <IconButton size="small" onClick={() => handleEditClick(user)}>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => handleEditClick(user)}
+                    disabled={!canEditClients}
+                    sx={{ opacity: canEditClients ? 1 : 0.5 }}
+                  >
                     <Icon icon="ph:pencil-simple" width={20} />
                   </IconButton>
-                  <IconButton size="small" onClick={() => handleDeleteClick(user)}>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => handleDeleteClick(user)}
+                    disabled={!canDeleteClients}
+                    sx={{ opacity: canDeleteClients ? 1 : 0.5 }}
+                  >
                     <Icon icon="ph:trash" width={20} />
                   </IconButton>
                 </TableCell>

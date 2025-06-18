@@ -125,7 +125,8 @@ module.exports = {
         id: uuidv4(),
         directory_id: clientsDir.id,
         name: 'name',
-        type: 'string',
+        type: 'text',
+        required: true,
         created_at: now,
         updated_at: now
       },
@@ -133,7 +134,8 @@ module.exports = {
         id: uuidv4(),
         directory_id: clientsDir.id,
         name: 'contact_person',
-        type: 'string',
+        type: 'text',
+        required: false,
         created_at: now,
         updated_at: now
       },
@@ -141,7 +143,8 @@ module.exports = {
         id: uuidv4(),
         directory_id: clientsDir.id,
         name: 'address',
-        type: 'string',
+        type: 'textarea',
+        required: false,
         created_at: now,
         updated_at: now
       },
@@ -151,6 +154,7 @@ module.exports = {
         name: 'contracts',
         type: 'relation',
         relation_id: contractsDir.id,
+        required: false,
         created_at: now,
         updated_at: now
       },
@@ -160,7 +164,8 @@ module.exports = {
         id: uuidv4(),
         directory_id: contractsDir.id,
         name: 'name',
-        type: 'string',
+        type: 'text',
+        required: true,
         created_at: now,
         updated_at: now
       },
@@ -168,7 +173,8 @@ module.exports = {
         id: uuidv4(),
         directory_id: contractsDir.id,
         name: 'content',
-        type: 'text',
+        type: 'textarea',
+        required: true,
         created_at: now,
         updated_at: now
       },
@@ -177,6 +183,7 @@ module.exports = {
         directory_id: contractsDir.id,
         name: 'start_date',
         type: 'date',
+        required: true,
         created_at: now,
         updated_at: now
       },
@@ -185,6 +192,7 @@ module.exports = {
         directory_id: contractsDir.id,
         name: 'end_date',
         type: 'date',
+        required: false,
         created_at: now,
         updated_at: now
       },
@@ -194,6 +202,7 @@ module.exports = {
         name: 'client',
         type: 'relation',
         relation_id: clientsDir.id,
+        required: true,
         created_at: now,
         updated_at: now
       },
@@ -201,7 +210,8 @@ module.exports = {
         id: uuidv4(),
         directory_id: contractsDir.id,
         name: 'amount',
-        type: 'decimal',
+        type: 'number',
+        required: true,
         created_at: now,
         updated_at: now
       },
@@ -210,6 +220,7 @@ module.exports = {
         directory_id: contractsDir.id,
         name: 'requisites',
         type: 'json',
+        required: false,
         created_at: now,
         updated_at: now
       },
@@ -219,7 +230,8 @@ module.exports = {
         id: uuidv4(),
         directory_id: carsDir.id,
         name: 'name',
-        type: 'string',
+        type: 'text',
+        required: true,
         created_at: now,
         updated_at: now
       },
@@ -229,6 +241,7 @@ module.exports = {
         name: 'driver',
         type: 'relation',
         relation_id: employeesDir.id,
+        required: false,
         created_at: now,
         updated_at: now
       },
@@ -238,7 +251,8 @@ module.exports = {
         id: uuidv4(),
         directory_id: employeesDir.id,
         name: 'firstname',
-        type: 'string',
+        type: 'text',
+        required: true,
         created_at: now,
         updated_at: now
       },
@@ -246,7 +260,17 @@ module.exports = {
         id: uuidv4(),
         directory_id: employeesDir.id,
         name: 'lastname',
-        type: 'string',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: employeesDir.id,
+        name: 'email',
+        type: 'email',
+        required: true,
         created_at: now,
         updated_at: now
       },
@@ -254,15 +278,35 @@ module.exports = {
         id: uuidv4(),
         directory_id: employeesDir.id,
         name: 'phone',
-        type: 'string',
+        type: 'tel',
+        required: false,
         created_at: now,
         updated_at: now
       },
       {
         id: uuidv4(),
         directory_id: employeesDir.id,
-        name: 'address',
-        type: 'string',
+        name: 'position',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: employeesDir.id,
+        name: 'department',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_id: employeesDir.id,
+        name: 'hire_date',
+        type: 'date',
+        required: true,
         created_at: now,
         updated_at: now
       },
@@ -270,198 +314,8 @@ module.exports = {
         id: uuidv4(),
         directory_id: employeesDir.id,
         name: 'salary',
-        type: 'decimal',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: employeesDir.id,
-        name: 'contract',
-        type: 'relation',
-        relation_id: contractsDir.id,
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: employeesDir.id,
-        name: 'role',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-
-      // Receipts fields
-      {
-        id: uuidv4(),
-        directory_id: receiptsDirId,
-        name: 'receipt_number',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: receiptsDirId,
-        name: 'date',
-        type: 'date',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: receiptsDirId,
-        name: 'amount',
-        type: 'decimal',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: receiptsDirId,
-        name: 'customer_name',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-
-      // Terminal fields
-      {
-        id: uuidv4(),
-        directory_id: terminalDirId,
-        name: 'terminal_id',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: terminalDirId,
-        name: 'location',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: terminalDirId,
-        name: 'status',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-
-      // Bank Statement fields
-      {
-        id: uuidv4(),
-        directory_id: bankStatementDirId,
-        name: 'statement_date',
-        type: 'date',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: bankStatementDirId,
-        name: 'account_number',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: bankStatementDirId,
-        name: 'balance',
-        type: 'decimal',
-        created_at: now,
-        updated_at: now
-      },
-
-      // Measurements fields
-      {
-        id: uuidv4(),
-        directory_id: measurementsDirId,
-        name: 'measurement_name',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: measurementsDirId,
-        name: 'symbol',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-
-      // Currency fields
-      {
-        id: uuidv4(),
-        directory_id: currencyDirId,
-        name: 'currency_code',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: currencyDirId,
-        name: 'currency_name',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: currencyDirId,
-        name: 'symbol',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-
-      // Tax Codes fields
-      {
-        id: uuidv4(),
-        directory_id: taxCodesDirId,
-        name: 'tax_code',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: taxCodesDirId,
-        name: 'description',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: taxCodesDirId,
-        name: 'rate',
-        type: 'decimal',
-        created_at: now,
-        updated_at: now
-      },
-
-      // Units fields
-      {
-        id: uuidv4(),
-        directory_id: unitsDirId,
-        name: 'unit_name',
-        type: 'string',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_id: unitsDirId,
-        name: 'abbreviation',
-        type: 'string',
+        type: 'number',
+        required: true,
         created_at: now,
         updated_at: now
       }
@@ -722,6 +576,14 @@ module.exports = {
       {
         id: uuidv4(),
         directory_record_id: employeeRecord.id,
+        field_id: employeeFields.find(f => f.name === 'email').id,
+        value: 'aziz.karimov@uzauto.com',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: employeeRecord.id,
         field_id: employeeFields.find(f => f.name === 'phone').id,
         value: '+998901234567',
         created_at: now,
@@ -730,8 +592,24 @@ module.exports = {
       {
         id: uuidv4(),
         directory_record_id: employeeRecord.id,
-        field_id: employeeFields.find(f => f.name === 'address').id,
-        value: 'Tashkent, Yunusabad',
+        field_id: employeeFields.find(f => f.name === 'position').id,
+        value: 'Driver',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: employeeRecord.id,
+        field_id: employeeFields.find(f => f.name === 'department').id,
+        value: 'Transport',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: employeeRecord.id,
+        field_id: employeeFields.find(f => f.name === 'hire_date').id,
+        value: '2024-01-01',
         created_at: now,
         updated_at: now
       },
@@ -740,14 +618,6 @@ module.exports = {
         directory_record_id: employeeRecord.id,
         field_id: employeeFields.find(f => f.name === 'salary').id,
         value: '5000000.00',
-        created_at: now,
-        updated_at: now
-      },
-      {
-        id: uuidv4(),
-        directory_record_id: employeeRecord.id,
-        field_id: employeeFields.find(f => f.name === 'role').id,
-        value: 'Driver',
         created_at: now,
         updated_at: now
       }

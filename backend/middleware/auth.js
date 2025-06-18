@@ -1,8 +1,81 @@
 const jwt = require('jsonwebtoken');
 const UserFactory = require('../factories/UserFactory');
 const models = require('../models');
+const { User, UserRole, Permission, RolePermission, Module, Directory } = models;
 
 const userFactory = new UserFactory(models);
+
+// Middleware to verify JWT token and fetch user with roles and permissions
+const authenticateUser = async (req, res, next) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Fetch user with all required associations
+    const user = await User.findByPk(decoded.id, {
+      include: [{
+        model: UserRole,
+        as: 'roles',
+        through: { attributes: [] },
+        include: [{
+          model: Permission,
+          as: 'permissions',
+          through: { 
+            model: RolePermission,
+            attributes: ['effective_from', 'effective_until', 'constraint_data']
+          },
+          include: [
+            {
+              model: Module,
+              as: 'module',
+              attributes: ['id', 'name']
+            },
+            {
+              model: Directory,
+              as: 'directory',
+              attributes: ['id', 'name']
+            }
+          ]
+        }]
+      }]
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    // Flatten permissions from roles into a single array
+    const flattenedPermissions = user.roles.reduce((acc, role) => {
+      const rolePermissions = role.permissions.map(permission => ({
+        id: permission.id,
+        name: permission.name,
+        description: permission.description,
+        type: permission.type,
+        module_id: permission.module_id,
+        directory_id: permission.directory_id,
+        effective_from: permission.RolePermission.effective_from,
+        effective_until: permission.RolePermission.effective_until,
+        constraint_data: permission.RolePermission.constraint_data
+      }));
+      return [...acc, ...rolePermissions];
+    }, []);
+
+    // Assign user and permissions to request object
+    req.user = user;
+    req.user.permissions = flattenedPermissions;
+    
+    next();
+  } catch (error) {
+    console.error('Error authenticating user:', error);
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+};
 
 // Middleware to verify JWT token
 const authenticateToken = async (req, res, next) => {
@@ -71,5 +144,6 @@ const authorizeCompanyAccess = (req, res, next) => {
 module.exports = {
   authenticateToken,
   checkRole,
-  authorizeCompanyAccess
+  authorizeCompanyAccess,
+  authenticateUser
 }; 

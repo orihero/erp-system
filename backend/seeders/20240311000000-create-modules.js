@@ -7,57 +7,64 @@ module.exports = {
     const modules = [
       {
         id: uuidv4(),
+        name: 'Dashboard',
+        icon_name: 'material-symbols:dashboard',
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        id: uuidv4(),
         name: 'Cashier',
-        icon_name: 'cash-register',
+        icon_name: 'material-symbols:point-of-sale',
         created_at: new Date(),
         updated_at: new Date()
       },
       {
         id: uuidv4(),
         name: 'Inventory',
-        icon_name: 'boxes',
+        icon_name: 'material-symbols:inventory',
         created_at: new Date(),
         updated_at: new Date()
       },
       {
         id: uuidv4(),
         name: 'Realization',
-        icon_name: 'chart-line',
+        icon_name: 'material-symbols:trending-up',
         created_at: new Date(),
         updated_at: new Date()
       },
       {
         id: uuidv4(),
         name: 'Accounting',
-        icon_name: 'calculator',
+        icon_name: 'material-symbols:account-balance',
         created_at: new Date(),
         updated_at: new Date()
       },
       {
         id: uuidv4(),
         name: 'Purchases',
-        icon_name: 'shopping-cart',
+        icon_name: 'material-symbols:shopping-cart',
         created_at: new Date(),
         updated_at: new Date()
       },
       {
         id: uuidv4(),
         name: 'Sales',
-        icon_name: 'store',
+        icon_name: 'material-symbols:store',
         created_at: new Date(),
         updated_at: new Date()
       },
       {
         id: uuidv4(),
         name: 'Reports',
-        icon_name: 'file-invoice',
+        icon_name: 'material-symbols:assessment',
         created_at: new Date(),
         updated_at: new Date()
       },
       {
         id: uuidv4(),
         name: 'Settings',
-        icon_name: 'cog',
+        icon_name: 'material-symbols:settings',
         created_at: new Date(),
         updated_at: new Date()
       }

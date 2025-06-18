@@ -10,6 +10,18 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'user_id',
         as: 'users'
       });
+
+      UserRole.hasMany(models.RolePermission, {
+        foreignKey: 'role_id',
+        as: 'rolePermissions'
+      });
+
+      UserRole.belongsToMany(models.Permission, {
+        through: models.RolePermission,
+        foreignKey: 'role_id',
+        otherKey: 'permission_id',
+        as: 'permissions'
+      });
     }
   }
 
@@ -38,7 +50,8 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'UserRole',
     tableName: 'user_roles',
     timestamps: true,
-    underscored: true
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
   });
 
   return UserRole;

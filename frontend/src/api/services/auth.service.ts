@@ -9,6 +9,7 @@ export type LoginCredentials = {
 export type LoginResponse = {
   token: string;
   user: User;
+  permissions?: string[];
 };
 
 class AuthService {
@@ -17,11 +18,34 @@ class AuthService {
       const response = await api.post<LoginResponse>('/api/users/login', credentials);
       console.log('Auth Service - Login response:', response.data);
       console.log('Auth Service - User roles:', response.data.user.roles);
+      
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        if (response.data.permissions) {
+          localStorage.setItem('permissions', JSON.stringify(response.data.permissions));
+        }
+      }
+      
       return response.data;
     } catch (error) {
       console.error('Auth Service - Login error:', error);
       throw error;
     }
+  }
+
+  getUserPermissions(): string[] {
+    try {
+      const permissions = localStorage.getItem('permissions');
+      return permissions ? JSON.parse(permissions) : [];
+    } catch (error) {
+      console.error('Error parsing permissions:', error);
+      return [];
+    }
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('permissions');
   }
 
   async getProfile(): Promise<User> {

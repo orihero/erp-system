@@ -10,16 +10,10 @@ module.exports = {
     try {
       const now = new Date();
 
-      // Check if demo users already exist
-      const existingUsers = await queryInterface.sequelize.query(
-        'SELECT * FROM users WHERE email LIKE \'%@demo.com\';',
-        { type: queryInterface.sequelize.QueryTypes.SELECT }
-      );
-
-      if (existingUsers.length > 0) {
-        console.log('Demo users already exist. Skipping user creation.');
-        return;
-      }
+      // Remove existing users and role assignments
+      console.log('Cleaning up existing users and role assignments...');
+      await queryInterface.bulkDelete('user_role_assignments', null, {});
+      await queryInterface.bulkDelete('users', null, {});
 
       // Create demo companies
       const companies = [
@@ -202,11 +196,11 @@ module.exports = {
       const superAdminRole = roles.find(r => r.name === 'super_admin');
       const adminRole = roles.find(r => r.name === 'admin');
       const managerRole = roles.find(r => r.name === 'manager');
-      const userRole = roles.find(r => r.name === 'user');
       const cashierRole = roles.find(r => r.name === 'cashier');
       const salesmanRole = roles.find(r => r.name === 'salesman');
+      const userRole = roles.find(r => r.name === 'user');
 
-      if (!superAdminRole || !adminRole || !managerRole || !userRole || !cashierRole || !salesmanRole) {
+      if (!superAdminRole || !adminRole || !managerRole || !cashierRole || !salesmanRole || !userRole) {
         console.log('Required roles not found. Please run the user roles seeder first.');
         return;
       }
@@ -232,7 +226,7 @@ module.exports = {
         id: uuidv4(),
         user_id: createdUsers.find(u => u.email === 'superadmin@demo.com').id,
         role_id: superAdminRole.id,
-        company_id: createdCompanies[0].id,
+        company_id: null,
         created_at: now,
         updated_at: now
       });
@@ -294,29 +288,26 @@ module.exports = {
         updated_at: now
       });
 
-      // Assign roles to Uzbek users
-      const uzbekCreatedUsers = createdUsers.filter(u => !['superadmin@demo.com', 'admin1@demo.com', 'admin2@demo.com', 'cashier1@demo.com', 'cashier2@demo.com', 'salesman1@demo.com', 'salesman2@demo.com'].includes(u.email));
-      
-      // Distribute roles among Uzbek users
-      uzbekCreatedUsers.forEach((user, index) => {
-        let roleId;
-        // 10% managers, 20% admins, 20% cashiers, 20% salesmen, 30% regular users
-        if (index % 10 === 0) {
-          roleId = managerRole.id;
-        } else if (index % 5 === 0) {
-          roleId = adminRole.id;
-        } else if (index % 5 === 1) {
-          roleId = cashierRole.id;
-        } else if (index % 5 === 2) {
-          roleId = salesmanRole.id;
-        } else {
-          roleId = userRole.id;
-        }
-
+      // Assign manager roles to some Uzbek users
+      const managerUsers = uzbekUsers.slice(0, 4); // Assign manager role to first 4 Uzbek users
+      managerUsers.forEach(user => {
         roleAssignments.push({
           id: uuidv4(),
           user_id: user.id,
-          role_id: roleId,
+          role_id: managerRole.id,
+          company_id: user.company_id,
+          created_at: now,
+          updated_at: now
+        });
+      });
+
+      // Assign regular user roles to remaining Uzbek users
+      const regularUsers = uzbekUsers.slice(4); // Remaining Uzbek users get regular user role
+      regularUsers.forEach(user => {
+        roleAssignments.push({
+          id: uuidv4(),
+          user_id: user.id,
+          role_id: userRole.id,
           company_id: user.company_id,
           created_at: now,
           updated_at: now
@@ -324,7 +315,7 @@ module.exports = {
       });
 
       await queryInterface.bulkInsert('user_role_assignments', roleAssignments);
-      console.log('Demo users seeder completed successfully!');
+      console.log('Role assignments created successfully');
     } catch (error) {
       console.error('Error in demo users seeder:', error);
       throw error;

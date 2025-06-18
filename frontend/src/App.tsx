@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Provider } from 'react-redux';
 import { ThemeProvider, createTheme } from '@mui/material';
@@ -18,6 +18,11 @@ import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 import Layout from './components/Layout/Layout';
 import CashierLayout from './components/Layout/CashierLayout';
 import CompanyDetail from './pages/companies/CompanyDetail';
+import UnauthorizedPage from './pages/UnauthorizedPage';
+
+// Module IDs
+const INVENTORY_MODULE_ID = '550e8400-e29b-41d4-a716-446655440000';
+const USERS_MODULE_ID = '550e8400-e29b-41d4-a716-446655440001';
 
 // Import cashier pages
 import CashierReceipts from './pages/cashier/Receipts';
@@ -39,112 +44,142 @@ const AppRoutes: React.FC = () => {
       <Routes>
         <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" />} />
         <Route path="/signup" element={!isAuthenticated ? <Signup /> : <Navigate to="/" />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
 
-        <Route path="/" element={
-          <PrivateRoute>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </PrivateRoute>
-        } />
+        {/* Protected Routes */}
+        <Route element={
+          <Layout>
+            <Outlet />
+          </Layout>
+        }>
+          <Route path="/" element={
+            <PrivateRoute requiredPermissionType="view_dashboard">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<Dashboard />} />
+          </Route>
 
-        <Route path="/clients" element={
-          <PrivateRoute>
-            <Layout>
-              <Clients />
-            </Layout>
-          </PrivateRoute>
-        } />
+          <Route path="/users" element={
+            <PrivateRoute requiredPermissionType="view_module" moduleId={USERS_MODULE_ID}>
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<Modules />} />
+          </Route>
 
-        <Route path="/directories" element={
-          <PrivateRoute>
-            <Layout>
-              <Directories />
-            </Layout>
-          </PrivateRoute>
-        } />
+          <Route path="/inventory" element={
+            <PrivateRoute requiredPermissionType="view_module" moduleId={INVENTORY_MODULE_ID}>
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<Modules />} />
+          </Route>
 
-        <Route path="/directories/:directoryId" element={
-          <PrivateRoute>
-            <Layout>
-              <DirectoryRecords />
-            </Layout>
-          </PrivateRoute>
-        } />
+          <Route path="/clients" element={
+            <PrivateRoute requiredPermissionType="view_clients">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<Clients />} />
+          </Route>
 
-        <Route path="/companies" element={
-          <PrivateRoute>
-            <Layout>
-              <Companies />
-            </Layout>
-          </PrivateRoute>
-        } />
+          <Route path="/directories" element={
+            <PrivateRoute requiredPermissionType="view_directories">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<Directories />} />
+          </Route>
 
-        <Route path="/companies/:companyId" element={
-          <PrivateRoute>
-            <Layout>
-              <CompanyDetail />
-            </Layout>
-          </PrivateRoute>
-        } />
+          <Route path="/directories/:directoryId" element={
+            <PrivateRoute requiredPermissionType="view_directories">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<DirectoryRecords />} />
+          </Route>
 
-        <Route path="/modules" element={
-          <PrivateRoute>
-            <Layout>
-              <Modules />
-            </Layout>
-          </PrivateRoute>
-        } />
+          <Route path="/companies" element={
+            <PrivateRoute requiredPermissionType="view_companies">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<Companies />} />
+          </Route>
 
-        <Route path="/reports" element={
-          <PrivateRoute>
-            <Layout>
-              <Reports />
-            </Layout>
-          </PrivateRoute>
-        } />
+          <Route path="/companies/:companyId" element={
+            <PrivateRoute requiredPermissionType="view_companies">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<CompanyDetail />} />
+          </Route>
+
+          <Route path="/modules" element={
+            <PrivateRoute requiredPermissionType="view_modules">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<Modules />} />
+          </Route>
+
+          <Route path="/reports" element={
+            <PrivateRoute requiredPermissionType="view_reports">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<Reports />} />
+          </Route>
+        </Route>
 
         {/* Cashier Routes */}
-        <Route path="/cashier/receipts" element={
-          <PrivateRoute>
-            <CashierLayout>
-              <CashierReceipts />
-            </CashierLayout>
-          </PrivateRoute>
-        } />
+        <Route element={
+          <CashierLayout>
+            <Outlet />
+          </CashierLayout>
+        }>
+          <Route path="/cashier/receipts" element={
+            <PrivateRoute requiredPermissionType="view_cashier">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<CashierReceipts />} />
+          </Route>
 
-        <Route path="/cashier/bank" element={
-          <PrivateRoute>
-            <CashierLayout>
-              <CashierBank />
-            </CashierLayout>
-          </PrivateRoute>
-        } />
+          <Route path="/cashier/bank" element={
+            <PrivateRoute requiredPermissionType="view_cashier">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<CashierBank />} />
+          </Route>
 
-        <Route path="/cashier/reports" element={
-          <PrivateRoute>
-            <CashierLayout>
-              <CashierReports />
-            </CashierLayout>
-          </PrivateRoute>
-        } />
+          <Route path="/cashier/reports" element={
+            <PrivateRoute requiredPermissionType="view_cashier">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<CashierReports />} />
+          </Route>
 
-        <Route path="/cashier/directories" element={
-          <PrivateRoute>
-            <CashierLayout>
-              <CashierDirectories />
-            </CashierLayout>
-          </PrivateRoute>
-        } />
+          <Route path="/cashier/directories" element={
+            <PrivateRoute requiredPermissionType="view_cashier">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<CashierDirectories />} />
+          </Route>
 
-        <Route path="/cashier/directories/:directoryId" element={
-          <PrivateRoute>
-            <CashierLayout>
-              <DirectoryRecords />
-            </CashierLayout>
-          </PrivateRoute>
-        } />
+          <Route path="/cashier/directories/:directoryId" element={
+            <PrivateRoute requiredPermissionType="view_cashier">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<DirectoryRecords />} />
+          </Route>
+        </Route>
       </Routes>
     </div>
   );

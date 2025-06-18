@@ -59,15 +59,12 @@ db.Directory.hasMany(db.DirectoryField, {
   as: 'relatedFields'
 });
 
- // Removed duplicate association to avoid alias conflict with CompanyDirectory.js
-
 db.DirectoryField.hasMany(db.DirectoryValue, {
   foreignKey: 'field_id',
   as: 'values2'
 });
 
-// Note: Ensure no references to company_directory_id for DirectoryValue. It should use directory_record_id to link to DirectoryRecord.
-
+// Role Permission associations are defined in their respective model files
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
