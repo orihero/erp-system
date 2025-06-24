@@ -1,14 +1,15 @@
 import api from '../config';
-import { User } from './types';
+import { User, Role } from './types';
 
 export type LoginCredentials = {
   email: string;
   password: string;
 };
 
-export type LoginResponse = {
+// Backend returns a flat object: user fields + roles + token
+export type LoginResponse = User & {
   token: string;
-  user: User;
+  roles: Role[];
   permissions?: string[];
 };
 
@@ -17,7 +18,7 @@ class AuthService {
     try {
       const response = await api.post<LoginResponse>('/api/users/login', credentials);
       console.log('Auth Service - Login response:', response.data);
-      console.log('Auth Service - User roles:', response.data.user.roles);
+      console.log('Auth Service - User roles:', response.data.roles);
       
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);

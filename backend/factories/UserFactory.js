@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const jwt = require("jsonwebtoken");
-const { User, UserRole, UserRoleAssignment, Company } = require('../models');
+const { User, UserRole, UserRoleAssignment, Company, Permission, RolePermission } = require('../models');
 const bcrypt = require('bcrypt');
 
 class UserFactory {
@@ -244,18 +244,31 @@ class UserFactory {
     }
   }
 
-  static async getUserRoles(userId) {
+  static async getUserRoles(userId, companyId = null) {
     try {
-      const user = await User.findByPk(userId, {
+      const { UserRoleAssignment, UserRole, Permission, RolePermission } = require('../models');
+      // Find all role assignments for this user (optionally filtered by company)
+      const where = { user_id: userId };
+      if (companyId) {
+        where.company_id = companyId;
+      }
+      const assignments = await UserRoleAssignment.findAll({
+        where,
         include: [
           {
             model: UserRole,
-            as: 'roles'
+            as: 'role',
+            include: [
+              {
+                model: Permission,
+                as: 'permissions',
+                through: { model: RolePermission, attributes: ['effective_from', 'effective_until', 'constraint_data'] }
+              }
+            ]
           }
         ]
       });
-      const roles = user ? user.roles : [];
-      console.log('Roles for user:', roles.map(r => r.name));
+      const roles = assignments.map(a => a.role).filter(Boolean);
       return roles;
     } catch (error) {
       console.error('Error getting user roles:', error);

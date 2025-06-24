@@ -7,8 +7,19 @@ import type { RootState } from '@/store';
 import { useState } from 'react';
 import { fetchCompanyModuleDirectoriesStart } from '@/store/slices/companyModuleDirectoriesSlice';
 
+interface NavigationItem {
+  label: string;
+  icon: string;
+  path: string;
+  isExpandable?: boolean;
+  adminOnly?: boolean;
+}
+
 // Define navigation items for each role
-const roleNavigationItems = {
+const roleNavigationItems: {
+  cashier: NavigationItem[];
+  default: NavigationItem[];
+} = {
   cashier: [
     {
       label: 'Receipts',
@@ -64,6 +75,18 @@ const roleNavigationItems = {
       icon: 'solar:chart-2-linear',
       path: '/reports',
     },
+    {
+      label: 'Roles',
+      icon: 'solar:users-group-two-rounded-linear',
+      path: '/roles',
+      adminOnly: true,
+    },
+    {
+      label: 'Permissions',
+      icon: 'solar:shield-keyhole-linear',
+      path: '/permissions',
+      adminOnly: true,
+    },
   ],
 };
 
@@ -78,7 +101,7 @@ const Sidebar: React.FC = () => {
   useEffect(() => {
     console.log('Sidebar - Current user:', user);
     console.log('Sidebar - User roles:', user?.roles);
-    console.log('Sidebar - Is cashier?', user?.roles?.some((role: string) => role.toLowerCase() === 'cashier'));
+    console.log('Sidebar - Is cashier?', user?.roles?.some((role) => role.name?.toLowerCase() === 'cashier'));
     if (user && user.company_id) {
       dispatch(fetchCompanyModuleDirectoriesStart(user.company_id));
     } else if (user && user.company && user.company.id) {
@@ -87,14 +110,17 @@ const Sidebar: React.FC = () => {
   }, [user, dispatch]);
 
   // Get navigation items based on user role
-  const navigationItems = user?.roles?.some((role: string) => role.toLowerCase() === 'cashier')
+  const navigationItems = user?.roles?.some((role) => role.name?.toLowerCase() === 'cashier')
     ? roleNavigationItems.cashier
     : roleNavigationItems.default;
 
   // Check if user is admin or super admin
-  const isAdmin = user?.roles?.some((role: string) => role.toLowerCase().includes('admin') || role.toLowerCase().includes('superadmin'));
+  const isAdmin = user?.roles?.some((role) => role.name?.toLowerCase().includes('admin') || role.name?.toLowerCase().includes('superadmin'));
 
-  console.log('Sidebar - Selected navigation items:', navigationItems);
+  // Filter navigation items based on admin status
+  const filteredNavigationItems = navigationItems.filter(item => !item.adminOnly || isAdmin);
+
+  console.log('Sidebar - Selected navigation items:', filteredNavigationItems);
   console.log('Sidebar - Is Admin or Super Admin:', isAdmin);
 
   return (
@@ -128,7 +154,7 @@ const Sidebar: React.FC = () => {
         }}
       >
         <List sx={{ width: '100%', p: 0 }}>
-          {navigationItems.map((item) => {
+          {filteredNavigationItems.map((item) => {
             const isExpanded = expanded[item.label] || false;
             const handleExpandClick = () => {
               setExpanded({ ...expanded, [item.label]: !isExpanded });

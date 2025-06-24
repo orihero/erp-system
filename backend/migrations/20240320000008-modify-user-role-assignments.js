@@ -22,6 +22,10 @@ module.exports = {
       type: Sequelize.UUID,
       allowNull: true
     });
+    // Always drop the constraint before adding
+    await queryInterface.sequelize.query(`
+      ALTER TABLE "user_role_assignments" DROP CONSTRAINT IF EXISTS "user_role_assignments_company_id_fkey";
+    `);
     // Re-add a single foreign key constraint
     await queryInterface.sequelize.query(`
       ALTER TABLE "user_role_assignments"
@@ -32,15 +36,21 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    // Drop the foreign key constraint
+    // Always drop the constraint before adding
     await queryInterface.sequelize.query(`
       ALTER TABLE "user_role_assignments" DROP CONSTRAINT IF EXISTS "user_role_assignments_company_id_fkey";
     `);
+    // Clean up rows with NULL company_id before making the column NOT NULL
+    await queryInterface.sequelize.query('DELETE FROM user_role_assignments WHERE company_id IS NULL;');
     // Alter column to NOT NULL
     await queryInterface.changeColumn('user_role_assignments', 'company_id', {
       type: Sequelize.UUID,
       allowNull: false
     });
+    // Always drop the constraint before adding
+    await queryInterface.sequelize.query(`
+      ALTER TABLE "user_role_assignments" DROP CONSTRAINT IF EXISTS "user_role_assignments_company_id_fkey";
+    `);
     // Re-add the original foreign key constraint
     await queryInterface.sequelize.query(`
       ALTER TABLE "user_role_assignments"

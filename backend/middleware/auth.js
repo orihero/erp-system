@@ -1,9 +1,7 @@
 const jwt = require('jsonwebtoken');
 const UserFactory = require('../factories/UserFactory');
-const models = require('../models');
-const { User, UserRole, Permission, RolePermission, Module, Directory } = models;
+const { User, UserRole, Permission, RolePermission, Module, Directory } = require('../models');
 
-const userFactory = new UserFactory(models);
 
 // Middleware to verify JWT token and fetch user with roles and permissions
 const authenticateUser = async (req, res, next) => {
@@ -11,11 +9,14 @@ const authenticateUser = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
+    console.log('Token:', token);
+
     if (!token) {
-      return res.status(401).json({ message: 'No token provided' });
+      return res.status(401).json({ message: 'No token provided', method: 'authenticateUser' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token:', decoded);
     
     // Fetch user with all required associations
     const user = await User.findByPk(decoded.id, {
@@ -47,8 +48,11 @@ const authenticateUser = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      return res.status(401).json({ message: 'User not found', method: 'authenticateUser' });
     }
+
+    console.log('User found:', { id: user.id, email: user.email });
+    console.log('User roles:', user.roles?.map(r => ({ name: r.name, permissions: r.permissions?.map(p => p.name) })));
 
     // Flatten permissions from roles into a single array
     const flattenedPermissions = user.roles.reduce((acc, role) => {
@@ -66,6 +70,8 @@ const authenticateUser = async (req, res, next) => {
       return [...acc, ...rolePermissions];
     }, []);
 
+    console.log('Flattened permissions:', flattenedPermissions.map(p => p.name));
+
     // Assign user and permissions to request object
     req.user = user;
     req.user.permissions = flattenedPermissions;
@@ -73,7 +79,7 @@ const authenticateUser = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Error authenticating user:', error);
-    return res.status(401).json({ message: 'Invalid token' });
+    return res.status(401).json({ message: 'Invalid token', method: 'authenticateUser' });
   }
 };
 
@@ -84,7 +90,7 @@ const authenticateToken = async (req, res, next) => {
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-      return res.status(401).json({ message: 'No token provided' });
+      return res.status(401).json({ message: 'No token provided', method: 'authenticateToken' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -93,7 +99,7 @@ const authenticateToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Error authenticating token:', error);
-    return res.status(401).json({ message: 'Invalid token' });
+    return res.status(401).json({ message: 'Invalid token', method: 'authenticateToken' });
   }
 };
 
@@ -102,22 +108,35 @@ const checkRole = (allowedRoles) => {
   return async (req, res, next) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ message: 'User not authenticated' });
+        return res.status(401).json({ message: 'User not authenticated',  method: 'checkRole' });
       }
 
+      // If user has roles loaded (from authenticateUser), use those
+      if (req.user.roles && Array.isArray(req.user.roles)) {
+        const hasRole = req.user.roles.some(role => allowedRoles.includes(role.name));
+        console.log('User roles from req.user:', req.user.roles.map(r => r.name));
+        console.log('Allowed roles:', allowedRoles);
+        console.log('Has role:', hasRole);
+        if (!hasRole) {
+          return res.status(403).json({ message: 'Insufficient permissions', method: 'checkRole' });
+        }
+        return next();
+      }
+
+      // Fallback to UserFactory if roles are not loaded
       const userRoles = await UserFactory.getUserRoles(req.user.id, req.user.company_id);
       const hasRole = userRoles.some(role => allowedRoles.includes(role.name));
-      console.log(userRoles);
-      console.log(allowedRoles);
-      console.log(hasRole);
+      console.log('User roles from UserFactory:', userRoles.map(r => r.name));
+      console.log('Allowed roles:', allowedRoles);
+      console.log('Has role:', hasRole);
       if (!hasRole) {
-        return res.status(403).json({ message: 'Insufficient permissions' });
+        return res.status(403).json({ message: 'Insufficient permissions', method: 'checkRole' });
       }
 
       next();
     } catch (error) {
       console.error('Error checking role:', error);
-      return res.status(500).json({ message: 'Internal server error' });
+      return res.status(500).json({ message: 'Internal server error', method: 'checkRole' });
     }
   };
 };
@@ -125,7 +144,7 @@ const checkRole = (allowedRoles) => {
 // Middleware to check company access
 const authorizeCompanyAccess = (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'Not authenticated' });
+    return res.status(401).json({ error: 'Not authenticated', method: 'authorizeCompanyAccess' });
   }
 
   // Super admin can access all companies
@@ -135,7 +154,7 @@ const authorizeCompanyAccess = (req, res, next) => {
 
   // Other roles can only access their own company
   if (!req.user.company_id) {
-    return res.status(403).json({ error: 'No company associated with user' });
+    return res.status(403).json({ error: 'No company associated with user', method: 'authorizeCompanyAccess' });
   }
 
   next();

@@ -93,10 +93,123 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true
       },
-      is_system: {
+      is_super_admin: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
         allowNull: false
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      }
+    });
+
+    // Create modules table
+    await queryInterface.createTable('modules', {
+      id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+      },
+      description: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      }
+    });
+
+    // Create directories table
+    await queryInterface.createTable('directories', {
+      id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      icon_name: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      }
+    });
+
+    // Create permissions table
+    await queryInterface.createTable('permissions', {
+      id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+      },
+      description: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      type: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      module_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'modules',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
+      },
+      directory_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'directories',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
+      },
+      effective_from: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      effective_until: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      constraint_data: {
+        type: Sequelize.JSONB,
+        allowNull: true
       },
       created_at: {
         type: Sequelize.DATE,
@@ -123,12 +236,12 @@ module.exports = {
         },
         allowNull: false
       },
-      module: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      action: {
-        type: Sequelize.STRING,
+      permission_id: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'permissions',
+          key: 'id'
+        },
         allowNull: false
       },
       created_at: {
@@ -139,6 +252,11 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false
       }
+    });
+    await queryInterface.addConstraint('role_permissions', {
+      fields: ['role_id', 'permission_id'],
+      type: 'unique',
+      name: 'unique_role_permission'
     });
 
     // Create users table
@@ -218,53 +336,6 @@ module.exports = {
           model: 'companies',
           key: 'id'
         },
-        allowNull: false
-      },
-      created_at: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      updated_at: {
-        type: Sequelize.DATE,
-        allowNull: false
-      }
-    });
-
-    // Create modules table
-    await queryInterface.createTable('modules', {
-      id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        primaryKey: true
-      },
-      name: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        unique: true
-      },
-      created_at: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      updated_at: {
-        type: Sequelize.DATE,
-        allowNull: false
-      }
-    });
-
-    // Create directories table
-    await queryInterface.createTable('directories', {
-      id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        primaryKey: true
-      },
-      name: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      icon_name: {
-        type: Sequelize.STRING,
         allowNull: false
       },
       created_at: {

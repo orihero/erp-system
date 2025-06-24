@@ -5,7 +5,7 @@
 /**
  * Checks if a user has the required permission based on various criteria
  * @param {Array} userPermissions - Array of permission objects
- * @param {string} requiredType - Type of permission being checked
+ * @param {string} requiredType - Type of permission being checked (e.g., 'read', 'create', 'edit', 'delete')
  * @param {string|null} requiredModuleId - UUID of the module (optional)
  * @param {string|null} requiredDirectoryId - UUID of the directory (optional)
  * @param {Object|null} entityData - Data about the entity being accessed (optional)
@@ -25,10 +25,29 @@ const checkPermission = (
 
   const now = new Date();
 
+  // Map permission types to action names
+  const typeToAction = {
+    'create': 'create',
+    'read': 'view',
+    'edit': 'update',
+    'delete': 'delete'
+  };
+
+  const requiredAction = typeToAction[requiredType];
+
   // Iterate through user permissions to find a match
   return userPermissions.some((p) => {
-    // Check if permission type matches
-    if (p.type !== requiredType) {
+    // Check if permission type is 'module' (which is the standard for this system)
+    if (p.type !== 'module') {
+      return false;
+    }
+
+    // Check if the permission name matches the required action
+    // Permission names are in format: 'module.action' (e.g., 'companies.view')
+    const [module, action] = p.name.split('.');
+    
+    // Check if action matches the required action
+    if (action !== requiredAction) {
       return false;
     }
 

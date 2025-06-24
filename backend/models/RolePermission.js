@@ -61,7 +61,13 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'role_permissions',
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    updatedAt: 'updated_at',
+    indexes: [
+      {
+        unique: true,
+        fields: ['role_id', 'permission_id']
+      }
+    ]
   });
 
   return RolePermission;

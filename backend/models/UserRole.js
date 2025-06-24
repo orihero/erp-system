@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
-    is_system: {
+    is_super_admin: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       allowNull: false

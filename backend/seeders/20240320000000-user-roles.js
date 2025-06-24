@@ -55,7 +55,7 @@ module.exports = {
           id: uuidv4(),
           name: 'super_admin',
           description: 'Super Administrator with full system access',
-          is_system: true,
+          is_super_admin: true,
           created_at: now,
           updated_at: now
         },
@@ -63,7 +63,7 @@ module.exports = {
           id: uuidv4(),
           name: 'admin',
           description: 'Company Administrator with full company access',
-          is_system: true,
+          is_super_admin: true,
           created_at: now,
           updated_at: now
         },
@@ -71,7 +71,7 @@ module.exports = {
           id: uuidv4(),
           name: 'manager',
           description: 'Department Manager with limited administrative access',
-          is_system: true,
+          is_super_admin: true,
           created_at: now,
           updated_at: now
         },
@@ -79,7 +79,7 @@ module.exports = {
           id: uuidv4(),
           name: 'cashier',
           description: 'Cashier with access to sales and payment features',
-          is_system: true,
+          is_super_admin: true,
           created_at: now,
           updated_at: now
         },
@@ -87,7 +87,7 @@ module.exports = {
           id: uuidv4(),
           name: 'salesman',
           description: 'Sales representative with access to sales and customer features',
-          is_system: true,
+          is_super_admin: true,
           created_at: now,
           updated_at: now
         },
@@ -95,7 +95,7 @@ module.exports = {
           id: uuidv4(),
           name: 'user',
           description: 'Regular user with basic access',
-          is_system: true,
+          is_super_admin: true,
           created_at: now,
           updated_at: now
         }
@@ -126,153 +126,201 @@ module.exports = {
       }
 
       console.log('Creating role permissions...');
-      // Define permissions for each role
-      const permissions = [
-        // Super Admin permissions
-        {
-          id: uuidv4(),
-          role_id: superAdminRole.id,
-          module: 'system',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: superAdminRole.id,
-          module: 'companies',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: superAdminRole.id,
-          module: 'users',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: superAdminRole.id,
-          module: 'roles',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        // Admin permissions
-        {
-          id: uuidv4(),
-          role_id: adminRole.id,
-          module: 'company',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: adminRole.id,
-          module: 'users',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: adminRole.id,
-          module: 'roles',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: adminRole.id,
-          module: 'reports',
-          action: 'view',
-          created_at: now,
-          updated_at: now
-        },
-        // Manager permissions
-        {
-          id: uuidv4(),
-          role_id: managerRole.id,
-          module: 'department',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: managerRole.id,
-          module: 'users',
-          action: 'view',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: managerRole.id,
-          module: 'reports',
-          action: 'view',
-          created_at: now,
-          updated_at: now
-        },
-        // Cashier permissions
-        {
-          id: uuidv4(),
-          role_id: cashierRole.id,
-          module: 'cashier',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: cashierRole.id,
-          module: 'sales',
-          action: 'create',
-          created_at: now,
-          updated_at: now
-        },
-        // Salesman permissions
-        {
-          id: uuidv4(),
-          role_id: salesmanRole.id,
-          module: 'sales',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: salesmanRole.id,
-          module: 'customers',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        },
-        // User permissions
-        {
-          id: uuidv4(),
-          role_id: userRole.id,
-          module: 'dashboard',
-          action: 'view',
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          role_id: userRole.id,
-          module: 'profile',
-          action: 'manage',
-          created_at: now,
-          updated_at: now
-        }
+      // Define all modules and actions for super admin
+      const allModules = [
+        'system', 'companies', 'users', 'roles', 'reports', 'directories', 'modules', 'clients', 'cashier', 'sales', 'dashboard', 'profile', 'permissions', 'role_permissions'
       ];
+      const allActions = ['view', 'create', 'update', 'delete', 'manage'];
 
-      await queryInterface.bulkInsert('role_permissions', permissions);
+      // Generate all permissions for super admin
+      const permissions = [];
+      for (const module of allModules) {
+        for (const action of allActions) {
+          permissions.push({
+            id: uuidv4(),
+            role_id: superAdminRole.id,
+            module,
+            action,
+            created_at: now,
+            updated_at: now
+          });
+        }
+      }
+      // Ensure super_admin has all CRUD permissions for 'company' entity
+      const companyCrudActions = ['create', 'read', 'edit', 'delete'];
+      for (const action of companyCrudActions) {
+        permissions.push({
+          id: uuidv4(),
+          role_id: superAdminRole.id,
+          module: 'company',
+          action,
+          created_at: now,
+          updated_at: now
+        });
+      }
+
+      // Admin permissions
+      permissions.push({
+        id: uuidv4(),
+        role_id: adminRole.id,
+        module: 'company',
+        action: 'manage',
+        created_at: now,
+        updated_at: now
+      });
+      permissions.push({
+        id: uuidv4(),
+        role_id: adminRole.id,
+        module: 'users',
+        action: 'manage',
+        created_at: now,
+        updated_at: now
+      });
+      permissions.push({
+        id: uuidv4(),
+        role_id: adminRole.id,
+        module: 'roles',
+        action: 'manage',
+        created_at: now,
+        updated_at: now
+      });
+      permissions.push({
+        id: uuidv4(),
+        role_id: adminRole.id,
+        module: 'reports',
+        action: 'view',
+        created_at: now,
+        updated_at: now
+      });
+      // Manager permissions
+      permissions.push({
+        id: uuidv4(),
+        role_id: managerRole.id,
+        module: 'department',
+        action: 'manage',
+        created_at: now,
+        updated_at: now
+      });
+      permissions.push({
+        id: uuidv4(),
+        role_id: managerRole.id,
+        module: 'users',
+        action: 'view',
+        created_at: now,
+        updated_at: now
+      });
+      permissions.push({
+        id: uuidv4(),
+        role_id: managerRole.id,
+        module: 'reports',
+        action: 'view',
+        created_at: now,
+        updated_at: now
+      });
+      // Cashier permissions
+      permissions.push({
+        id: uuidv4(),
+        role_id: cashierRole.id,
+        module: 'cashier',
+        action: 'manage',
+        created_at: now,
+        updated_at: now
+      });
+      permissions.push({
+        id: uuidv4(),
+        role_id: cashierRole.id,
+        module: 'sales',
+        action: 'create',
+        created_at: now,
+        updated_at: now
+      });
+      // Salesman permissions
+      permissions.push({
+        id: uuidv4(),
+        role_id: salesmanRole.id,
+        module: 'sales',
+        action: 'manage',
+        created_at: now,
+        updated_at: now
+      });
+      permissions.push({
+        id: uuidv4(),
+        role_id: salesmanRole.id,
+        module: 'customers',
+        action: 'manage',
+        created_at: now,
+        updated_at: now
+      });
+      // User permissions
+      permissions.push({
+        id: uuidv4(),
+        role_id: userRole.id,
+        module: 'dashboard',
+        action: 'view',
+        created_at: now,
+        updated_at: now
+      });
+      permissions.push({
+        id: uuidv4(),
+        role_id: userRole.id,
+        module: 'profile',
+        action: 'manage',
+        created_at: now,
+        updated_at: now
+      });
+
+      // Get all existing permission names from the DB
+      const existingPermissions = await queryInterface.sequelize.query(
+        'SELECT name FROM permissions;',
+        { type: queryInterface.sequelize.QueryTypes.SELECT }
+      );
+      const existingPermissionNames = new Set(existingPermissions.map(p => p.name));
+
+      const permissionDefs = [];
+      const permissionKeySet = new Set();
+      permissions.forEach(p => {
+        const key = `${p.module}:${p.action}`;
+        const name = `${p.module}.${p.action}`;
+        if (!permissionKeySet.has(key) && !existingPermissionNames.has(name)) {
+          permissionKeySet.add(key);
+          permissionDefs.push({
+            id: uuidv4(),
+            name,
+            description: `${p.module} ${p.action}`,
+            type: 'module',
+            module_id: null,
+            directory_id: null,
+            effective_from: null,
+            effective_until: null,
+            constraint_data: null,
+            created_at: now,
+            updated_at: now
+          });
+        }
+      });
+      if (permissionDefs.length > 0) {
+        await queryInterface.bulkInsert('permissions', permissionDefs);
+      }
+
+      // Step 2: Map module/action to permission_id
+      const allPermissions = await queryInterface.sequelize.query(
+        'SELECT * FROM permissions;',
+        { type: queryInterface.sequelize.QueryTypes.SELECT }
+      );
+      function getPermissionId(module, action) {
+        const perm = allPermissions.find(p => p.name === `${module}.${action}`);
+        return perm ? perm.id : null;
+      }
+
+      // Step 3: Insert into role_permissions with permission_id
+      const rolePermissions = permissions.map(p => ({
+        id: p.id,
+        role_id: p.role_id,
+        permission_id: getPermissionId(p.module, p.action),
+        created_at: p.created_at,
+        updated_at: p.updated_at
+      })).filter(rp => rp.permission_id);
+      await queryInterface.bulkInsert('role_permissions', rolePermissions);
       console.log('Permissions created successfully');
 
       // Create demo users if they don't exist

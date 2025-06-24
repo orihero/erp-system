@@ -14,15 +14,13 @@ import DirectoryRecords from './pages/directories/DirectoryRecords';
 import Companies from './pages/companies';
 import Modules from './pages/modules/Modules';
 import Reports from './pages/reports/Reports';
+import Roles from './pages/roles';
+import PermissionsManagement from './pages/permissions/PermissionsManagement';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 import Layout from './components/Layout/Layout';
 import CashierLayout from './components/Layout/CashierLayout';
 import CompanyDetail from './pages/companies/CompanyDetail';
 import UnauthorizedPage from './pages/UnauthorizedPage';
-
-// Module IDs
-const INVENTORY_MODULE_ID = '550e8400-e29b-41d4-a716-446655440000';
-const USERS_MODULE_ID = '550e8400-e29b-41d4-a716-446655440001';
 
 // Import cashier pages
 import CashierReceipts from './pages/cashier/Receipts';
@@ -54,7 +52,7 @@ const AppRoutes: React.FC = () => {
           </Layout>
         }>
           <Route path="/" element={
-            <PrivateRoute requiredPermissionType="view_dashboard">
+            <PrivateRoute requiredPermissionType="dashboard.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -62,7 +60,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/users" element={
-            <PrivateRoute requiredPermissionType="view_module" moduleId={USERS_MODULE_ID}>
+            <PrivateRoute requiredPermissionType="users.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -70,7 +68,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/inventory" element={
-            <PrivateRoute requiredPermissionType="view_module" moduleId={INVENTORY_MODULE_ID}>
+            <PrivateRoute requiredPermissionType="modules.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -78,7 +76,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/clients" element={
-            <PrivateRoute requiredPermissionType="view_clients">
+            <PrivateRoute requiredPermissionType="clients.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -86,7 +84,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/directories" element={
-            <PrivateRoute requiredPermissionType="view_directories">
+            <PrivateRoute requiredPermissionType="directories.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -94,7 +92,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/directories/:directoryId" element={
-            <PrivateRoute requiredPermissionType="view_directories">
+            <PrivateRoute requiredPermissionType="directories.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -102,7 +100,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/companies" element={
-            <PrivateRoute requiredPermissionType="view_companies">
+            <PrivateRoute requiredPermissionType="companies.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -110,7 +108,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/companies/:companyId" element={
-            <PrivateRoute requiredPermissionType="view_companies">
+            <PrivateRoute requiredPermissionType="companies.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -118,7 +116,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/modules" element={
-            <PrivateRoute requiredPermissionType="view_modules">
+            <PrivateRoute requiredPermissionType="modules.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -126,11 +124,28 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/reports" element={
-            <PrivateRoute requiredPermissionType="view_reports">
+            <PrivateRoute requiredPermissionType="reports.view">
               <Outlet />
             </PrivateRoute>
           }>
             <Route index element={<Reports />} />
+          </Route>
+
+          {/* Roles and Permissions Routes */}
+          <Route path="/roles" element={
+            <PrivateRoute requiredPermissionType="roles.view">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<Roles />} />
+          </Route>
+
+          <Route path="/permissions" element={
+            <PrivateRoute requiredPermissionType="permissions.view">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<PermissionsManagement />} />
           </Route>
         </Route>
 
@@ -141,7 +156,7 @@ const AppRoutes: React.FC = () => {
           </CashierLayout>
         }>
           <Route path="/cashier/receipts" element={
-            <PrivateRoute requiredPermissionType="view_cashier">
+            <PrivateRoute requiredPermissionType="cashier.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -149,7 +164,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/cashier/bank" element={
-            <PrivateRoute requiredPermissionType="view_cashier">
+            <PrivateRoute requiredPermissionType="cashier.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -157,7 +172,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/cashier/reports" element={
-            <PrivateRoute requiredPermissionType="view_cashier">
+            <PrivateRoute requiredPermissionType="cashier.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -165,7 +180,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/cashier/directories" element={
-            <PrivateRoute requiredPermissionType="view_cashier">
+            <PrivateRoute requiredPermissionType="cashier.view">
               <Outlet />
             </PrivateRoute>
           }>
@@ -173,7 +188,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           <Route path="/cashier/directories/:directoryId" element={
-            <PrivateRoute requiredPermissionType="view_cashier">
+            <PrivateRoute requiredPermissionType="cashier.view">
               <Outlet />
             </PrivateRoute>
           }>

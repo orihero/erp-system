@@ -1,9 +1,21 @@
 import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../store/hooks';
+import { logout } from '../store/slices/authSlice';
+import { authService } from '../api/services/auth.service';
 
 const UnauthorizedPage: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const handleLogout = () => {
+    // Clear authentication state
+    dispatch(logout());
+    authService.logout();
+    // Navigate to login page
+    navigate('/login');
+  };
 
   return (
     <Box
@@ -26,14 +38,22 @@ const UnauthorizedPage: React.FC = () => {
       <Typography variant="body1" color="text.secondary" paragraph>
         You don't have permission to access this page.
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => navigate('/')}
-        sx={{ mt: 2 }}
-      >
-        Return to Home
-      </Button>
+      <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate('/')}
+        >
+          Return to Home
+        </Button>
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
+      </Stack>
     </Box>
   );
 };

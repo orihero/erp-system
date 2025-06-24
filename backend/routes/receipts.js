@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, checkRole, authorizeCompanyAccess } = require('../middleware/auth');
+const { authorize } = require('../middleware/permissionMiddleware');
 const ReceiptFactory = require('../factories/ReceiptFactory');
 
 // Apply authentication to all routes
 router.use(authenticateToken);
 
 // Create receipt
-router.post('/', checkRole(['cashier', 'admin']), async (req, res) => {
+router.post('/', authorize('create', () => 'receipt'), checkRole(['cashier', 'admin']), async (req, res) => {
   try {
     const {
       invoice_number,
@@ -62,7 +63,7 @@ router.post('/', checkRole(['cashier', 'admin']), async (req, res) => {
 });
 
 // Get all receipts
-router.get('/', checkRole(['cashier', 'admin', 'super_admin']), async (req, res) => {
+router.get('/', authorize('read', () => 'receipt'), checkRole(['cashier', 'admin', 'super_admin']), async (req, res) => {
   try {
     const {
       page,
@@ -100,7 +101,7 @@ router.get('/', checkRole(['cashier', 'admin', 'super_admin']), async (req, res)
 });
 
 // Get receipt by ID
-router.get('/:id', checkRole(['cashier', 'admin', 'super_admin']), async (req, res) => {
+router.get('/:id', authorize('read', () => 'receipt'), checkRole(['cashier', 'admin', 'super_admin']), async (req, res) => {
   try {
     const receipt = await ReceiptFactory.getReceiptById(req.params.id);
     if (!receipt) {
@@ -120,7 +121,7 @@ router.get('/:id', checkRole(['cashier', 'admin', 'super_admin']), async (req, r
 });
 
 // Update receipt status
-router.patch('/:id/status', checkRole(['cashier', 'admin']), async (req, res) => {
+router.patch('/:id/status', authorize('edit', () => 'receipt'), checkRole(['cashier', 'admin']), async (req, res) => {
   try {
     const { status } = req.body;
 

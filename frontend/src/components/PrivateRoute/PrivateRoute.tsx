@@ -6,13 +6,11 @@ import { usePermissions } from '../../hooks/usePermissions';
 
 interface PrivateRouteProps {
   requiredPermissionType: string;
-  moduleId?: string;
   children?: React.ReactNode;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({
   requiredPermissionType,
-  moduleId,
   children,
 }) => {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isAuthenticated);
@@ -23,10 +21,44 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Parse the permission name to extract entity type and action
+  // Permission names are in format: 'module.action' (e.g., 'dashboard.view')
+  const [entityType, action] = requiredPermissionType.split('.');
+  
+  // Map action to requiredType
+  const actionToType: Record<string, 'create' | 'read' | 'edit' | 'delete'> = {
+    'view': 'read',
+    'create': 'create',
+    'update': 'edit',
+    'delete': 'delete',
+    'manage': 'read' // manage permissions typically include read access
+  };
+
+  const requiredType = actionToType[action] || 'read';
+
+  // Map entity types to the expected format
+  const entityTypeMap: Record<string, 'company' | 'company_directory' | 'directory' | 'directory_record' | 'report_structure' | 'user'> = {
+    'dashboard': 'user', // dashboard permissions are typically user-level
+    'users': 'user',
+    'modules': 'user', // modules permissions are typically user-level
+    'clients': 'user', // clients permissions are typically user-level
+    'directories': 'directory',
+    'companies': 'company',
+    'reports': 'report_structure',
+    'cashier': 'user' // cashier permissions are typically user-level
+  };
+
+  const mappedEntityType = entityTypeMap[entityType] || 'user';
+
   const hasPermission = check({ 
-    requiredType: requiredPermissionType,
-    moduleId: moduleId 
+    requiredType,
+    entityType: mappedEntityType
   });
+
+  console.log('hasPermission', hasPermission);
+  console.log('requiredPermissionType', requiredPermissionType);
+  console.log('parsed requiredType', requiredType);
+  console.log('parsed entityType', mappedEntityType);
 
   if (!hasPermission) {
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;

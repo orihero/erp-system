@@ -3,10 +3,11 @@ const router = express.Router();
 const { Receipt } = require('../models');
 const { Op } = require('sequelize');
 const { authenticateToken } = require('../middleware/auth');
+const { authorize } = require('../middleware/permissionMiddleware');
 
 router.use(authenticateToken);
 
-router.get('/overview', async (req, res) => {
+router.get('/overview', authorize('read', () => 'statistics'), async (req, res) => {
   try {
     const company_id = req.user.company_id;
 

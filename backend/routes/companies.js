@@ -1,14 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const CompanyFactory = require("../factories/CompanyFactory");
-const { authenticateToken, checkRole } = require("../middleware/auth");
-
-// Apply authentication to all routes
-router.use(authenticateToken);
-router.use(checkRole(["super_admin"]));
+const { authenticateUser, checkRole } = require("../middleware/auth");
+const { USER_ROLES, PERMISSION_TYPES, ENTITY_TYPES } = require("../utils/constants");
+const { authorize } = require("../middleware/permissionMiddleware");
 
 // Get companies with pagination
-router.get("/", async (req, res) => {
+router.get("/", authenticateUser, authorize(PERMISSION_TYPES.READ, () => ENTITY_TYPES.COMPANY), checkRole([USER_ROLES.SUPER_ADMIN]), async (req, res) => {
   try {
     const { page, limit, search } = req.query;
 
@@ -34,7 +32,7 @@ router.get("/", async (req, res) => {
 });
 
 // Create new company
-router.post("/", async (req, res) => {
+router.post("/", authenticateUser, authorize(PERMISSION_TYPES.CREATE, () => ENTITY_TYPES.COMPANY), checkRole([USER_ROLES.SUPER_ADMIN]), async (req, res) => {
   try {
     const { name, admin_email } = req.body;
 
@@ -68,7 +66,7 @@ router.post("/", async (req, res) => {
 });
 
 // Get company details
-router.get("/:company_id", async (req, res) => {
+router.get("/:company_id", authenticateUser, authorize(PERMISSION_TYPES.READ, () => ENTITY_TYPES.COMPANY), checkRole([USER_ROLES.SUPER_ADMIN]), async (req, res) => {
   try {
     const { company_id } = req.params;
 
@@ -86,7 +84,7 @@ router.get("/:company_id", async (req, res) => {
 });
 
 // Update company
-router.put("/:company_id", async (req, res) => {
+router.put("/:company_id", authenticateUser, authorize(PERMISSION_TYPES.EDIT, () => ENTITY_TYPES.COMPANY), checkRole([USER_ROLES.SUPER_ADMIN]), async (req, res) => {
   try {
     const { company_id } = req.params;
     const { name, admin_email } = req.body;
@@ -128,29 +126,35 @@ router.put("/:company_id", async (req, res) => {
 });
 
 // Get employees for a company with filters, sorting, and pagination
-router.get("/:company_id/employees", async (req, res) => {
-  try {
-    const { company_id } = req.params;
-    const {
-      page = 1,
-      limit = 10,
-      sort = "created_at",
-      order = "DESC",
-      ...filters
-    } = req.query;
-    const result = await CompanyFactory.getEmployees({
-      companyId: company_id,
-      filters,
-      sort,
-      order,
-      page: parseInt(page),
-      limit: parseInt(limit),
-    });
-    res.json(result);
-  } catch (error) {
-    console.error("Error fetching company employees:", error);
-    res.status(500).json({ error: "Failed to fetch company employees" });
+router.get(
+  "/:company_id/employees",
+  authenticateUser,
+  authorize(PERMISSION_TYPES.READ, () => ENTITY_TYPES.COMPANY),
+  checkRole([USER_ROLES.SUPER_ADMIN]),
+  async (req, res) => {
+    try {
+      const { company_id } = req.params;
+      const {
+        page = 1,
+        limit = 10,
+        sort = "created_at",
+        order = "DESC",
+        ...filters
+      } = req.query;
+      const result = await CompanyFactory.getEmployees({
+        companyId: company_id,
+        filters,
+        sort,
+        order,
+        page: parseInt(page),
+        limit: parseInt(limit),
+      });
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching company employees:", error);
+      res.status(500).json({ error: "Failed to fetch company employees" });
+    }
   }
-});
+);
 
 module.exports = router;

@@ -1,21 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateUser, checkRole } = require('../middleware/auth');
+const { authorize } = require('../middleware/permissionMiddleware');
+const { USER_ROLES, ENTITY_TYPES } = require('../utils/constants');
 const { createReportStructure, getAllReportStructures, getReportStructureById, updateReportStructure, deleteReportStructure } = require('../controllers/reportStructureController');
 
 // Get all report structures
-router.get('/', authenticateToken, getAllReportStructures);
+router.get('/', authenticateUser, authorize('read', () => ENTITY_TYPES.REPORT_STRUCTURE), getAllReportStructures);
 
 // Get a report structure by ID
-router.get('/:id', authenticateToken, getReportStructureById);
+router.get('/:id', authenticateUser, authorize('read', () => ENTITY_TYPES.REPORT_STRUCTURE), getReportStructureById);
 
 // Create a new report structure
-router.post('/', authenticateToken, createReportStructure);
+router.post('/', authenticateUser, authorize('create', () => ENTITY_TYPES.REPORT_STRUCTURE), checkRole([USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]), createReportStructure);
 
 // Update a report structure
-router.put('/:id', authenticateToken, updateReportStructure);
+router.put('/:id', authenticateUser, authorize('edit', () => ENTITY_TYPES.REPORT_STRUCTURE), checkRole([USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]), updateReportStructure);
 
 // Delete a report structure
-router.delete('/:id', authenticateToken, deleteReportStructure);
+router.delete('/:id', authenticateUser, authorize('delete', () => ENTITY_TYPES.REPORT_STRUCTURE), checkRole([USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]), deleteReportStructure);
 
 module.exports = router; 

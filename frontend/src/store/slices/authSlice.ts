@@ -29,8 +29,13 @@ const getStoredToken = () => {
   return localStorage.getItem("token") || sessionStorage.getItem("token");
 };
 
+const getStoredUser = () => {
+  const user = localStorage.getItem("user") || sessionStorage.getItem("user");
+  return user ? JSON.parse(user) : null;
+};
+
 const initialState: AuthState = {
-  user: null,
+  user: getStoredUser(),
   token: getStoredToken(),
   isAuthenticated: !!getStoredToken(),
   loading: false,
@@ -79,6 +84,8 @@ const authSlice = createSlice({
       state.permissions = [];
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("user");
     },
     updateUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;

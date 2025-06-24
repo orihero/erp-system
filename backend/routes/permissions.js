@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { authenticateToken, checkRole } = require("../middleware/auth");
+const { authenticateUser, checkRole } = require("../middleware/auth");
 const { authorize } = require("../middleware/permissionMiddleware");
 const models = require("../models");
 const { Permission, UserRole, RolePermission, Module, Directory } = models;
 
 // List all permissions
 router.get("/", 
-  authenticateToken,
-  authorize('read', () => 'uuid_of_permissions_module'),
+  authenticateUser,
+  authorize('read', null, null, null, 'permissions.view'),
   checkRole(["super_admin"]),
   async (req, res) => {
     try {
@@ -28,8 +28,8 @@ router.get("/",
 
 // Create new permission
 router.post("/",
-  authenticateToken,
-  authorize('create', () => 'uuid_of_permissions_module'),
+  authenticateUser,
+  authorize('create', null, null, null, 'permissions.create'),
   checkRole(["super_admin"]),
   async (req, res) => {
     try {
@@ -56,8 +56,8 @@ router.post("/",
 
 // Update permission
 router.put("/:id",
-  authenticateToken,
-  authorize('edit', () => 'uuid_of_permissions_module'),
+  authenticateUser,
+  authorize('edit', null, null, null, 'permissions.update'),
   checkRole(["super_admin"]),
   async (req, res) => {
     try {
@@ -90,8 +90,8 @@ router.put("/:id",
 
 // Delete permission
 router.delete("/:id",
-  authenticateToken,
-  authorize('delete', () => 'uuid_of_permissions_module'),
+  authenticateUser,
+  authorize('delete', null, null, null, 'permissions.delete'),
   checkRole(["super_admin"]),
   async (req, res) => {
     try {
@@ -124,8 +124,8 @@ router.delete("/:id",
 
 // Assign permission to role
 router.post("/roles/:roleId/permissions",
-  authenticateToken,
-  authorize('create', () => 'uuid_of_permissions_module'),
+  authenticateUser,
+  authorize('create', null, null, null, 'role_permissions.create'),
   checkRole(["super_admin"]),
   async (req, res) => {
     try {
@@ -174,8 +174,8 @@ router.post("/roles/:roleId/permissions",
 
 // Revoke permission from role
 router.delete("/roles/:roleId/permissions/:permissionId",
-  authenticateToken,
-  authorize('delete', () => 'uuid_of_permissions_module'),
+  authenticateUser,
+  authorize('delete', null, null, null, 'role_permissions.delete'),
   checkRole(["super_admin"]),
   async (req, res) => {
     try {
@@ -193,6 +193,51 @@ router.delete("/roles/:roleId/permissions/:permissionId",
       res.status(204).send();
     } catch (error) {
       console.error("Error revoking permission from role:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+);
+
+// Get permissions for a specific role
+router.get("/roles/:roleId/permissions",
+  authenticateUser,
+  authorize('read', null, null, null, 'role_permissions.view'),
+  checkRole(["super_admin"]),
+  async (req, res) => {
+    try {
+      const { roleId } = req.params;
+
+      // Check if role exists
+      const role = await UserRole.findByPk(roleId);
+      if (!role) {
+        return res.status(404).json({ message: "Role not found" });
+      }
+
+      const rolePermissions = await RolePermission.findAll({
+        where: { role_id: roleId },
+        include: [
+          {
+            model: Permission,
+            as: 'permission',
+            include: [
+              {
+                model: Module,
+                as: 'module',
+                attributes: ['id', 'name']
+              },
+              {
+                model: Directory,
+                as: 'directory',
+                attributes: ['id', 'name']
+              }
+            ]
+          }
+        ]
+      });
+
+      res.json(rolePermissions);
+    } catch (error) {
+      console.error("Error fetching role permissions:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   }

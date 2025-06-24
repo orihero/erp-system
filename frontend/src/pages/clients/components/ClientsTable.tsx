@@ -21,8 +21,8 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
   const { check } = usePermissions();
 
   // Check permissions
-  const canEditClients = check({ requiredType: 'edit' });
-  const canDeleteClients = check({ requiredType: 'delete' });
+  const canEditClients = check({ requiredType: 'edit', entityType: 'user' });
+  const canDeleteClients = check({ requiredType: 'delete', entityType: 'user' });
 
   useEffect(() => {
     dispatch(fetchUsersStart({ page, limit, search }));

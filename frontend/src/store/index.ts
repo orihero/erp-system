@@ -9,6 +9,7 @@ import companiesReducer from "./slices/companiesSlice";
 import companyDirectoriesReducer from "./slices/companyDirectoriesSlice";
 import modulesReducer from "./slices/modulesSlice";
 import rolesReducer from "./slices/rolesSlice";
+import permissionsReducer from "./slices/permissionsSlice";
 import appStateReducer from "./slices/appStateSlice";
 import companyModuleDirectoriesReducer from "./slices/companyModuleDirectoriesSlice";
 import directoryRecordsReducer from "./slices/directoryRecordsSlice";
@@ -19,6 +20,7 @@ import { companiesSaga } from "./sagas/companiesSaga";
 import { companyDirectoriesSaga } from "./sagas/companyDirectoriesSaga";
 import { modulesSaga } from "./sagas/modulesSaga";
 import { rolesSaga } from "./sagas/rolesSaga";
+import { permissionsSaga } from "./sagas/permissionsSaga";
 import { companyModuleDirectoriesSaga } from "./sagas/companyModuleDirectoriesSaga";
 import directoryRecordsSaga from "./sagas/directoryRecordsSaga";
 
@@ -34,6 +36,7 @@ export const store = configureStore({
     companyDirectories: companyDirectoriesReducer,
     modules: modulesReducer,
     roles: rolesReducer,
+    permissions: permissionsReducer,
     appState: appStateReducer,
     companyModuleDirectories: companyModuleDirectoriesReducer,
     directoryRecords: directoryRecordsReducer,
@@ -51,6 +54,7 @@ function* rootSaga() {
     companyDirectoriesSaga(),
     modulesSaga(),
     rolesSaga(),
+    permissionsSaga(),
     companyModuleDirectoriesSaga(),
     directoryRecordsSaga(),
   ]);

@@ -16,6 +16,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'permission_id',
         as: 'rolePermissions'
       });
+      Permission.belongsToMany(models.UserRole, {
+        through: models.RolePermission,
+        foreignKey: 'permission_id',
+        otherKey: 'role_id',
+        as: 'roles'
+      });
     }
   }
 
@@ -58,6 +64,18 @@ module.exports = (sequelize, DataTypes) => {
       },
       onUpdate: 'CASCADE',
       onDelete: 'SET NULL'
+    },
+    effective_from: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    effective_until: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    constraint_data: {
+      type: DataTypes.JSONB,
+      allowNull: true
     }
   }, {
     sequelize,

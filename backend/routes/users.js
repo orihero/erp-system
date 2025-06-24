@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const UserFactory = require("../factories/UserFactory");
 const CompanyFactory = require("../factories/CompanyFactory");
-const { authenticateToken, checkRole } = require("../middleware/auth");
+const { authenticateUser, checkRole } = require("../middleware/auth");
 const { authorize } = require("../middleware/permissionMiddleware");
+const { USER_ROLES } = require("../utils/constants");
 const jwt = require("jsonwebtoken");
 const models = require("../models");
 const { User } = models;
@@ -36,9 +37,19 @@ router.post("/register", async (req, res) => {
     const user = await userFactory.create({
       email,
       password,
-      company_id: company.id,
-      role: "admin", // First user of the company is admin
+      company_id: company.id
     });
+
+    // Find the admin role
+    const adminRole = await models.UserRole.findOne({ where: { name: 'admin' } });
+    if (!adminRole) {
+      return res.status(500).json({ error: 'Admin role not found' });
+    }
+    // Assign admin role to the new user
+    await UserFactory.assignRole(user.id, adminRole.id, company.id);
+
+    // Fetch roles for this user and company
+    const roles = await UserFactory.getUserRoles(user.id, user.company_id);
 
     // Generate JWT token
     const token = jwt.sign(
@@ -53,12 +64,23 @@ router.post("/register", async (req, res) => {
     );
 
     res.status(201).json({
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        company_id: user.company_id,
-      },
+      ...user.toJSON(),
+      roles: roles.map(role => ({
+        id: role.id,
+        name: role.name,
+        description: role.description,
+        permissions: (role.permissions || []).map(permission => ({
+          id: permission.id,
+          name: permission.name,
+          description: permission.description,
+          type: permission.type,
+          module_id: permission.module_id,
+          directory_id: permission.directory_id,
+          effective_from: permission.RolePermission?.effective_from,
+          effective_until: permission.RolePermission?.effective_until,
+          constraint_data: permission.RolePermission?.constraint_data
+        }))
+      })),
       token,
     });
   } catch (error) {
@@ -100,14 +122,23 @@ router.post("/login", async (req, res) => {
     );
 
     res.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        company_id: user.company_id,
-        roles: roles.map(role => role.name)
-      },
+      ...user.toJSON(),
+      roles: roles.map(role => ({
+        id: role.id,
+        name: role.name,
+        description: role.description,
+        permissions: (role.permissions || []).map(permission => ({
+          id: permission.id,
+          name: permission.name,
+          description: permission.description,
+          type: permission.type,
+          module_id: permission.module_id,
+          directory_id: permission.directory_id,
+          effective_from: permission.RolePermission?.effective_from,
+          effective_until: permission.RolePermission?.effective_until,
+          constraint_data: permission.RolePermission?.constraint_data
+        }))
+      })),
       token
     });
   } catch (error) {
@@ -117,7 +148,7 @@ router.post("/login", async (req, res) => {
 });
 
 // Get user profile
-router.get("/profile", authenticateToken, async (req, res) => {
+router.get("/profile", authenticateUser, async (req, res) => {
   try {
     const user = await userFactory.findById(req.user.id);
     if (!user) {
@@ -127,7 +158,23 @@ router.get("/profile", authenticateToken, async (req, res) => {
     const roles = await UserFactory.getUserRoles(user.id, user.company_id);
     res.json({
       ...user.toJSON(),
-      roles: roles.map(role => role.name)
+      roles: roles.map(role => ({
+        id: role.id,
+        name: role.name,
+        description: role.description,
+        permissions: (role.permissions || []).map(permission => ({
+          id: permission.id,
+          name: permission.name,
+          description: permission.description,
+          type: permission.type,
+          module_id: permission.module_id,
+          directory_id: permission.directory_id,
+          // RolePermission join table fields:
+          effective_from: permission.RolePermission?.effective_from,
+          effective_until: permission.RolePermission?.effective_until,
+          constraint_data: permission.RolePermission?.constraint_data
+        }))
+      }))
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);
@@ -136,7 +183,7 @@ router.get("/profile", authenticateToken, async (req, res) => {
 });
 
 // Update user profile
-router.put("/profile", authenticateToken, async (req, res) => {
+router.put("/profile", authenticateUser, async (req, res) => {
   try {
     const { email } = req.body;
     const user = await userFactory.update(req.user.id, { email });
@@ -156,7 +203,7 @@ router.put("/profile", authenticateToken, async (req, res) => {
 });
 
 // Change password
-router.put("/change-password", authenticateToken, async (req, res) => {
+router.put("/change-password", authenticateUser, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     await userFactory.changePassword(req.user.id, currentPassword, newPassword);
@@ -168,7 +215,7 @@ router.put("/change-password", authenticateToken, async (req, res) => {
 });
 
 // Get current user
-router.get("/me", authenticateToken, async (req, res) => {
+router.get("/me", authenticateUser, async (req, res) => {
   try {
     const user = await UserFactory.findByEmail(req.user.email);
     if (!user) {
@@ -194,9 +241,9 @@ router.get("/me", authenticateToken, async (req, res) => {
 
 // Get all users (admin only)
 router.get("/", 
-  authenticateToken, 
-  authorize('read', () => 'uuid_of_users_module'),
-  checkRole(["super_admin", "admin"]), 
+  authenticateUser, 
+  authorize(null, null, null, null, 'users.view'),
+  checkRole([USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN]), 
   async (req, res) => {
     try {
       // Parse page and limit from query string, with defaults
@@ -214,7 +261,7 @@ router.get("/",
 );
 
 // Create user (admin only)
-router.post("/", authenticateToken, checkRole(["super_admin", "admin"]), async (req, res) => {
+router.post("/", authenticateUser, checkRole([USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN]), async (req, res) => {
   try {
     const user = await UserFactory.create(req.body);
     res.status(201).json(user);
@@ -226,7 +273,7 @@ router.post("/", authenticateToken, checkRole(["super_admin", "admin"]), async (
 
 // Update user (admin only)
 router.put("/:id", 
-  authenticateToken, 
+  authenticateUser, 
   authorize(
     'edit', 
     () => 'uuid_of_users_module',
@@ -236,7 +283,7 @@ router.put("/:id",
       return user;
     }
   ),
-  checkRole(["super_admin", "admin"]), 
+  checkRole([USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN]), 
   async (req, res) => {
     try {
       const { roles, ...userData } = req.body;
@@ -280,7 +327,7 @@ router.put("/:id",
 );
 
 // Delete user (admin only)
-router.delete("/:id", authenticateToken, checkRole(["super_admin", "admin"]), async (req, res) => {
+router.delete("/:id", authenticateUser, checkRole([USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN]), async (req, res) => {
   try {
     await UserFactory.delete(req.params.id);
     res.status(204).send();
@@ -291,7 +338,7 @@ router.delete("/:id", authenticateToken, checkRole(["super_admin", "admin"]), as
 });
 
 // Assign role to user (admin only)
-router.post("/:id/roles", authenticateToken, checkRole(["super_admin", "admin"]), async (req, res) => {
+router.post("/:id/roles", authenticateUser, checkRole([USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN]), async (req, res) => {
   try {
     const { role_id, company_id } = req.body;
     const assignment = await UserFactory.assignRole(req.params.id, role_id, company_id);
@@ -303,7 +350,7 @@ router.post("/:id/roles", authenticateToken, checkRole(["super_admin", "admin"])
 });
 
 // Remove role from user (admin only)
-router.delete("/:id/roles/:roleId", authenticateToken, checkRole(["super_admin", "admin"]), async (req, res) => {
+router.delete("/:id/roles/:roleId", authenticateUser, checkRole([USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN]), async (req, res) => {
   try {
     const { company_id } = req.body;
     await UserFactory.removeRole(req.params.id, req.params.roleId, company_id);

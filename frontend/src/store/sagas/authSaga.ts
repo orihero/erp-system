@@ -1,24 +1,37 @@
 import { takeLatest, put, call, Effect } from 'redux-saga/effects';
 import { loginStart, loginSuccess, loginFailure, signupStart, signupSuccess, signupFailure } from '../slices/authSlice';
 import { showNotification } from '../slices/notificationSlice';
-import { authService, type LoginResponse, type User } from '../../api/services/auth.service';
+import { authService, type LoginResponse } from '../../api/services/auth.service';
+import { Role, Permission, User } from '../../api/services/types';
+
+// Utility to flatten permissions from user.roles
+function extractPermissionsFromUser(user: User): string[] {
+  if (!user || !user.roles) return [];
+  const allPerms = user.roles.flatMap((role: Role) =>
+    (role.permissions || []).map((perm: Permission) => perm.name)
+  );
+  return Array.from(new Set(allPerms));
+}
 
 function* handleLogin(action: ReturnType<typeof loginStart>): Generator<Effect, void, LoginResponse> {
   try {
     if (!action.payload) return;
     const { email, password, remember } = action.payload;
     const response = yield call(authService.login, { email, password });
-    
-    // Store token in appropriate storage
+    const permissions = extractPermissionsFromUser(response);
+    // Store token and permissions in appropriate storage
     if (remember) {
       localStorage.setItem('token', response.token);
+      localStorage.setItem('permissions', JSON.stringify(permissions));
+      localStorage.setItem('user', JSON.stringify(response));
     } else {
       sessionStorage.setItem('token', response.token);
+      localStorage.setItem('permissions', JSON.stringify(permissions));
+      sessionStorage.setItem('user', JSON.stringify(response));
     }
-    
-    yield put(loginSuccess(response));
+    yield put(loginSuccess({ user: response, token: response.token, permissions }));
     yield put(showNotification({ 
-      message: `Welcome back, ${response.user.email}! You've successfully logged in.`,
+      message: `Welcome back, ${response.email}! You've successfully logged in.`,
       type: 'success'
     }));
   } catch (error) {
@@ -35,11 +48,12 @@ function* verifyToken(): Generator<Effect, void, User> {
       yield put(loginFailure('No token found'));
       return;
     }
-
     const user = yield call(authService.getProfile);
-    yield put(loginSuccess({ user, token }));
+    const permissions = extractPermissionsFromUser(user);
+    localStorage.setItem('permissions', JSON.stringify(permissions));
+    localStorage.setItem('user', JSON.stringify(user));
+    yield put(loginSuccess({ user, token, permissions }));
   } catch (error) {
-    // If token verification fails, clear the token
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     const errorMessage = error instanceof Error ? error.message : 'Session expired. Please login again.';

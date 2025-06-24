@@ -19,8 +19,8 @@ const Dashboard: React.FC = () => {
   const { check } = usePermissions();
 
   // Check permissions
-  const canViewInventory = check({ requiredType: 'view_module' });
-  const canManageUsers = check({ requiredType: 'manage' });
+  const canViewInventory = check({ requiredType: 'read', entityType: 'directory' });
+  const canManageUsers = check({ requiredType: 'read', entityType: 'user' });
 
   useEffect(() => {
     const fetchStats = async () => {
