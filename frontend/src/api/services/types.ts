@@ -18,7 +18,7 @@ export interface Permission {
   id: string;
   name: string;
   description?: string;
-  type?: string;
+  type?: 'read' | 'write' | 'manage';
   module_id?: string;
   directory_id?: string;
   effective_from?: string;
@@ -26,16 +26,24 @@ export interface Permission {
   constraint_data?: unknown;
 }
 
+export interface NavigationItem {
+  label: string;
+  path: string;
+  icon?: string;
+  children?: NavigationItem[];
+}
+
 export interface User {
-  id: number;
+  id: string;
   email: string;
-  role: string;
+  role?: string;
   roles: Role[];
-  company_id: number;
+  company_id: string;
   firstname?: string;
   lastname?: string;
   company?: {
-    id: number;
+    id: string;
     name: string;
   };
+  navigation?: NavigationItem[];
 } 

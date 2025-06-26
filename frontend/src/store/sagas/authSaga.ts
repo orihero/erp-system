@@ -3,14 +3,21 @@ import { loginStart, loginSuccess, loginFailure, signupStart, signupSuccess, sig
 import { showNotification } from '../slices/notificationSlice';
 import { authService, type LoginResponse } from '../../api/services/auth.service';
 import { Role, Permission, User } from '../../api/services/types';
+import { setNavigation } from '../slices/navigationSlice';
 
 // Utility to flatten permissions from user.roles
-function extractPermissionsFromUser(user: User): string[] {
+function extractPermissionsFromUser(user: User): Permission[] {
   if (!user || !user.roles) return [];
   const allPerms = user.roles.flatMap((role: Role) =>
-    (role.permissions || []).map((perm: Permission) => perm.name)
+    (role.permissions || [])
   );
-  return Array.from(new Set(allPerms));
+  // Remove duplicates by id
+  const seen = new Set();
+  return allPerms.filter((perm) => {
+    if (seen.has(perm.id)) return false;
+    seen.add(perm.id);
+    return true;
+  });
 }
 
 function* handleLogin(action: ReturnType<typeof loginStart>): Generator<Effect, void, LoginResponse> {
@@ -30,6 +37,11 @@ function* handleLogin(action: ReturnType<typeof loginStart>): Generator<Effect, 
       sessionStorage.setItem('user', JSON.stringify(response));
     }
     yield put(loginSuccess({ user: response, token: response.token, permissions }));
+    if (response.navigation) {
+      yield put(setNavigation(response.navigation));
+    } else {
+      yield put(setNavigation([]));
+    }
     yield put(showNotification({ 
       message: `Welcome back, ${response.email}! You've successfully logged in.`,
       type: 'success'
@@ -53,6 +65,11 @@ function* verifyToken(): Generator<Effect, void, User> {
     localStorage.setItem('permissions', JSON.stringify(permissions));
     localStorage.setItem('user', JSON.stringify(user));
     yield put(loginSuccess({ user, token, permissions }));
+    if (user.navigation) {
+      yield put(setNavigation(user.navigation));
+    } else {
+      yield put(setNavigation([]));
+    }
   } catch (error) {
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');

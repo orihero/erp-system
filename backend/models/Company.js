@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     employee_count: {
-      type: DataTypes.ENUM('less_than_10', '10_to_50', '50_to_100', '100_to_500', '500_to_1000', 'more_than_1000'),
+      type: DataTypes.ENUM('less_than_10', '10_to_50', '50_to_100', '100_to_500', '500_to_1000'),
       allowNull: false
     },
     status: {

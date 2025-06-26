@@ -16,24 +16,34 @@ module.exports = {
       await queryInterface.bulkDelete('users', null, {});
 
       // Create demo companies
-      const companies = [
-        {
+      faker.locale = 'en';
+      const industries = ['Technology', 'Textiles', 'Logistics', 'Finance', 'Retail', 'Manufacturing', 'Healthcare', 'Education'];
+      const employeeCounts = ['less_than_10', '10_to_50', '50_to_100', '100_to_500', '500_to_1000'];
+      const companies = Array.from({ length: 8 }, (_, i) => {
+        return {
           id: uuidv4(),
-          name: 'Demo Company 1',
-          admin_email: 'admin1@demo.com',
-          employee_count: '50_to_100',
+          name: faker.company.name(),
+          admin_email: faker.internet.email(),
+          employee_count: faker.helpers.arrayElement(employeeCounts),
+          status: 'active',
+          logo: faker.image.urlPicsumPhotos({ width: 200, height: 200 }),
+          address: faker.location.streetAddress() + ', ' + faker.location.city() + ', ' + faker.location.country(),
+          description: faker.company.catchPhrase(),
+          website: faker.internet.url(),
+          phone: faker.phone.number(),
+          tax_id: faker.finance.accountNumber(12),
+          registration_number: faker.string.uuid(),
+          industry: faker.helpers.arrayElement(industries),
+          founded_year: faker.date.past({ years: 30 }).getFullYear(),
+          contacts: JSON.stringify({
+            ceo: faker.person.fullName(),
+            support: faker.internet.email(),
+            phone: faker.phone.number()
+          }),
           created_at: now,
           updated_at: now
-        },
-        {
-          id: uuidv4(),
-          name: 'Demo Company 2',
-          admin_email: 'admin2@demo.com',
-          employee_count: '50_to_100',
-          created_at: now,
-          updated_at: now
-        }
-      ];
+        };
+      });
 
       console.log('Creating demo companies...');
       await queryInterface.bulkInsert('companies', companies);
@@ -66,92 +76,50 @@ module.exports = {
       };
 
       // Create company admins
-      const companyAdmins = [
-        {
-          id: uuidv4(),
-          email: 'admin1@demo.com',
-          password: await bcrypt.hash('password123', 10),
-          firstname: 'Admin',
-          lastname: 'One',
-          status: 'active',
-          company_id: createdCompanies[0].id,
-          last_login: null,
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          email: 'admin2@demo.com',
-          password: await bcrypt.hash('password123', 10),
-          firstname: 'Admin',
-          lastname: 'Two',
-          status: 'active',
-          company_id: createdCompanies[1].id,
-          last_login: null,
-          created_at: now,
-          updated_at: now
-        }
-      ];
+      const companyAdmins = await Promise.all(companies.map(async (company, i) => ({
+        id: uuidv4(),
+        email: `admin${i + 1}@demo.com`,
+        password: await bcrypt.hash('password123', 10),
+        firstname: 'Admin',
+        lastname: `${i + 1}`,
+        status: 'active',
+        company_id: company.id,
+        last_login: null,
+        created_at: now,
+        updated_at: now
+      })));
 
       // Create cashiers
-      const cashiers = [
-        {
-          id: uuidv4(),
-          email: 'cashier1@demo.com',
-          password: await bcrypt.hash('password123', 10),
-          firstname: 'John',
-          lastname: 'Smith',
-          status: 'active',
-          company_id: createdCompanies[0].id,
-          last_login: null,
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          email: 'cashier2@demo.com',
-          password: await bcrypt.hash('password123', 10),
-          firstname: 'Sarah',
-          lastname: 'Johnson',
-          status: 'active',
-          company_id: createdCompanies[1].id,
-          last_login: null,
-          created_at: now,
-          updated_at: now
-        }
-      ];
+      const cashiers = await Promise.all(companies.map(async (company, i) => ({
+        id: uuidv4(),
+        email: `cashier${i + 1}@demo.com`,
+        password: await bcrypt.hash('password123', 10),
+        firstname: faker.person.firstName(),
+        lastname: faker.person.lastName(),
+        status: 'active',
+        company_id: company.id,
+        last_login: null,
+        created_at: now,
+        updated_at: now
+      })));
 
       // Create salesmen
-      const salesmen = [
-        {
-          id: uuidv4(),
-          email: 'salesman1@demo.com',
-          password: await bcrypt.hash('password123', 10),
-          firstname: 'Mike',
-          lastname: 'Brown',
-          status: 'active',
-          company_id: createdCompanies[0].id,
-          last_login: null,
-          created_at: now,
-          updated_at: now
-        },
-        {
-          id: uuidv4(),
-          email: 'salesman2@demo.com',
-          password: await bcrypt.hash('password123', 10),
-          firstname: 'Lisa',
-          lastname: 'Davis',
-          status: 'active',
-          company_id: createdCompanies[1].id,
-          last_login: null,
-          created_at: now,
-          updated_at: now
-        }
-      ];
+      const salesmen = await Promise.all(companies.map(async (company, i) => ({
+        id: uuidv4(),
+        email: `salesman${i + 1}@demo.com`,
+        password: await bcrypt.hash('password123', 10),
+        firstname: faker.person.firstName(),
+        lastname: faker.person.lastName(),
+        status: 'active',
+        company_id: company.id,
+        last_login: null,
+        created_at: now,
+        updated_at: now
+      })));
 
       // Create 100 Uzbek users
       const uzbekUsers = Array.from({ length: 100 }, () => {
-        const companyIndex = Math.floor(Math.random() * createdCompanies.length);
+        const companyIndex = Math.floor(Math.random() * companies.length);
         return {
           id: uuidv4(),
           email: faker.internet.email(),
@@ -159,7 +127,7 @@ module.exports = {
           firstname: faker.person.firstName(),
           lastname: faker.person.lastName(),
           status: 'active',
-          company_id: createdCompanies[companyIndex].id,
+          company_id: companies[companyIndex].id,
           last_login: null,
           created_at: now,
           updated_at: now
@@ -232,60 +200,39 @@ module.exports = {
       });
 
       // Assign admin roles
-      roleAssignments.push({
-        id: uuidv4(),
-        user_id: createdUsers.find(u => u.email === 'admin1@demo.com').id,
-        role_id: adminRole.id,
-        company_id: createdCompanies[0].id,
-        created_at: now,
-        updated_at: now
-      });
-
-      roleAssignments.push({
-        id: uuidv4(),
-        user_id: createdUsers.find(u => u.email === 'admin2@demo.com').id,
-        role_id: adminRole.id,
-        company_id: createdCompanies[1].id,
-        created_at: now,
-        updated_at: now
+      companyAdmins.forEach((admin, i) => {
+        roleAssignments.push({
+          id: uuidv4(),
+          user_id: admin.id,
+          role_id: adminRole.id,
+          company_id: companies[i].id,
+          created_at: now,
+          updated_at: now
+        });
       });
 
       // Assign cashier roles
-      roleAssignments.push({
-        id: uuidv4(),
-        user_id: createdUsers.find(u => u.email === 'cashier1@demo.com').id,
-        role_id: cashierRole.id,
-        company_id: createdCompanies[0].id,
-        created_at: now,
-        updated_at: now
-      });
-
-      roleAssignments.push({
-        id: uuidv4(),
-        user_id: createdUsers.find(u => u.email === 'cashier2@demo.com').id,
-        role_id: cashierRole.id,
-        company_id: createdCompanies[1].id,
-        created_at: now,
-        updated_at: now
+      cashiers.forEach((cashier, i) => {
+        roleAssignments.push({
+          id: uuidv4(),
+          user_id: cashier.id,
+          role_id: cashierRole.id,
+          company_id: companies[i].id,
+          created_at: now,
+          updated_at: now
+        });
       });
 
       // Assign salesman roles
-      roleAssignments.push({
-        id: uuidv4(),
-        user_id: createdUsers.find(u => u.email === 'salesman1@demo.com').id,
-        role_id: salesmanRole.id,
-        company_id: createdCompanies[0].id,
-        created_at: now,
-        updated_at: now
-      });
-
-      roleAssignments.push({
-        id: uuidv4(),
-        user_id: createdUsers.find(u => u.email === 'salesman2@demo.com').id,
-        role_id: salesmanRole.id,
-        company_id: createdCompanies[1].id,
-        created_at: now,
-        updated_at: now
+      salesmen.forEach((salesman, i) => {
+        roleAssignments.push({
+          id: uuidv4(),
+          user_id: salesman.id,
+          role_id: salesmanRole.id,
+          company_id: companies[i].id,
+          created_at: now,
+          updated_at: now
+        });
       });
 
       // Assign manager roles to some Uzbek users

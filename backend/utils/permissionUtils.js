@@ -25,29 +25,11 @@ const checkPermission = (
 
   const now = new Date();
 
-  // Map permission types to action names
-  const typeToAction = {
-    'create': 'create',
-    'read': 'view',
-    'edit': 'update',
-    'delete': 'delete'
-  };
-
-  const requiredAction = typeToAction[requiredType];
-
   // Iterate through user permissions to find a match
   return userPermissions.some((p) => {
-    // Check if permission type is 'module' (which is the standard for this system)
-    if (p.type !== 'module') {
-      return false;
-    }
-
-    // Check if the permission name matches the required action
-    // Permission names are in format: 'module.action' (e.g., 'companies.view')
-    const [module, action] = p.name.split('.');
-    
-    // Check if action matches the required action
-    if (action !== requiredAction) {
+    // Check if permission type matches the required action or is 'manage' (which grants all actions)
+    // Accept 'manage' as a superset for 'read', 'create', 'edit', 'delete'
+    if (!(p.type === requiredType || p.type === 'manage')) {
       return false;
     }
 

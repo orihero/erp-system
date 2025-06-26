@@ -62,7 +62,13 @@ router.put("/:id",
   async (req, res) => {
     try {
       const { id } = req.params;
-      const { name, description, type, module_id, directory_id } = req.body;
+      const { name, description, type, module_id, directory_id, effective_from, effective_until, constraint_data } = req.body;
+
+      // Convert empty strings to null for optional fields
+      const safeDirectoryId = directory_id === '' ? null : directory_id;
+      const safeEffectiveFrom = effective_from === '' ? null : effective_from;
+      const safeEffectiveUntil = effective_until === '' ? null : effective_until;
+      const safeConstraintData = constraint_data === '' ? null : constraint_data;
 
       const permission = await Permission.findByPk(id);
       if (!permission) {
@@ -74,7 +80,10 @@ router.put("/:id",
         description,
         type,
         module_id,
-        directory_id
+        directory_id: safeDirectoryId,
+        effective_from: safeEffectiveFrom,
+        effective_until: safeEffectiveUntil,
+        constraint_data: safeConstraintData
       });
 
       res.json(permission);

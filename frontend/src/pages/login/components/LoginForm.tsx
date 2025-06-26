@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
@@ -7,6 +7,7 @@ import * as z from 'zod';
 import type { RootState } from '../../../store';
 import { useAppDispatch } from '../../../store/hooks';
 import { loginStart } from '../../../store/slices/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -20,6 +21,9 @@ const LoginForm: React.FC = () => {
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const { loading } = useSelector((state: RootState) => state.auth);
+  const navigate = useNavigate();
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const navigation = useSelector((state: RootState) => state.navigation.navigation);
 
   const {
     register,
@@ -35,8 +39,39 @@ const LoginForm: React.FC = () => {
   });
 
   const onSubmit: SubmitHandler<LoginFormData> = (data) => {
+    // @ts-expect-error Redux Toolkit typing quirk
     dispatch(loginStart(data));
   };
+
+  useEffect(() => {
+    if (isAuthenticated && Array.isArray(navigation) && navigation.length > 0) {
+      // Helper to recursively find the first module directory with directory_type === 'module'
+      type NavItem = { path?: string; directory_type?: string; children?: NavItem[] };
+      function findFirstModuleDirectory(navItems: NavItem[]): string | null {
+        for (const item of navItems) {
+          // If this is a module (has children), look for a directory child with type 'module'
+          if (item.children && item.children.length > 0) {
+            // Try to find a directory child with type 'module'
+            for (const child of item.children) {
+              if (child.directory_type === 'module' && child.path) {
+                return child.path as string;
+              }
+            }
+            // Otherwise, recurse into children
+            const found = findFirstModuleDirectory(item.children);
+            if (found) return found;
+          }
+        }
+        return null;
+      }
+      const firstModuleDirectoryPath = findFirstModuleDirectory(navigation);
+      if (firstModuleDirectoryPath) {
+        navigate(firstModuleDirectoryPath, { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [isAuthenticated, navigation, navigate]);
 
   return (
     <form

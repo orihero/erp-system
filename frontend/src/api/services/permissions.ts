@@ -4,7 +4,7 @@ export interface Permission {
   id: string;
   name: string;
   description?: string;
-  type?: string;
+  type?: 'read' | 'write' | 'manage';
   module_id?: string;
   directory_id?: string;
 }
@@ -27,4 +27,6 @@ export const permissionsApi = {
     api.post<RolePermission>(`/api/permissions/roles/${roleId}/permissions`, data),
   removeFromRole: (roleId: string, permissionId: string) =>
     api.delete(`/api/permissions/roles/${roleId}/permissions/${permissionId}`),
+  getRolePermissions: (roleId: string) =>
+    api.get(`/api/permissions/roles/${roleId}/permissions`),
 }; 

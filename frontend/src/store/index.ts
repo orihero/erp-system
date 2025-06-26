@@ -13,6 +13,7 @@ import permissionsReducer from "./slices/permissionsSlice";
 import appStateReducer from "./slices/appStateSlice";
 import companyModuleDirectoriesReducer from "./slices/companyModuleDirectoriesSlice";
 import directoryRecordsReducer from "./slices/directoryRecordsSlice";
+import navigationReducer from "./slices/navigationSlice";
 import { authSaga } from "./sagas/authSaga";
 import { usersSaga } from "./sagas/usersSaga";
 import { directoriesSaga } from "./sagas/directoriesSaga";
@@ -40,6 +41,7 @@ export const store = configureStore({
     appState: appStateReducer,
     companyModuleDirectories: companyModuleDirectoriesReducer,
     directoryRecords: directoryRecordsReducer,
+    navigation: navigationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(sagaMiddleware),

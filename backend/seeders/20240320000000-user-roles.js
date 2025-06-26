@@ -1,6 +1,7 @@
 'use strict';
 
 const { v4: uuidv4 } = require('uuid');
+const { faker } = require('@faker-js/faker');
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -22,24 +23,34 @@ module.exports = {
       let companies = existingCompanies;
       if (!companies || companies.length === 0) {
         console.log('Creating demo companies...');
-        const demoCompanies = [
-          {
+        faker.locale = 'en';
+        const industries = ['Technology', 'Textiles', 'Logistics', 'Finance', 'Retail', 'Manufacturing', 'Healthcare', 'Education'];
+        const employeeCounts = ['less_than_10', '10_to_50', '50_to_100', '100_to_500', '500_to_1000'];
+        const demoCompanies = Array.from({ length: 8 }, (_, i) => {
+          return {
             id: uuidv4(),
-            name: 'Demo Company 1',
-            admin_email: 'admin1@demo.com',
-            employee_count: '50_to_100',
+            name: faker.company.name(),
+            admin_email: faker.internet.email(),
+            employee_count: faker.helpers.arrayElement(employeeCounts),
+            status: 'active',
+            logo: faker.image.urlPicsumPhotos({ width: 200, height: 200 }),
+            address: faker.location.streetAddress() + ', ' + faker.location.city() + ', ' + faker.location.country(),
+            description: faker.company.catchPhrase(),
+            website: faker.internet.url(),
+            phone: faker.phone.number(),
+            tax_id: faker.finance.accountNumber(12),
+            registration_number: faker.string.uuid(),
+            industry: faker.helpers.arrayElement(industries),
+            founded_year: faker.date.past({ years: 30 }).getFullYear(),
+            contacts: JSON.stringify({
+              ceo: faker.person.fullName(),
+              support: faker.internet.email(),
+              phone: faker.phone.number()
+            }),
             created_at: now,
             updated_at: now
-          },
-          {
-            id: uuidv4(),
-            name: 'Demo Company 2',
-            admin_email: 'admin2@demo.com',
-            employee_count: '50_to_100',
-            created_at: now,
-            updated_at: now
-          }
-        ];
+          };
+        });
 
         await queryInterface.bulkInsert('companies', demoCompanies);
         companies = await queryInterface.sequelize.query(
@@ -283,11 +294,32 @@ module.exports = {
         const name = `${p.module}.${p.action}`;
         if (!permissionKeySet.has(key) && !existingPermissionNames.has(name)) {
           permissionKeySet.add(key);
+          // Map action to type
+          let type;
+          switch (p.action) {
+            case 'view':
+              type = 'read';
+              break;
+            case 'create':
+              type = 'create';
+              break;
+            case 'update':
+              type = 'edit';
+              break;
+            case 'delete':
+              type = 'delete';
+              break;
+            case 'manage':
+              type = 'manage';
+              break;
+            default:
+              type = 'read';
+          }
           permissionDefs.push({
             id: uuidv4(),
             name,
             description: `${p.module} ${p.action}`,
-            type: 'module',
+            type,
             module_id: null,
             directory_id: null,
             effective_from: null,

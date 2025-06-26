@@ -5,6 +5,9 @@ import {
 import { Icon } from '@iconify/react';
 import { permissionsApi, Permission } from '@/api/services/permissions';
 import { rolesApi, UserRole } from '@/api/services/roles';
+import PermissionDrawer from '@/components/PermissionDrawer';
+import { modulesApi } from '@/api/services/modules';
+import { directoriesService } from '@/api/services/directories.service';
 
 const PermissionsManagement: React.FC = () => {
   const [tab, setTab] = useState(0);
@@ -21,6 +24,11 @@ const PermissionsManagement: React.FC = () => {
   const [rolePermissions, setRolePermissions] = useState<string[]>([]);
   const [roleLoading, setRoleLoading] = useState(false);
   const [roleError, setRoleError] = useState<string | null>(null);
+  const [permissionDrawerOpen, setPermissionDrawerOpen] = useState(false);
+  const [permissionDrawerMode, setPermissionDrawerMode] = useState<'add' | 'edit'>('add');
+  const [editingPermission, setEditingPermission] = useState<Permission | undefined>(undefined);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [directories, setDirectories] = useState<Directory[]>([]);
 
   const fetchPermissions = async () => {
     setLoading(true);
@@ -71,20 +79,24 @@ const PermissionsManagement: React.FC = () => {
     if (tab === 1 && selectedRoleId) fetchRolePermissions();
   }, [tab, selectedRoleId]);
 
+  useEffect(() => {
+    modulesApi.getAll().then(res => setModules(res.data));
+    directoriesService.getAll().then(res => setDirectories(res.data));
+  }, []);
+
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
   };
 
-  const handleOpenAdd = () => {
-    setForm({ name: '', description: '', type: '' });
-    setEditMode(false);
-    setDialogOpen(true);
+  const openAddPermissionDrawer = () => {
+    setEditingPermission(undefined);
+    setPermissionDrawerMode('add');
+    setPermissionDrawerOpen(true);
   };
-  const handleOpenEdit = (perm: Permission) => {
-    setSelected(perm);
-    setForm({ name: perm.name, description: perm.description || '', type: perm.type || '' });
-    setEditMode(true);
-    setDialogOpen(true);
+  const openEditPermissionDrawer = (perm: Permission) => {
+    setEditingPermission(perm);
+    setPermissionDrawerMode('edit');
+    setPermissionDrawerOpen(true);
   };
   const handleCloseDialog = () => {
     setDialogOpen(false);
@@ -174,7 +186,7 @@ const PermissionsManagement: React.FC = () => {
         <Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Permissions</Typography>
-            <Button variant="contained" onClick={handleOpenAdd} sx={{ borderRadius: 999, textTransform: 'none', bgcolor: '#3b82f6' }}>
+            <Button variant="contained" onClick={openAddPermissionDrawer} sx={{ borderRadius: 999, textTransform: 'none', bgcolor: '#3b82f6' }}>
               <Icon icon="ph:plus" style={{ marginRight: 8 }} /> Add Permission
             </Button>
           </Box>
@@ -200,8 +212,8 @@ const PermissionsManagement: React.FC = () => {
                     <TableCell>{perm.type}</TableCell>
                     <TableCell align="right">
                       <Tooltip title="Edit">
-                        <IconButton onClick={() => handleOpenEdit(perm)}>
-                          <Icon icon="ph:pencil-simple" />
+                        <IconButton onClick={() => openEditPermissionDrawer(perm)}>
+                          <Icon icon="ph:pencil" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete">
@@ -216,20 +228,23 @@ const PermissionsManagement: React.FC = () => {
             </Table>
           )}
           {/* Add/Edit Dialog */}
-          <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="xs" fullWidth>
-            <DialogTitle>{editMode ? 'Edit Permission' : 'Add Permission'}</DialogTitle>
-            <form onSubmit={handleSubmit}>
-              <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <TextField label="Name" name="name" value={form.name} onChange={handleFormChange} required fullWidth />
-                <TextField label="Description" name="description" value={form.description} onChange={handleFormChange} fullWidth />
-                <TextField label="Type" name="type" value={form.type} onChange={handleFormChange} fullWidth />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseDialog}>Cancel</Button>
-                <Button type="submit" variant="contained">{editMode ? 'Save' : 'Add'}</Button>
-              </DialogActions>
-            </form>
-          </Dialog>
+          <PermissionDrawer
+            open={permissionDrawerOpen}
+            onClose={() => setPermissionDrawerOpen(false)}
+            onSubmit={async data => {
+              if (permissionDrawerMode === 'edit' && editingPermission) {
+                await permissionsApi.update(editingPermission.id, data);
+              } else {
+                await permissionsApi.create(data);
+              }
+              setPermissionDrawerOpen(false);
+              fetchPermissions();
+            }}
+            initialData={permissionDrawerMode === 'edit' ? editingPermission : undefined}
+            modules={modules}
+            directories={directories}
+            mode={permissionDrawerMode}
+          />
           {/* Delete Dialog */}
           <Dialog open={deleteDialogOpen} onClose={handleCloseDelete} maxWidth="xs" fullWidth>
             <DialogTitle>Delete Permission</DialogTitle>

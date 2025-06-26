@@ -1,33 +1,47 @@
 import { Icon } from '@iconify/react';
-import { Avatar, Box, IconButton, Menu, MenuItem, Paper, Tab, Tabs, Typography } from '@mui/material';
-import React, { useEffect } from 'react';
+import { Avatar, Box, IconButton, Menu, MenuItem, Paper, Typography, ListItemIcon, ListItemText } from '@mui/material';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/store/slices/authSlice';
-import { fetchModulesStart, selectEnabledModules } from '@/store/slices/modulesSlice';
-import { setCurrentModule } from '@/store/slices/appStateSlice';
 import type { RootState } from '@/store';
+import type { NavigationItem } from '@/api/services/types';
 
 export default function DashboardHeader() {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [moduleAnchorEl, setModuleAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const moduleMenuOpen = Boolean(moduleAnchorEl);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
-  const companyId = user?.company?.id;
-  const enabledModules = useSelector(selectEnabledModules);
-  const currentModule = useSelector((state: RootState) => state.appState.currentModule);
-  const isOwner = user?.roles.includes('owner');
+  const navigation = useSelector((state: RootState) => state.navigation.navigation);
+  const safeNavigation = Array.isArray(navigation) ? navigation : [];
 
-  useEffect(() => {
-    if (isOwner && companyId) {
-      dispatch(fetchModulesStart(companyId));
+  // --- Step 3.1: Evaluate Module Count ---
+  // Assume modules are top-level navigation items with a path like '/modules/...' or have a 'module' property
+  // For this example, treat each top-level item as a module if it has children or a path starting with '/modules' or '/module'
+  const getDistinctModules = (nav: NavigationItem[]): NavigationItem[] => {
+    // You may want to adjust this logic based on your backend's navigation structure
+    return nav.filter(item => item.children && item.children.length > 0 || (item.path && item.path.startsWith('/modules')));
+  };
+  const distinctModules = getDistinctModules(safeNavigation);
+  const hasComprehensiveAccess = safeNavigation.length > 6; // Adjust as needed
+
+  // --- Step 3.2: Conditional Display ---
+  const shouldShowModuleNav = !hasComprehensiveAccess && distinctModules.length > 1;
+
+  const handleModuleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setModuleAnchorEl(event.currentTarget);
+  };
+  const handleModuleClose = () => {
+    setModuleAnchorEl(null);
+  };
+  const handleModuleSelect = (module: NavigationItem) => {
+    setModuleAnchorEl(null);
+    if (module.path) {
+      navigate(module.path);
     }
-  }, [dispatch, isOwner, companyId]);
-
-  const handleModuleChange = (_: React.SyntheticEvent, newValue: number) => {
-    const selectedModule = enabledModules[newValue];
-    dispatch(setCurrentModule(selectedModule));
   };
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -70,44 +84,31 @@ export default function DashboardHeader() {
             <Box component="span" sx={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>+</Box>
           </Box>
           <Typography variant="h6" sx={{ fontWeight: 700, fontSize: 22, letterSpacing: 1 }}>
-            Symptra
+            OSON ERP
           </Typography>
         </Box>
-        {/* Center: Nav Tabs in pill container, only for owner */}
-        {isOwner && (
-          <Box sx={{ bgcolor: '#eef2f5', borderRadius: 999, px: 1, py: 0.5, display: 'flex', alignItems: 'center', width: 'fit-content' }}>
-            <Tabs
-              value={currentModule ? enabledModules.findIndex(m => m.id === currentModule.id) : 0}
-              onChange={handleModuleChange}
-              sx={{ minHeight: 0, "&.Mui-selected": { color: '#fff' } }}
-              slotProps={{ indicator: { style: { display: 'none' }, } }}
-            >
-              {enabledModules.map((mod) => (
-                <Tab
-                  key={mod.id}
-                  label={mod.name}
-                  sx={{
-                    textTransform: 'none',
-                    fontWeight: 500,
-                    fontSize: 16,
-                    color: '#222',
-                    bgcolor: 'transparent',
-                    borderRadius: 999,
-                    px: 3,
-                    minHeight: 40,
-                    mr: 0.5,
-                    transition: 'all 0.2s',
-                    '&.Mui-selected': {
-                      color: '#fff',
-                      bgcolor: '#1a1e1c',
-                    },
-                    '&:hover': {
-                      bgcolor: currentModule?.id === mod.id ? '#1a1e1c' : '#ececec',
-                    },
-                  }}
-                />
+        {/* Center: Conditional Module Navigation */}
+        {shouldShowModuleNav && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <IconButton onClick={handleModuleMenu} sx={{ bgcolor: '#eef2f5', borderRadius: 999, px: 2 }}>
+              <Icon icon="solar:widget-linear" width={28} height={28} />
+              <Typography sx={{ ml: 1, fontWeight: 500, fontSize: 16 }}>
+                Modules
+              </Typography>
+              <Icon icon={moduleMenuOpen ? 'solar:arrow-up-linear' : 'solar:arrow-down-linear'} width={18} height={18} style={{ marginLeft: 4 }} />
+            </IconButton>
+            <Menu anchorEl={moduleAnchorEl} open={moduleMenuOpen} onClose={handleModuleClose}>
+              {distinctModules.map((mod) => (
+                <MenuItem key={mod.label} onClick={() => handleModuleSelect(mod)}>
+                  {mod.icon && (
+                    <ListItemIcon>
+                      <Icon icon={mod.icon} width={22} height={22} />
+                    </ListItemIcon>
+                  )}
+                  <ListItemText primary={mod.label} />
+                </MenuItem>
               ))}
-            </Tabs>
+            </Menu>
           </Box>
         )}
         {/* Right: Icons and User in bubbles */}
@@ -125,7 +126,7 @@ export default function DashboardHeader() {
           <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 999, px: 2, py: 0.5 }}>
             <Avatar sx={{ width: 40, height: 40, mr: 1 }} />
             <Box sx={{ textAlign: 'right', mr: 1 }}>
-              <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{user ? user.name || 'User' : 'User'}</Typography>
+              <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{user ? `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'User' : 'User'}</Typography>
               <Typography sx={{ fontSize: 12, color: '#888', textAlign: 'left' }}>{user?.email || ''}</Typography>
             </Box>
             <IconButton onClick={handleMenu} size="small" sx={{ color: '#222' }}>

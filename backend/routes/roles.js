@@ -24,7 +24,7 @@ router.post('/', authenticateToken, checkRole(["super_admin", "admin"]), async (
     if (existing) {
       return res.status(409).json({ error: 'Role with this name already exists' });
     }
-    const role = await UserRole.create({ name, description, is_system: false });
+    const role = await UserRole.create({ name, description, is_super_admin: false });
     res.status(201).json(role);
   } catch (err) {
     res.status(500).json({ error: 'Failed to create role' });

@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Provider } from 'react-redux';
 import { ThemeProvider, createTheme } from '@mui/material';
@@ -21,6 +21,8 @@ import Layout from './components/Layout/Layout';
 import CashierLayout from './components/Layout/CashierLayout';
 import CompanyDetail from './pages/companies/CompanyDetail';
 import UnauthorizedPage from './pages/UnauthorizedPage';
+import UserRoles from './pages/roles';
+import type { NavigationItem } from './api/services/types';
 
 // Import cashier pages
 import CashierReceipts from './pages/cashier/Receipts';
@@ -28,17 +30,68 @@ import CashierBank from './pages/cashier/Bank';
 import CashierReports from './pages/cashier/Reports';
 import CashierDirectories from './pages/cashier/Directories';
 
+type SubItemWithModule = { directory_type: string; name: string; path?: string };
+
 const theme = createTheme({
   typography: {
     fontFamily: `'Outfit', 'Roboto', Arial, sans-serif`,
   },
 });
 
+function AutoRedirector() {
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const navigation = useSelector((state: RootState) => state.navigation.navigation);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (
+      isAuthenticated &&
+      Array.isArray(navigation) &&
+      navigation.length > 0 &&
+      (location.pathname === '/' || location.pathname === '/dashboard')
+    ) {
+      function findFirstModuleDirectory(navItems: NavigationItem[]): string | null {
+        for (const item of navItems) {
+          const subItems = (item as unknown as { subItems?: unknown[] }).subItems;
+          if (Array.isArray(subItems) && subItems.length > 0) {
+            for (const sub of subItems) {
+              if (
+                typeof sub === 'object' &&
+                sub !== null &&
+                'directory_type' in sub &&
+                (sub as SubItemWithModule).directory_type === 'Module' &&
+                'name' in sub &&
+                typeof (sub as SubItemWithModule).name === 'string'
+              ) {
+                // Use sub.path if it exists, otherwise construct fallback
+                return (sub as SubItemWithModule).path || `/cashier/${(sub as SubItemWithModule).name.toLowerCase().replace(/ /g, '-')}`;
+              }
+            }
+            const found = findFirstModuleDirectory(subItems as NavigationItem[]);
+            if (found) return found;
+          }
+        }
+        return null;
+      }
+
+      console.log('navigation', navigation);
+      const firstModuleDirectoryPath = findFirstModuleDirectory(navigation);
+      console.log('firstModuleDirectoryPath', firstModuleDirectoryPath);
+      if (firstModuleDirectoryPath) {
+        navigate(firstModuleDirectoryPath, { replace: true });
+      }
+    }
+  }, [isAuthenticated, navigation, location, navigate]);
+  return null;
+}
+
 const AppRoutes: React.FC = () => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   return (
     <div style={{ backgroundColor: '#eef2f5' }}>
+      <AutoRedirector />
       <Routes>
         <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" />} />
         <Route path="/signup" element={!isAuthenticated ? <Signup /> : <Navigate to="/" />} />
@@ -129,6 +182,15 @@ const AppRoutes: React.FC = () => {
             </PrivateRoute>
           }>
             <Route index element={<Reports />} />
+          </Route>
+
+          {/* User Roles Route */}
+          <Route path="/user-roles" element={
+            <PrivateRoute requiredPermissionType="roles.view">
+              <Outlet />
+            </PrivateRoute>
+          }>
+            <Route index element={<UserRoles />} />
           </Route>
 
           {/* Roles and Permissions Routes */}

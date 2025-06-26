@@ -14,6 +14,7 @@ interface Employee {
   lastname: string;
   email: string;
   status?: string;
+  roles: { id: string; name: string; description?: string }[];
 }
 
 interface CompaniesState {

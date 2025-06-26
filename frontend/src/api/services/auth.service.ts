@@ -1,5 +1,5 @@
 import api from '../config';
-import { User, Role } from './types';
+import { User, Role, NavigationItem } from './types';
 
 export type LoginCredentials = {
   email: string;
@@ -11,6 +11,7 @@ export type LoginResponse = User & {
   token: string;
   roles: Role[];
   permissions?: string[];
+  navigation?: NavigationItem[];
 };
 
 class AuthService {

@@ -60,6 +60,7 @@ const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId
               <TableCell>First Name</TableCell>
               <TableCell>Last Name</TableCell>
               <TableCell>Email</TableCell>
+              <TableCell>Role</TableCell>
               <TableCell>Status</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
@@ -67,13 +68,13 @@ const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" style={{ minHeight: 300 }}>
+                <TableCell colSpan={7} align="center" style={{ minHeight: 300 }}>
                   <CircularProgress />
                 </TableCell>
               </TableRow>
             ) : error ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" style={{ color: '#e53e3e', fontSize: 20, minHeight: 300 }}>
+                <TableCell colSpan={7} align="center" style={{ color: '#e53e3e', fontSize: 20, minHeight: 300 }}>
                   {error}
                 </TableCell>
               </TableRow>
@@ -88,6 +89,13 @@ const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId
                 <TableCell style={{ fontWeight: 500 }}>{emp.lastname || ''}</TableCell>
                 <TableCell>{emp.email}</TableCell>
                 <TableCell>
+                  {emp.roles && emp.roles.length > 0 ? (
+                    emp.roles.map(role => role.name).join(', ')
+                  ) : (
+                    <span style={{ color: '#888' }}>-</span>
+                  )}
+                </TableCell>
+                <TableCell>
                   <span style={{ color: emp.status && emp.status === 'active' ? '#22c55e' : '#888', fontWeight: 600 }}>{emp.status || '-'}</span>
                 </TableCell>
                 <TableCell align="right">
@@ -101,7 +109,7 @@ const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId
               </TableRow>
             )) : (
               <TableRow>
-                <TableCell colSpan={6} align="center" style={{ color: '#888', fontSize: 20, minHeight: 300 }}>
+                <TableCell colSpan={7} align="center" style={{ color: '#888', fontSize: 20, minHeight: 300 }}>
                   No employees found.
                 </TableCell>
               </TableRow>

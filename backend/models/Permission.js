@@ -41,8 +41,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    /**
+     * Permission type: 'read', 'write', or 'manage' (read+write)
+     */
     type: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM('read', 'write', 'manage'),
       allowNull: false
     },
     module_id: {

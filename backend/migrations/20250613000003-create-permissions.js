@@ -19,7 +19,7 @@ module.exports = {
         allowNull: true
       },
       type: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('read', 'write', 'manage'),
         allowNull: false
       },
       module_id: {

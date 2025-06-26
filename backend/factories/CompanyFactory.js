@@ -45,7 +45,11 @@ class CompanyFactory {
       ]
     } : {};
 
-    const { count, rows } = await Company.findAndCountAll({
+    // Get the count without includes for accurate pagination
+    const count = await Company.count({ where });
+
+    // Get the rows with includes
+    const rows = await Company.findAll({
       where,
       include: [
         {
@@ -121,7 +125,7 @@ class CompanyFactory {
   }
 
   static async getEmployees({ companyId, filters = {}, sort = 'created_at', order = 'DESC', page = 1, limit = 10 }) {
-    const { User } = require('../models');
+    const { User, UserRole } = require('../models');
     const where = { company_id: companyId };
     // Apply filters
     if (filters.firstname) {
@@ -142,10 +146,26 @@ class CompanyFactory {
       order: [[sort, order]],
       limit,
       offset,
-      attributes: ['id', 'firstname', 'lastname', 'email', 'status', 'last_login', 'created_at']
+      attributes: ['id', 'firstname', 'lastname', 'email', 'status', 'last_login', 'created_at'],
+      include: [
+        {
+          model: UserRole,
+          as: 'roles',
+          attributes: ['id', 'name', 'description'],
+          through: { attributes: [] }
+        }
+      ]
+    });
+    // Convert Sequelize instances to plain objects
+    const employees = rows.map(user => {
+      const plain = user.get({ plain: true });
+      return {
+        ...plain,
+        roles: plain.roles || []
+      };
     });
     return {
-      employees: rows,
+      employees,
       pagination: {
         total: count,
         page,

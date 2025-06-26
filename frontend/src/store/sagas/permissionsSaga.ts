@@ -68,10 +68,8 @@ function* deletePermissionSaga(action: ReturnType<typeof deletePermissionStart>)
 
 function* fetchRolePermissionsSaga(action: ReturnType<typeof fetchRolePermissionsStart>): Generator<any, void, any> {
   try {
-    const response: Response = yield call(fetch, `/api/roles/${action.payload}/permissions`, { credentials: 'include' });
-    if (!response.ok) throw new Error('Failed to fetch role permissions');
-    const data: any = yield call([response, 'json']);
-    yield put(fetchRolePermissionsSuccess(data));
+    const response: any = yield call(permissionsApi.getRolePermissions, action.payload);
+    yield put(fetchRolePermissionsSuccess(response.data));
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to fetch role permissions';
     yield put(fetchRolePermissionsFailure(errorMessage));

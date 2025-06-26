@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { User } from "../../api/services/types";
-import { authService } from "../../api/services/auth.service";
+import type { User, Permission } from "../../api/services/types";
+// import { authService } from "../../api/services/auth.service";
 
 interface AuthState {
   user: User | null;
@@ -9,14 +9,7 @@ interface AuthState {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
-  permissions: string[];
-}
-
-interface SignupPayload {
-  email: string;
-  password: string;
-  company_name: string;
-  employee_count: string;
+  permissions: Permission[];
 }
 
 // interface LoginPayload {
@@ -40,7 +33,7 @@ const initialState: AuthState = {
   isAuthenticated: !!getStoredToken(),
   loading: false,
   error: null,
-  permissions: authService.getUserPermissions(),
+  permissions: [], // Permissions will be set on login/profile
 };
 
 const authSlice = createSlice({
@@ -60,7 +53,7 @@ const authSlice = createSlice({
     },
     loginSuccess: (
       state,
-      action: PayloadAction<{ user: User; token: string; permissions?: string[] }>
+      action: PayloadAction<{ user: User; token: string; permissions?: Permission[] }>
     ) => {
       state.loading = false;
       state.isAuthenticated = true;
@@ -71,9 +64,9 @@ const authSlice = createSlice({
         state.permissions = action.payload.permissions;
       }
     },
-    loginFailure: (state, action: PayloadAction<string>) => {
+    loginFailure: (state) => {
       state.loading = false;
-      state.error = action.payload;
+      state.error = null;
       state.permissions = [];
     },
     logout: (state) => {
@@ -90,7 +83,7 @@ const authSlice = createSlice({
     updateUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
     },
-    signupStart: (state, action: PayloadAction<SignupPayload>) => {
+    signupStart: (state) => {
       state.loading = true;
       state.error = null;
     },
@@ -98,9 +91,9 @@ const authSlice = createSlice({
       state.loading = false;
       state.error = null;
     },
-    signupFailure: (state, action: PayloadAction<string>) => {
+    signupFailure: (state) => {
       state.loading = false;
-      state.error = action.payload;
+      state.error = null;
     },
   },
 });

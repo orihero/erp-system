@@ -25,14 +25,14 @@ const EditUserDrawer: React.FC<EditUserDrawerProps> = ({ open, user, onClose, on
   const [editForm, setEditForm] = useState<Partial<User>>({});
 
   useEffect(() => {
-    if (open) {
+    if (open && user) {
       dispatch(fetchRolesStart());
       setEditForm({
-        firstname: user?.firstname,
-        lastname: user?.lastname,
-        email: user?.email,
-        roles: user?.roles || (user?.role ? [user.role] : []),
-        status: user?.status,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+        roles: user.roles || (user.role ? [user.role] : []),
+        status: user.status,
       });
     }
   }, [dispatch, open, user]);
@@ -62,10 +62,33 @@ const EditUserDrawer: React.FC<EditUserDrawerProps> = ({ open, user, onClose, on
 
   const handleEditSave = () => {
     if (user) {
-      console.log('EditUserDrawer onSave:', user.id, editForm);
       onSave(user.id, editForm);
     }
   };
+
+  if (!user) {
+    return (
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={onClose}
+        PaperProps={{
+          sx: {
+            width: 420,
+            maxWidth: '100vw',
+            borderTopLeftRadius: 24,
+            borderBottomLeftRadius: 24,
+            boxShadow: '0 4px 32px 0 rgba(0,0,0,0.10)',
+          },
+        }}
+      >
+        <Box sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+          <Typography variant="h6">No client selected for editing.</Typography>
+          <Button onClick={onClose} variant="outlined" sx={{ mt: 2, borderRadius: 999, textTransform: 'none' }}>Close</Button>
+        </Box>
+      </Drawer>
+    );
+  }
 
   return (
     <Drawer
@@ -101,24 +124,27 @@ const EditUserDrawer: React.FC<EditUserDrawerProps> = ({ open, user, onClose, on
             input={<OutlinedInput label="Roles" />}
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {(selected as string[]).map((value) => (
-                  <Chip
-                    key={value}
-                    label={roles.find(r => r.name === value)?.description || value}
-                    onDelete={() => handleRoleDelete(value)}
-                    onMouseDown={e => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                    }}
-                  />
-                ))}
+                {(selected as string[]).map((roleId) => {
+                  const roleObj = roles.find(r => r.id === roleId || r.name === roleId);
+                  return (
+                    <Chip
+                      key={roleId}
+                      label={roleObj?.description || roleObj?.name || roleId}
+                      onDelete={() => handleRoleDelete(roleId)}
+                      onMouseDown={e => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }}
+                    />
+                  );
+                })}
               </Box>
             )}
             fullWidth
             required
           >
             {roles.map(role => (
-              <MenuItem key={role.id} value={role.name}>
+              <MenuItem key={role.id} value={role.id}>
                 {role.description || role.name}
               </MenuItem>
             ))}

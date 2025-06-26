@@ -26,12 +26,12 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
   const [entityType, action] = requiredPermissionType.split('.');
   
   // Map action to requiredType
-  const actionToType: Record<string, 'create' | 'read' | 'edit' | 'delete'> = {
+  const actionToType: Record<string, 'create' | 'read' | 'edit' | 'delete' | 'manage'> = {
     'view': 'read',
     'create': 'create',
     'update': 'edit',
     'delete': 'delete',
-    'manage': 'read' // manage permissions typically include read access
+    'manage': 'manage'
   };
 
   const requiredType = actionToType[action] || 'read';
@@ -50,15 +50,15 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
 
   const mappedEntityType = entityTypeMap[entityType] || 'user';
 
+  console.log('mappedEntityType', mappedEntityType);
+  console.log('requiredType', requiredType);
+
   const hasPermission = check({ 
     requiredType,
     entityType: mappedEntityType
   });
 
-  console.log('hasPermission', hasPermission);
-  console.log('requiredPermissionType', requiredPermissionType);
-  console.log('parsed requiredType', requiredType);
-  console.log('parsed entityType', mappedEntityType);
+  console.log('hasPermission', hasPermission);  
 
   if (!hasPermission) {
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
