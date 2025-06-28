@@ -18,17 +18,12 @@ import Roles from './pages/roles';
 import PermissionsManagement from './pages/permissions/PermissionsManagement';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 import Layout from './components/Layout/Layout';
-import CashierLayout from './components/Layout/CashierLayout';
 import CompanyDetail from './pages/companies/CompanyDetail';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import UserRoles from './pages/roles';
 import type { NavigationItem } from './api/services/types';
-
-// Import cashier pages
-import CashierReceipts from './pages/cashier/Receipts';
-import CashierBank from './pages/cashier/Bank';
-import CashierReports from './pages/cashier/Reports';
-import CashierDirectories from './pages/cashier/Directories';
+import Settings from './pages/Settings';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 type SubItemWithModule = { directory_type: string; name: string; path?: string };
 
@@ -60,12 +55,12 @@ function AutoRedirector() {
                 typeof sub === 'object' &&
                 sub !== null &&
                 'directory_type' in sub &&
-                (sub as SubItemWithModule).directory_type === 'Module' &&
+                (sub as SubItemWithModule).directory_type === 'module' &&
                 'name' in sub &&
                 typeof (sub as SubItemWithModule).name === 'string'
               ) {
                 // Use sub.path if it exists, otherwise construct fallback
-                return (sub as SubItemWithModule).path || `/cashier/${(sub as SubItemWithModule).name.toLowerCase().replace(/ /g, '-')}`;
+                return (sub as SubItemWithModule).path || `/directories/${(sub as SubItemWithModule).name.toLowerCase().replace(/ /g, '-')}`;
               }
             }
             const found = findFirstModuleDirectory(subItems as NavigationItem[]);
@@ -209,52 +204,14 @@ const AppRoutes: React.FC = () => {
           }>
             <Route index element={<PermissionsManagement />} />
           </Route>
-        </Route>
 
-        {/* Cashier Routes */}
-        <Route element={
-          <CashierLayout>
-            <Outlet />
-          </CashierLayout>
-        }>
-          <Route path="/cashier/receipts" element={
-            <PrivateRoute requiredPermissionType="cashier.view">
+          {/* Settings Route */}
+          <Route path="/settings" element={
+            <PrivateRoute requiredPermissionType="settings.view">
               <Outlet />
             </PrivateRoute>
           }>
-            <Route index element={<CashierReceipts />} />
-          </Route>
-
-          <Route path="/cashier/bank" element={
-            <PrivateRoute requiredPermissionType="cashier.view">
-              <Outlet />
-            </PrivateRoute>
-          }>
-            <Route index element={<CashierBank />} />
-          </Route>
-
-          <Route path="/cashier/reports" element={
-            <PrivateRoute requiredPermissionType="cashier.view">
-              <Outlet />
-            </PrivateRoute>
-          }>
-            <Route index element={<CashierReports />} />
-          </Route>
-
-          <Route path="/cashier/directories" element={
-            <PrivateRoute requiredPermissionType="cashier.view">
-              <Outlet />
-            </PrivateRoute>
-          }>
-            <Route index element={<CashierDirectories />} />
-          </Route>
-
-          <Route path="/cashier/directories/:directoryId" element={
-            <PrivateRoute requiredPermissionType="cashier.view">
-              <Outlet />
-            </PrivateRoute>
-          }>
-            <Route index element={<DirectoryRecords />} />
+            <Route index element={<Settings />} />
           </Route>
         </Route>
       </Routes>
@@ -262,14 +219,18 @@ const AppRoutes: React.FC = () => {
   );
 };
 
+const queryClient = new QueryClient();
+
 const App: React.FC = () => {
   return (
     <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <Router>
-          <AppRoutes />
-        </Router>
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <Router>
+            <AppRoutes />
+          </Router>
+        </ThemeProvider>
+      </QueryClientProvider>
     </Provider>
   );
 };

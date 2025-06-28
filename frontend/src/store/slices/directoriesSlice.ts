@@ -36,7 +36,7 @@ const directoriesSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    deleteDirectoryStart: (state, action: PayloadAction<string>) => {
+    deleteDirectoryStart: (state) => {
       state.loading = true;
       state.error = null;
     },
@@ -49,7 +49,7 @@ const directoriesSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    editDirectoryStart: (state, action: PayloadAction<{ id: string; data: Partial<Directory> & { fields?: DirectoryField[] } }>) => {
+    editDirectoryStart: (state) => {
       state.loading = true;
       state.error = null;
     },
@@ -65,7 +65,7 @@ const directoriesSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    createDirectoryStart: (state, action: PayloadAction<Omit<Directory, 'id' | 'created_at' | 'updated_at'> & { fields?: DirectoryField[] }>) => {
+    createDirectoryStart: (state) => {
       state.loading = true;
       state.error = null;
     },
@@ -91,6 +91,11 @@ const directoriesSlice = createSlice({
       state.fieldsLoading[action.payload.directoryId] = false;
       state.fieldsError[action.payload.directoryId] = action.payload.error;
     },
+    clearDirectoryFields: (state) => {
+      state.fields = {};
+      state.fieldsLoading = {};
+      state.fieldsError = {};
+    },
   },
 });
 
@@ -110,6 +115,7 @@ export const {
   fetchDirectoryFieldsStart,
   fetchDirectoryFieldsSuccess,
   fetchDirectoryFieldsFailure,
+  clearDirectoryFields,
 } = directoriesSlice.actions;
 
 export default directoriesSlice.reducer;

@@ -21,6 +21,9 @@ export interface Directory {
   updated_at: string;
   is_enabled?: boolean;
   fields?: DirectoryField[];
+  metadata?: {
+    [key: string]: string | number | boolean;
+  };
 }
 
 export interface DirectoryField {
@@ -32,6 +35,9 @@ export interface DirectoryField {
   relation_id?: string;
   created_at: string;
   updated_at: string;
+  metadata?: {
+    [key: string]: string | number | boolean;
+  };
 }
 
 export const directoriesApi = {
@@ -60,7 +66,7 @@ export const directoriesApi = {
     page?: number;
     limit?: number;
     search?: string;
-    filters?: Record<string, any>;
+    filters?: Record<string, string | number | boolean>;
   }) => 
     api.get<{
       entries: DirectoryEntry[];
@@ -88,5 +94,19 @@ export const directoriesApi = {
 
   // Delete a directory entry
   deleteDirectoryEntry: (directoryTypeId: string, entryId: string) => 
-    api.delete(`/api/directory-records/${entryId}`)
+    api.delete(`/api/directory-records/${entryId}`),
+
+  // Get full directory data, companyDirectory, and directoryRecords
+  getFullDirectoryData: (directory_id: string, company_id: string) =>
+    api.get<{
+      directory: Directory;
+      companyDirectory: {
+        id: string;
+        company_id: string;
+        directory_id: string;
+        module_id: string;
+        directory: Directory;
+      };
+      directoryRecords: DirectoryEntry[];
+    }>(`/api/directory-records/full-data`, { params: { directory_id, company_id } }),
 };

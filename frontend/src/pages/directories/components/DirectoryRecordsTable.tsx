@@ -1,9 +1,7 @@
-import type { RootState } from '@/store';
 import { Icon } from '@iconify/react';
 import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 interface DirectoryField {
   id: string;
@@ -11,6 +9,11 @@ interface DirectoryField {
   type: string;
   directory_id: string;
   relation_id: string | null;
+  metadata?: {
+    isVisibleOnTable?: boolean;
+    fieldOrder?: number;
+    [key: string]: unknown;
+  };
 }
 
 interface DirectoryRecordValue {
@@ -18,58 +21,31 @@ interface DirectoryRecordValue {
   field_id: string;
   value: string | number | boolean;
   field: DirectoryField;
+  [key: string]: unknown;
 }
 
-interface DirectoryRecord {
+interface DirectoryRecordApi {
   id: string;
-  company_directory_id: string;
+  company_directory_id?: string;
+  createdAt?: string;
+  updatedAt?: string;
   recordValues: DirectoryRecordValue[];
-  createdAt: string;
-  updatedAt: string;
+  [key: string]: unknown;
 }
 
-const DirectoryRecordsTable: React.FC<{ companyDirectoryId: string | undefined }> = ({ companyDirectoryId }) => {
+interface DirectoryRecordsTableProps {
+  records: DirectoryRecordApi[];
+  loading: boolean;
+  error: unknown;
+  fields: DirectoryField[];
+}
+
+const DirectoryRecordsTable: React.FC<DirectoryRecordsTableProps> = ({ records, loading, error, fields }) => {
   const { t } = useTranslation();
-  const records = useSelector((state: RootState) => state.directoryRecords.records);
-  const loading = useSelector((state: RootState) => state.directoryRecords.loading);
-  const error = useSelector((state: RootState) => state.directoryRecords.error);
-  const fields = useSelector((state: RootState) => state.directories.fields);
 
-  console.log('=== DirectoryRecordsTable Debug ===');
-  console.log('Company Directory ID:', companyDirectoryId);
-  console.log('Fields:', fields);
-  console.log('Records:', records);
-
-  // Determine the fields to display
-  const displayFields = companyDirectoryId && fields[companyDirectoryId] && fields[companyDirectoryId].length > 0 
-    ? fields[companyDirectoryId] 
-    : Object.values(fields).flat().length > 0 
-      ? Object.values(fields).flat() 
-      : [];
-
-  console.log('Display Fields:', displayFields);
-
-  const renderFieldValue = (record: any, fieldId: string) => {
-    console.log(`Rendering value for record ${record.id}, field ${fieldId}:`, {
-      recordValues: record.recordValues,
-      fieldId,
-      foundValue: record.recordValues?.find((v: any) => v.field_id === fieldId)
-    });
-
-    if (!record.recordValues || !Array.isArray(record.recordValues)) {
-      console.log('No recordValues array found for record:', record.id);
-      return '-';
-    }
-    
-    const valueObj = record.recordValues.find((v: any) => v.field_id === fieldId);
-    if (!valueObj) {
-      console.log('No value found for field:', fieldId);
-      return '-';
-    }
-    
-    console.log('Found value:', valueObj.value);
-    return String(valueObj.value);
-  };
+  const displayFields = (fields || [])
+    .filter(field => field.metadata?.isVisibleOnTable)
+    .sort((a, b) => Number(a.metadata?.fieldOrder ?? 0) - Number(b.metadata?.fieldOrder ?? 0));
 
   return (
     <Box sx={{ width: '100%', mb: 4 }}>
@@ -89,25 +65,28 @@ const DirectoryRecordsTable: React.FC<{ companyDirectoryId: string | undefined }
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={displayFields.length + 2} sx={{ textAlign: 'center', color: 'text.secondary' }}>
+                <TableCell colSpan={Number(displayFields.length) + 2} sx={{ textAlign: 'center', color: 'text.secondary' }}>
                   {t('directories.records.loading')}
                 </TableCell>
               </TableRow>
             ) : error ? (
               <TableRow>
-                <TableCell colSpan={displayFields.length + 2} sx={{ textAlign: 'center', color: 'error.main' }}>
-                  {t('directories.records.error')}: {error}
+                <TableCell colSpan={Number(displayFields.length) + 2} sx={{ textAlign: 'center', color: 'error.main' }}>
+                  {t('directories.records.error')}: {String(error)}
                 </TableCell>
               </TableRow>
             ) : Array.isArray(records) && records.length > 0 ? (
               records.map((record) => (
-                <TableRow key={record.id} hover>
-                  <TableCell>{record.id}</TableCell>
-                  {displayFields.map((field) => (
-                    <TableCell key={field.id}>
-                      {renderFieldValue(record, field.id.toString())}
-                    </TableCell>
-                  ))}
+                <TableRow key={String(record.id)} hover>
+                  <TableCell>{String(record.id)}</TableCell>
+                  {displayFields.map((field) => {
+                    const valueObj = record.recordValues.find((v) => v.field_id === field.id);
+                    return (
+                      <TableCell key={field.id}>
+                        {valueObj ? String(valueObj.value) : '-'}
+                      </TableCell>
+                    );
+                  })}
                   <TableCell sx={{ textAlign: 'right' }}>
                     <IconButton size="small" sx={{ mr: 1 }}>
                       <Icon icon="ph:pencil-simple" />
@@ -120,7 +99,7 @@ const DirectoryRecordsTable: React.FC<{ companyDirectoryId: string | undefined }
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={displayFields.length + 2} sx={{ textAlign: 'center', color: 'text.secondary' }}>
+                <TableCell colSpan={Number(displayFields.length) + 2} sx={{ textAlign: 'center', color: 'text.secondary' }}>
                   {t('directories.records.noRecords')}
                 </TableCell>
               </TableRow>

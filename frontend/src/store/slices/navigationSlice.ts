@@ -1,34 +1,28 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { NavigationItem } from '@/api/services/types';
+import type { NavigationResponse } from '@/api/services/types';
 
-interface NavigationState {
-  navigation: NavigationItem[];
-  secondaryNavigation: NavigationItem[];
-}
-
-const initialState: NavigationState = {
-  navigation: [],
-  secondaryNavigation: [],
+const initialState: NavigationResponse = {
+  modules: [],
+  companyDirectories: [],
+  systemDirectories: [],
 };
 
 const navigationSlice = createSlice({
   name: 'navigation',
   initialState,
   reducers: {
-    setNavigation: (state, action: PayloadAction<NavigationItem[]>) => {
-      state.navigation = action.payload;
+    setNavigation: (state, action: PayloadAction<NavigationResponse>) => {
+      state.modules = action.payload.modules;
+      state.companyDirectories = action.payload.companyDirectories;
+      state.systemDirectories = action.payload.systemDirectories;
     },
     clearNavigation: (state) => {
-      state.navigation = [];
-    },
-    setSecondaryNavigation: (state, action: PayloadAction<NavigationItem[]>) => {
-      state.secondaryNavigation = action.payload;
-    },
-    clearSecondaryNavigation: (state) => {
-      state.secondaryNavigation = [];
+      state.modules = [];
+      state.companyDirectories = [];
+      state.systemDirectories = [];
     },
   },
 });
 
-export const { setNavigation, clearNavigation, setSecondaryNavigation, clearSecondaryNavigation } = navigationSlice.actions;
+export const { setNavigation, clearNavigation } = navigationSlice.actions;
 export default navigationSlice.reducer; 

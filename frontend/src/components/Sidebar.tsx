@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { Box, List, ListItemButton, ListItemIcon, ListItemText, Paper, Collapse, Divider } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, List, ListItemButton, ListItemIcon, ListItemText, Paper, Collapse, Divider, ListSubheader } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import type { RootState } from '@/store';
-import { fetchCompanyModuleDirectoriesStart } from '@/store/slices/companyModuleDirectoriesSlice';
-import type { NavigationItem } from '@/api/services/types';
+import type { Directory } from '@/api/services/types';
 
 // Static sidebar config for super_admin
-const superAdminSidebar: NavigationItem[] = [
+const superAdminSidebar = [
   { label: 'Dashboard', path: '/', icon: 'si:dashboard-line' },
   { label: 'Companies', path: '/companies', icon: 'solar:shop-linear' },
   { label: 'Directories', path: '/directories', icon: 'solar:folder-outline' },
@@ -21,105 +20,61 @@ const superAdminSidebar: NavigationItem[] = [
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
-  const navigation = useSelector((state: RootState) => state.navigation.navigation);
-  const secondaryNavigation = useSelector((state: RootState) => state.navigation.secondaryNavigation);
-  const safeNavigation = Array.isArray(navigation) ? navigation : [];
-  const safeSecondaryNavigation = Array.isArray(secondaryNavigation) ? secondaryNavigation : [];
-  const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
-  const [secondaryOpen, setSecondaryOpen] = useState(false);
-
-  useEffect(() => {
-    if (user && user.company_id) {
-      dispatch(fetchCompanyModuleDirectoriesStart(user.company_id));
-    } else if (user && user.company && user.company.id) {
-      dispatch(fetchCompanyModuleDirectoriesStart(user.company.id));
-    }
-  }, [user, dispatch]);
-
-  // --- Step 2.1: Determine Access Level ---
-  // For demo: if navigation has more than 6 items, treat as comprehensive access (adjust as needed)
-  const hasComprehensiveAccess = safeNavigation.length > 6;
+  const modules = useSelector((state: RootState) => state.navigation.modules);
+  const companyDirectories = useSelector((state: RootState) => state.navigation.companyDirectories);
+  const systemDirectories = useSelector((state: RootState) => state.navigation.systemDirectories);
 
   // Determine if user is super_admin with no company
   const isSuperAdmin = user && Array.isArray(user.roles) && user.roles.some((role) => role.name === 'super_admin') && (user.company_id === null || user.company_id === undefined);
 
-  // --- Step 2.2: Render Primary Navigation Items ---
-  const renderNavItems = (items: NavigationItem[], nested = false) => (
-    items.map((item) => {
-      const isExpanded = expanded[String(item.label)] || false;
-      const handleExpandClick = () => {
-        setExpanded({ ...expanded, [String(item.label)]: !isExpanded });
-      };
-      const hasChildren = item.children && item.children.length > 0;
-      return (
-        <React.Fragment key={item.label}>
-          <ListItemButton
-            sx={{
-              borderRadius: 3,
-              my: nested ? 0.5 : 1,
-              px: nested ? 4 : 2,
-              minHeight: 56,
-              '&.Mui-selected': {
-                bgcolor: '#eef2f5',
-              },
-            }}
-            selected={location.pathname === item.path}
-            onClick={hasChildren ? handleExpandClick : () => navigate(item.path)}
-          >
-            {item.icon && (
-              <ListItemIcon sx={{ minWidth: 40, color: '#1a1e1c' }}>
-                <Icon icon={item.icon} width={24} height={24} />
-              </ListItemIcon>
-            )}
-            <ListItemText
-              primary={item.label}
-              primaryTypographyProps={{
-                fontSize: 15,
-                fontWeight: 500,
-                color: '#1a1e1c',
-              }}
-            />
-            {hasChildren && (
-              <Icon icon={isExpanded ? 'solar:arrow-up-linear' : 'solar:arrow-down-linear'} width={16} height={16} />
-            )}
-          </ListItemButton>
-          {hasChildren && (
-            <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                {renderNavItems(item.children!, true)}
-              </List>
-            </Collapse>
-          )}
-        </React.Fragment>
-      );
-    })
+  // Settings item for the bottom
+  const settingsItem = {
+    label: 'Settings',
+    path: '/settings',
+    icon: 'solar:settings-bold',
+  };
+
+  // Type guard for Directory with 'directory_type'
+  const hasDirectoryType = (dir: Directory): dir is Directory & { directory_type: string } => typeof (dir as { directory_type?: string }).directory_type === 'string';
+  const [directoriesExpanded, setDirectoriesExpanded] = useState<boolean>(false);
+
+  // Flatten all module directories (type === 'module')
+  const moduleDirectories = (modules || []).flatMap((mod) =>
+    (mod.directories || []).filter((dir) => hasDirectoryType(dir) && dir.directory_type?.toLowerCase() === 'module')
   );
 
-  // --- Step 2.3: Render Secondary Navigation Group ---
-  const renderSecondaryNav = () => (
-    <>
-      <Divider sx={{ my: 2 }} />
+  // Only company directories (type === 'company')
+  const companyTypeDirectories = (companyDirectories || []).filter((dir) => hasDirectoryType(dir) && dir.directory_type?.toLowerCase() === 'company');
+
+  // Render a list of directories
+  const renderDirectoryList = (dirs: Directory[], indent: number = 0) => (
+    dirs.map((dir) => (
       <ListItemButton
-        sx={{ borderRadius: 3, my: 1, px: 2, minHeight: 56 }}
-        onClick={() => setSecondaryOpen((open) => !open)}
+        key={dir.id}
+        sx={{
+          borderRadius: 3,
+          my: 0.5,
+          pl: 2 + indent,
+          minHeight: 48,
+          width: '100%',
+          boxSizing: 'border-box',
+          '&.Mui-selected': { bgcolor: '#eef2f5' },
+        }}
+        selected={location.pathname === `/directories/${dir.id}`}
+        onClick={() => navigate(`/directories/${dir.id}`)}
       >
-        <ListItemIcon sx={{ minWidth: 40, color: '#1a1e1c' }}>
-          <Icon icon="solar:menu-dots-bold" width={24} height={24} />
-        </ListItemIcon>
+        {dir.icon_name && (
+          <ListItemIcon sx={{ minWidth: 40, color: '#1a1e1c' }}>
+            <Icon icon={dir.icon_name} width={22} height={22} />
+          </ListItemIcon>
+        )}
         <ListItemText
-          primary="More"
-          primaryTypographyProps={{ fontSize: 15, fontWeight: 500, color: '#1a1e1c' }}
+          primary={dir.name}
+          primaryTypographyProps={{ fontSize: 14, fontWeight: 400, color: '#1a1e1c' }}
         />
-        <Icon icon={secondaryOpen ? 'solar:arrow-up-linear' : 'solar:arrow-down-linear'} width={16} height={16} />
       </ListItemButton>
-      <Collapse in={secondaryOpen} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-          {renderNavItems(safeSecondaryNavigation, true)}
-        </List>
-      </Collapse>
-    </>
+    ))
   );
 
   return (
@@ -135,6 +90,7 @@ const Sidebar: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         pt: 3,
+        overflow: 'hidden',
       }}
     >
       <Paper
@@ -150,18 +106,93 @@ const Sidebar: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'stretch',
           boxShadow: '0 4px 24px 0 rgba(0,0,0,0.04)',
+          overflow: 'hidden',
         }}
       >
         <List sx={{ width: '100%', p: 0, flex: 1 }}>
           {/* Render static sidebar for super_admin with no company */}
-          {isSuperAdmin
-            ? renderNavItems(superAdminSidebar)
-            : hasComprehensiveAccess
-              ? renderNavItems(safeNavigation)
-              : renderNavItems(safeNavigation)}
+          {isSuperAdmin ? (
+            superAdminSidebar.map((item) => (
+              <ListItemButton
+                key={item.label}
+                sx={{ borderRadius: 3, my: 1, px: 2, minHeight: 56, '&.Mui-selected': { bgcolor: '#eef2f5' } }}
+                selected={location.pathname === item.path}
+                onClick={() => navigate(item.path)}
+              >
+                {item.icon && (
+                  <ListItemIcon sx={{ minWidth: 40, color: '#1a1e1c' }}>
+                    <Icon icon={item.icon} width={24} height={24} />
+                  </ListItemIcon>
+                )}
+                <ListItemText
+                  primary={item.label}
+                  primaryTypographyProps={{ fontSize: 15, fontWeight: 500, color: '#1a1e1c' }}
+                />
+              </ListItemButton>
+            ))
+          ) : (
+            <>
+              {/* Module Directories (type: module) */}
+              {renderDirectoryList(moduleDirectories)}
+              {/* Company Directories (type: company) grouped under 'Directories' */}
+              {companyTypeDirectories.length > 0 && (
+                <>
+                  <Divider sx={{ my: 2 }} />
+                  <ListItemButton
+                    onClick={() => setDirectoriesExpanded((prev: boolean) => !prev)}
+                    sx={{ borderRadius: 3, my: 1, px: 2, minHeight: 48 }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 40, color: '#1a1e1c' }}>
+                      <Icon icon="solar:folder-outline" width={22} height={22} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Directories"
+                      primaryTypographyProps={{ fontSize: 15, fontWeight: 500, color: '#1a1e1c' }}
+                    />
+                    <Icon icon={directoriesExpanded ? 'solar:arrow-up-linear' : 'solar:arrow-down-linear'} width={16} height={16} />
+                  </ListItemButton>
+                  <Collapse in={directoriesExpanded} timeout="auto" unmountOnExit>
+                    <List disablePadding sx={{ width: '100%' }}>
+                      {renderDirectoryList(companyTypeDirectories, 0)}
+                    </List>
+                  </Collapse>
+                </>
+              )}
+              {/* System Directories (if any) */}
+              {systemDirectories && systemDirectories.length > 0 && (
+                <>
+                  <Divider sx={{ my: 2 }} />
+                  <ListSubheader sx={{ pl: 2, fontWeight: 600, color: '#888' }}>System Directories</ListSubheader>
+                  {renderDirectoryList(systemDirectories)}
+                </>
+              )}
+            </>
+          )}
         </List>
-        {/* Secondary navigation group at the bottom if present and not comprehensive access */}
-        {!isSuperAdmin && !hasComprehensiveAccess && safeSecondaryNavigation.length > 0 && renderSecondaryNav()}
+        {/* Settings section at the bottom for non-super_admin */}
+        {!isSuperAdmin && (
+          <>
+            <Divider sx={{ my: 2 }} />
+            <List sx={{ width: '100%', p: 0 }}>
+              <ListItemButton
+                key={settingsItem.label}
+                sx={{ borderRadius: 3, my: 1, px: 2, minHeight: 56, '&.Mui-selected': { bgcolor: '#eef2f5' } }}
+                selected={location.pathname === settingsItem.path}
+                onClick={() => navigate(settingsItem.path)}
+              >
+                {settingsItem.icon && (
+                  <ListItemIcon sx={{ minWidth: 40, color: '#1a1e1c' }}>
+                    <Icon icon={settingsItem.icon} width={24} height={24} />
+                  </ListItemIcon>
+                )}
+                <ListItemText
+                  primary={settingsItem.label}
+                  primaryTypographyProps={{ fontSize: 15, fontWeight: 500, color: '#1a1e1c' }}
+                />
+              </ListItemButton>
+            </List>
+          </>
+        )}
       </Paper>
     </Box>
   );

@@ -74,7 +74,7 @@ module.exports = {
           id: uuidv4(),
           name: 'admin',
           description: 'Company Administrator with full company access',
-          is_super_admin: true,
+          is_super_admin: false,
           created_at: now,
           updated_at: now
         },
@@ -82,7 +82,7 @@ module.exports = {
           id: uuidv4(),
           name: 'manager',
           description: 'Department Manager with limited administrative access',
-          is_super_admin: true,
+          is_super_admin: false,
           created_at: now,
           updated_at: now
         },
@@ -90,7 +90,7 @@ module.exports = {
           id: uuidv4(),
           name: 'cashier',
           description: 'Cashier with access to sales and payment features',
-          is_super_admin: true,
+          is_super_admin: false,
           created_at: now,
           updated_at: now
         },
@@ -98,7 +98,7 @@ module.exports = {
           id: uuidv4(),
           name: 'salesman',
           description: 'Sales representative with access to sales and customer features',
-          is_super_admin: true,
+          is_super_admin: false,
           created_at: now,
           updated_at: now
         },
@@ -106,7 +106,7 @@ module.exports = {
           id: uuidv4(),
           name: 'user',
           description: 'Regular user with basic access',
-          is_super_admin: true,
+          is_super_admin: false,
           created_at: now,
           updated_at: now
         }

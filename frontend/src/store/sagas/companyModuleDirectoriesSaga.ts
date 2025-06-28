@@ -67,6 +67,7 @@ function* fetchCompanyModuleDirectoriesSaga(
             updated_at: entry.updated_at,
             is_enabled: true,
             company_directory_id: entry.id,
+            directory_type: entry.directory.directory_type,
           })
         );
       } catch (error) {

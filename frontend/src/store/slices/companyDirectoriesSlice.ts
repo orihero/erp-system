@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Directory } from '@/api/services/directories';
 
-interface CompanyDirectory extends Directory {
+export interface CompanyDirectory extends Directory {
   is_enabled: boolean;
 }
 

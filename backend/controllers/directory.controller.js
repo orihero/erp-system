@@ -93,7 +93,8 @@ const directoryController = {
 
       await directory.update({
         name,
-        icon_name
+        icon_name,
+        metadata: req.body.metadata
       });
 
       if (fields) {

@@ -1,46 +1,37 @@
 import { Icon } from '@iconify/react';
-import { Avatar, Box, IconButton, Menu, MenuItem, Paper, Typography, ListItemIcon, ListItemText } from '@mui/material';
+import { Avatar, Box, IconButton, Menu, MenuItem, Paper, Typography, Tabs, Tab } from '@mui/material';
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/store/slices/authSlice';
 import type { RootState } from '@/store';
-import type { NavigationItem } from '@/api/services/types';
+import type { NavigationModule } from '@/api/services/types';
 
 export default function DashboardHeader() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [moduleAnchorEl, setModuleAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const moduleMenuOpen = Boolean(moduleAnchorEl);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
-  const navigation = useSelector((state: RootState) => state.navigation.navigation);
-  const safeNavigation = Array.isArray(navigation) ? navigation : [];
+  const modules: NavigationModule[] = useSelector((state: RootState) => state.navigation.modules) || [];
+  const [tabValue, setTabValue] = useState(() => {
+    // Find the current module index based on the route
+    const currentPath = window.location.pathname;
+    const idx = modules.findIndex((mod) => currentPath.startsWith(`/modules/${mod.id}`));
+    return idx >= 0 ? idx : 0;
+  });
 
-  // --- Step 3.1: Evaluate Module Count ---
-  // Assume modules are top-level navigation items with a path like '/modules/...' or have a 'module' property
-  // For this example, treat each top-level item as a module if it has children or a path starting with '/modules' or '/module'
-  const getDistinctModules = (nav: NavigationItem[]): NavigationItem[] => {
-    // You may want to adjust this logic based on your backend's navigation structure
-    return nav.filter(item => item.children && item.children.length > 0 || (item.path && item.path.startsWith('/modules')));
-  };
-  const distinctModules = getDistinctModules(safeNavigation);
-  const hasComprehensiveAccess = safeNavigation.length > 6; // Adjust as needed
+  React.useEffect(() => {
+    // Update tab when route changes
+    const currentPath = window.location.pathname;
+    const idx = modules.findIndex((mod) => currentPath.startsWith(`/modules/${mod.id}`));
+    if (idx >= 0 && idx !== tabValue) setTabValue(idx);
+  }, [window.location.pathname, modules]);
 
-  // --- Step 3.2: Conditional Display ---
-  const shouldShowModuleNav = !hasComprehensiveAccess && distinctModules.length > 1;
-
-  const handleModuleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setModuleAnchorEl(event.currentTarget);
-  };
-  const handleModuleClose = () => {
-    setModuleAnchorEl(null);
-  };
-  const handleModuleSelect = (module: NavigationItem) => {
-    setModuleAnchorEl(null);
-    if (module.path) {
-      navigate(module.path);
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+    if (modules[newValue]) {
+      navigate(`/modules/${modules[newValue].id}`);
     }
   };
 
@@ -87,29 +78,64 @@ export default function DashboardHeader() {
             OSON ERP
           </Typography>
         </Box>
-        {/* Center: Conditional Module Navigation */}
-        {shouldShowModuleNav && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={handleModuleMenu} sx={{ bgcolor: '#eef2f5', borderRadius: 999, px: 2 }}>
-              <Icon icon="solar:widget-linear" width={28} height={28} />
-              <Typography sx={{ ml: 1, fontWeight: 500, fontSize: 16 }}>
-                Modules
-              </Typography>
-              <Icon icon={moduleMenuOpen ? 'solar:arrow-up-linear' : 'solar:arrow-down-linear'} width={18} height={18} style={{ marginLeft: 4 }} />
-            </IconButton>
-            <Menu anchorEl={moduleAnchorEl} open={moduleMenuOpen} onClose={handleModuleClose}>
-              {distinctModules.map((mod) => (
-                <MenuItem key={mod.label} onClick={() => handleModuleSelect(mod)}>
-                  {mod.icon && (
-                    <ListItemIcon>
-                      <Icon icon={mod.icon} width={22} height={22} />
-                    </ListItemIcon>
-                  )}
-                  <ListItemText primary={mod.label} />
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+        {/* Center: Module Tab Bar */}
+        {modules.length > 1 && (
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            sx={{ 
+              minHeight: 48,
+              '& .MuiTabs-indicator': {
+                display: 'none', // Remove the default underline indicator
+              },
+              '& .MuiTabs-flexContainer': {
+                gap: 1, // Add gap between tabs
+              }
+            }}
+          >
+            {modules.map((mod, index) => (
+              <Tab
+                key={mod.id}
+                label={mod.name}
+                icon={mod.icon_name ? <Icon icon={mod.icon_name} width={18} height={18} /> : undefined}
+                iconPosition="start"
+                sx={{ 
+                  fontWeight: 500, 
+                  fontSize: 14, 
+                  minHeight: 36,
+                  textTransform: 'none',
+                  borderRadius: '24px',
+                  px: 2.5,
+                  py: 0.75,
+                  mx: 0.25,
+                  minWidth: 'auto',
+                  transition: 'all 0.2s ease-in-out',
+                  ...(tabValue === index ? {
+                    // Active tab styling - dark pill
+                    bgcolor: '#1a202c',
+                    color: '#fff',
+                    '&:hover': {
+                      bgcolor: '#1a202c',
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: '#fff',
+                    }
+                  } : {
+                    // Inactive tab styling - transparent background
+                    bgcolor: 'transparent',
+                    color: '#64748b',
+                    '&:hover': {
+                      bgcolor: 'rgba(0,0,0,0.04)',
+                      color: '#475569',
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: '#64748b',
+                    }
+                  })
+                }}
+              />
+            ))}
+          </Tabs>
         )}
         {/* Right: Icons and User in bubbles */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

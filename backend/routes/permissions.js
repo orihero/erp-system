@@ -35,12 +35,16 @@ router.post("/",
     try {
       const { name, description, type, module_id, directory_id } = req.body;
       
+      // Convert empty strings to null for UUID fields
+      const safeModuleId = module_id === '' ? null : module_id;
+      const safeDirectoryId = directory_id === '' ? null : directory_id;
+      
       const permission = await Permission.create({
         name,
         description,
         type,
-        module_id,
-        directory_id
+        module_id: safeModuleId,
+        directory_id: safeDirectoryId
       });
 
       res.status(201).json(permission);
@@ -65,6 +69,7 @@ router.put("/:id",
       const { name, description, type, module_id, directory_id, effective_from, effective_until, constraint_data } = req.body;
 
       // Convert empty strings to null for optional fields
+      const safeModuleId = module_id === '' ? null : module_id;
       const safeDirectoryId = directory_id === '' ? null : directory_id;
       const safeEffectiveFrom = effective_from === '' ? null : effective_from;
       const safeEffectiveUntil = effective_until === '' ? null : effective_until;
@@ -79,7 +84,7 @@ router.put("/:id",
         name,
         description,
         type,
-        module_id,
+        module_id: safeModuleId,
         directory_id: safeDirectoryId,
         effective_from: safeEffectiveFrom,
         effective_until: safeEffectiveUntil,

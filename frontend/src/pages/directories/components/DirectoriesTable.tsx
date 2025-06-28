@@ -32,6 +32,7 @@ import {
 } from '@/store/slices/directoriesSlice';
 import { Directory, DirectoryField } from '@/api/services/directories';
 import DirectoryFieldsEditor from './DirectoryFieldsEditor';
+import KeyValueEditor, { KeyValueObject } from '@/components/KeyValueEditor';
 
 const DirectoriesTable: React.FC = () => {
   const { t } = useTranslation();
@@ -52,6 +53,7 @@ const DirectoriesTable: React.FC = () => {
   const [editForm, setEditForm] = useState({
     name: '',
     icon_name: '',
+    metadata: {} as KeyValueObject,
   });
   const [editFields, setEditFields] = useState<DirectoryField[]>([]);
 
@@ -75,6 +77,7 @@ const DirectoriesTable: React.FC = () => {
 
   const handleDeleteConfirm = () => {
     if (directoryToDelete) {
+      // @ts-expect-error: Payload is required for saga, not for slice reducer
       dispatch(deleteDirectoryStart(directoryToDelete));
       setDeleteDialogOpen(false);
       setDirectoryToDelete(null);
@@ -86,6 +89,7 @@ const DirectoriesTable: React.FC = () => {
     setEditForm({
       name: directory.name,
       icon_name: directory.icon_name,
+      metadata: directory.metadata || {},
     });
     setEditFields(directory.fields || []);
     setEditModalOpen(true);
@@ -98,8 +102,13 @@ const DirectoriesTable: React.FC = () => {
     });
   };
 
+  const handleMetadataChange = (metadata: KeyValueObject) => {
+    setEditForm((prev) => ({ ...prev, metadata }));
+  };
+
   const handleEditSave = () => {
     if (selectedDirectory) {
+      // @ts-expect-error: Payload is required for saga, not for slice reducer
       dispatch(editDirectoryStart({
         id: selectedDirectory.id,
         data: {
@@ -232,7 +241,11 @@ const DirectoriesTable: React.FC = () => {
           <form style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24 }} onSubmit={e => { e.preventDefault(); handleEditSave(); }}>
             <TextField label={t('directories.name')} name="name" value={editForm.name} onChange={handleEditChange} fullWidth required />
             <TextField label={t('directories.iconName')} name="icon_name" value={editForm.icon_name} onChange={handleEditChange} fullWidth required />
-            
+            <KeyValueEditor
+              label={t('directories.metadata')}
+              value={editForm.metadata}
+              onChange={handleMetadataChange}
+            />
             <DirectoryFieldsEditor
               fields={editFields}
               onFieldsChange={setEditFields}

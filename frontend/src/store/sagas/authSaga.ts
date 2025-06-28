@@ -4,6 +4,7 @@ import { showNotification } from '../slices/notificationSlice';
 import { authService, type LoginResponse } from '../../api/services/auth.service';
 import { Role, Permission, User } from '../../api/services/types';
 import { setNavigation } from '../slices/navigationSlice';
+import { usersService } from '../../api/services/users';
 
 // Utility to flatten permissions from user.roles
 function extractPermissionsFromUser(user: User): Permission[] {
@@ -37,11 +38,9 @@ function* handleLogin(action: ReturnType<typeof loginStart>): Generator<Effect, 
       sessionStorage.setItem('user', JSON.stringify(response));
     }
     yield put(loginSuccess({ user: response, token: response.token, permissions }));
-    if (response.navigation) {
-      yield put(setNavigation(response.navigation));
-    } else {
-      yield put(setNavigation([]));
-    }
+    // Fetch navigation from new endpoint
+    const navigation = yield call(usersService.getNavigation);
+    yield put(setNavigation(navigation));
     yield put(showNotification({ 
       message: `Welcome back, ${response.email}! You've successfully logged in.`,
       type: 'success'
@@ -65,11 +64,9 @@ function* verifyToken(): Generator<Effect, void, User> {
     localStorage.setItem('permissions', JSON.stringify(permissions));
     localStorage.setItem('user', JSON.stringify(user));
     yield put(loginSuccess({ user, token, permissions }));
-    if (user.navigation) {
-      yield put(setNavigation(user.navigation));
-    } else {
-      yield put(setNavigation([]));
-    }
+    // Fetch navigation from new endpoint
+    const navigation = yield call(usersService.getNavigation);
+    yield put(setNavigation(navigation));
   } catch (error) {
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');

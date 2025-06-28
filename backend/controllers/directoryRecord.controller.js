@@ -60,6 +60,65 @@ const directoryRecordController = {
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
+  },
+
+  // New: Get all directory data, company_directory, and directory_records by directory_id and company_id
+  getFullDirectoryData: async (req, res) => {
+    try {
+      const { directory_id, company_id } = req.query;
+      if (!directory_id || !company_id) {
+        return res.status(400).json({ message: 'directory_id and company_id are required' });
+      }
+      const { CompanyDirectory, Directory, DirectoryField, DirectoryRecord, DirectoryValue } = require('../models');
+      // Find the company_directory
+      const companyDirectory = await CompanyDirectory.findOne({
+        where: { directory_id, company_id },
+        include: [
+          {
+            model: Directory,
+            as: 'directory',
+            include: [{ model: DirectoryField, as: 'fields' }]
+          }
+        ]
+      });
+      if (!companyDirectory) {
+        return res.status(404).json({ message: 'CompanyDirectory not found' });
+      }
+      // Get all directory records for this company_directory
+      const directoryRecords = await DirectoryRecord.findAll({
+        where: { company_directory_id: companyDirectory.id },
+        include: [
+          {
+            model: DirectoryValue,
+            as: 'recordValues',
+            include: [
+              {
+                model: DirectoryField,
+                as: 'field'
+              }
+            ]
+          }
+        ],
+        order: [['created_at', 'DESC']]
+      });
+      // Extract fields from directory and remove from directory and companyDirectory.directory
+      const directory = companyDirectory.directory?.toJSON ? companyDirectory.directory.toJSON() : companyDirectory.directory;
+      const fields = directory?.fields || [];
+      if (directory) delete directory.fields;
+      // Remove fields from companyDirectory.directory if present
+      const companyDirectoryObj = companyDirectory.toJSON ? companyDirectory.toJSON() : companyDirectory;
+      if (companyDirectoryObj.directory && companyDirectoryObj.directory.fields) {
+        delete companyDirectoryObj.directory.fields;
+      }
+      res.json({
+        directory,
+        companyDirectory: companyDirectoryObj,
+        directoryRecords,
+        fields
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
   }
 };
 

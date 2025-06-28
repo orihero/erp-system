@@ -53,13 +53,13 @@ const companyDirectoryController = {
 
       const companyDirectories = await CompanyDirectory.findAll({
         where,
-include: [
-  {
-    model: Directory,
-    as: 'directory',
-    attributes: ['id', 'name', 'icon_name']
-  }
-],
+        include: [
+          {
+            model: Directory,
+            as: 'directory',
+            attributes: ['id', 'name', 'icon_name', 'directory_type']
+          }
+        ],
         order: [['created_at', 'DESC']]
       });
 

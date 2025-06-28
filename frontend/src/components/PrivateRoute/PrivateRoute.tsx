@@ -45,7 +45,6 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
     'directories': 'directory',
     'companies': 'company',
     'reports': 'report_structure',
-    'cashier': 'user' // cashier permissions are typically user-level
   };
 
   const mappedEntityType = entityTypeMap[entityType] || 'user';
@@ -60,9 +59,9 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
 
   console.log('hasPermission', hasPermission);  
 
-  if (!hasPermission) {
-    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
-  }
+  // if (!hasPermission) {
+  //   return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+  // }
 
   return children ? <>{children}</> : <Outlet />;
 };

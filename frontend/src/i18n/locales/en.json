@@ -125,6 +125,13 @@
       "createFailed": "Failed to create directory",
       "updateFailed": "Failed to update directory",
       "deleteFailed": "Failed to delete directory"
+    },
+    "records": {
+      "title": "Directory Records",
+      "id": "ID",
+      "actions": "Actions",
+      "noRecords": "No records found",
+      "addNew": "Add New Record"
     }
   },
   "companies": {

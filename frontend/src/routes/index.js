@@ -1,9 +1,14 @@
 import UserRoles from '../pages/roles';
+import Settings from '../pages/Settings';
 
 const routes = [
   {
     path: '/user-roles',
     element: <UserRoles />,
+  },
+  {
+    path: '/settings',
+    element: <Settings />,
   },
   // Optionally, redirect old routes:
   // {

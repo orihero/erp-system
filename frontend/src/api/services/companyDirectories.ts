@@ -12,6 +12,7 @@ export interface CompanyDirectoryResponse {
     name: string;
     description: string;
     icon_name?: string;
+    directory_type: string;
   };
 }
 

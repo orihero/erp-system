@@ -82,6 +82,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
       field: 'updated_at'
+    },
+    metadata: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {},
+      comment: 'Field metadata such as isVisibleOnTable, fieldOrder, etc.'
     }
   }, {
     sequelize,

@@ -4,6 +4,12 @@ const { v4: uuidv4 } = require('uuid');
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+    // Clean up existing directory data in the correct order
+    await queryInterface.bulkDelete('directory_values', null, {});
+    await queryInterface.bulkDelete('directory_records', null, {});
+    await queryInterface.bulkDelete('directory_fields', null, {});
+    await queryInterface.bulkDelete('company_directories', null, {});
+    await queryInterface.bulkDelete('directories', null, {});
     const now = new Date();
 
     // Predefine UUIDs for new directories
@@ -23,7 +29,8 @@ module.exports = {
         icon_name: 'material-symbols:business',
         directory_type: 'Company',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: null
       },
       {
         id: uuidv4(),
@@ -31,7 +38,8 @@ module.exports = {
         icon_name: 'material-symbols:description',
         directory_type: 'Company',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: null
       },
       {
         id: uuidv4(),
@@ -39,7 +47,8 @@ module.exports = {
         icon_name: 'material-symbols:directions-car',
         directory_type: 'Company',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: null
       },
       {
         id: uuidv4(),
@@ -47,7 +56,8 @@ module.exports = {
         icon_name: 'material-symbols:people',
         directory_type: 'Company',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: null
       },
       {
         id: receiptsDirId,
@@ -55,7 +65,8 @@ module.exports = {
         icon_name: 'material-symbols:receipt',
         directory_type: 'Module',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: null
       },
       {
         id: terminalDirId,
@@ -63,7 +74,8 @@ module.exports = {
         icon_name: 'material-symbols:point-of-sale',
         directory_type: 'Module',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: null
       },
       {
         id: bankStatementDirId,
@@ -71,7 +83,8 @@ module.exports = {
         icon_name: 'material-symbols:account-balance',
         directory_type: 'Module',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: null
       },
       {
         id: measurementsDirId,
@@ -79,7 +92,8 @@ module.exports = {
         icon_name: 'material-symbols:straighten',
         directory_type: 'System',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: null
       },
       {
         id: currencyDirId,
@@ -87,7 +101,8 @@ module.exports = {
         icon_name: 'material-symbols:attach-money',
         directory_type: 'System',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: null
       },
       {
         id: taxCodesDirId,
@@ -95,7 +110,8 @@ module.exports = {
         icon_name: 'material-symbols:percent',
         directory_type: 'System',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: null
       },
       {
         id: unitsDirId,
@@ -103,11 +119,12 @@ module.exports = {
         icon_name: 'material-symbols:square-foot',
         directory_type: 'System',
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: null
       }
     ]);
 
-    // Get the created directories
+    // Fetch actual directory IDs from the database after insertion
     const directories = await queryInterface.sequelize.query(
       'SELECT * FROM directories ORDER BY created_at ASC;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
@@ -117,9 +134,12 @@ module.exports = {
     const contractsDir = directories.find(d => d.name === 'Contracts');
     const carsDir = directories.find(d => d.name === 'Cars');
     const employeesDir = directories.find(d => d.name === 'Employees');
+    const receiptsDir = directories.find(d => d.name === 'Receipts');
+    const terminalDir = directories.find(d => d.name === 'Terminal');
+    const bankStatementDir = directories.find(d => d.name === 'Bank Statement');
 
     // Create Directory Fields
-    await queryInterface.bulkInsert('directory_fields', [
+    const directoryFields = [
       // Clients fields
       {
         id: uuidv4(),
@@ -128,7 +148,13 @@ module.exports = {
         type: 'text',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 1,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -137,7 +163,13 @@ module.exports = {
         type: 'text',
         required: false,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 2,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -146,7 +178,13 @@ module.exports = {
         type: 'textarea',
         required: false,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 3,
+          isEditable: true,
+          isFilterable: false
+        }
       },
       {
         id: uuidv4(),
@@ -156,7 +194,13 @@ module.exports = {
         relation_id: contractsDir.id,
         required: false,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: false,
+          fieldOrder: 4,
+          isEditable: false,
+          isFilterable: false
+        }
       },
 
       // Contracts fields
@@ -167,7 +211,13 @@ module.exports = {
         type: 'text',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 1,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -176,7 +226,13 @@ module.exports = {
         type: 'textarea',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 2,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -185,7 +241,13 @@ module.exports = {
         type: 'date',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 3,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -194,7 +256,13 @@ module.exports = {
         type: 'date',
         required: false,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 4,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -204,7 +272,13 @@ module.exports = {
         relation_id: clientsDir.id,
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: false,
+          fieldOrder: 5,
+          isEditable: false,
+          isFilterable: false
+        }
       },
       {
         id: uuidv4(),
@@ -213,7 +287,13 @@ module.exports = {
         type: 'number',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 5,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -222,7 +302,13 @@ module.exports = {
         type: 'json',
         required: false,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: false,
+          fieldOrder: 6,
+          isEditable: false,
+          isFilterable: false
+        }
       },
 
       // Cars fields
@@ -233,7 +319,13 @@ module.exports = {
         type: 'text',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 1,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -243,7 +335,13 @@ module.exports = {
         relation_id: employeesDir.id,
         required: false,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: false,
+          fieldOrder: 2,
+          isEditable: false,
+          isFilterable: false
+        }
       },
 
       // Employees fields
@@ -254,7 +352,13 @@ module.exports = {
         type: 'text',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 1,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -263,7 +367,13 @@ module.exports = {
         type: 'text',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 2,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -272,7 +382,13 @@ module.exports = {
         type: 'email',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 3,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -281,7 +397,13 @@ module.exports = {
         type: 'tel',
         required: false,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 4,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -290,7 +412,13 @@ module.exports = {
         type: 'text',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 5,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -299,7 +427,13 @@ module.exports = {
         type: 'text',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 6,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -308,7 +442,13 @@ module.exports = {
         type: 'date',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 7,
+          isEditable: true,
+          isFilterable: true
+        }
       },
       {
         id: uuidv4(),
@@ -317,9 +457,358 @@ module.exports = {
         type: 'number',
         required: true,
         created_at: now,
-        updated_at: now
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 8,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+
+      // Receipts fields
+      {
+        id: uuidv4(),
+        directory_id: receiptsDir.id,
+        name: 'receipt_number',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 1,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: receiptsDir.id,
+        name: 'date',
+        type: 'date',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 2,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: receiptsDir.id,
+        name: 'customer_name',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 3,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: receiptsDir.id,
+        name: 'total_amount',
+        type: 'number',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 4,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: receiptsDir.id,
+        name: 'payment_method',
+        type: 'select',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 5,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: receiptsDir.id,
+        name: 'cashier',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 6,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: receiptsDir.id,
+        name: 'items',
+        type: 'json',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: false,
+          fieldOrder: 7,
+          isEditable: false,
+          isFilterable: false
+        }
+      },
+
+      // Bank Statement fields
+      {
+        id: uuidv4(),
+        directory_id: bankStatementDir.id,
+        name: 'statement_number',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 1,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: bankStatementDir.id,
+        name: 'period_start',
+        type: 'date',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 2,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: bankStatementDir.id,
+        name: 'period_end',
+        type: 'date',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 3,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: bankStatementDir.id,
+        name: 'account_number',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 4,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: bankStatementDir.id,
+        name: 'bank_name',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 5,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: bankStatementDir.id,
+        name: 'opening_balance',
+        type: 'number',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 6,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: bankStatementDir.id,
+        name: 'closing_balance',
+        type: 'number',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 7,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: bankStatementDir.id,
+        name: 'transactions',
+        type: 'json',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: false,
+          fieldOrder: 8,
+          isEditable: false,
+          isFilterable: false
+        }
+      },
+
+      // Terminal fields
+      {
+        id: uuidv4(),
+        directory_id: terminalDir.id,
+        name: 'terminal_id',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 1,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: terminalDir.id,
+        name: 'location',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 2,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: terminalDir.id,
+        name: 'model',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 3,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: terminalDir.id,
+        name: 'serial_number',
+        type: 'text',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 4,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: terminalDir.id,
+        name: 'status',
+        type: 'select',
+        required: true,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 5,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: terminalDir.id,
+        name: 'last_service_date',
+        type: 'date',
+        required: false,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 6,
+          isEditable: true,
+          isFilterable: true
+        }
+      },
+      {
+        id: uuidv4(),
+        directory_id: terminalDir.id,
+        name: 'assigned_employee',
+        type: 'text',
+        required: false,
+        created_at: now,
+        updated_at: now,
+        metadata: {
+          isVisibleOnTable: true,
+          fieldOrder: 7,
+          isEditable: true,
+          isFilterable: true
+        }
       }
-    ]);
+    ];
+    // Stringify metadata for each field
+    directoryFields.forEach(field => {
+      if (field.metadata) {
+        field.metadata = JSON.stringify(field.metadata);
+      }
+    });
+    await queryInterface.bulkInsert('directory_fields', directoryFields);
 
     // Get the created fields
     const fields = await queryInterface.sequelize.query(
@@ -622,13 +1111,259 @@ module.exports = {
         updated_at: now
       }
     ]);
+
+    // Get field IDs for new directories
+    const receiptsFields = fields.filter(f => f.directory_id === receiptsDir.id);
+    const bankStatementFields = fields.filter(f => f.directory_id === bankStatementDir.id);
+    const terminalFields = fields.filter(f => f.directory_id === terminalDir.id);
+
+    // Create Company Directories for new directories
+    const receiptsCompanyDir = await queryInterface.bulkInsert('company_directories', [{
+      id: uuidv4(),
+      company_id: companyId,
+      directory_id: receiptsDir.id,
+      module_id: companyModuleId,
+      created_at: now,
+      updated_at: now
+    }], { returning: true });
+    const terminalCompanyDir = await queryInterface.bulkInsert('company_directories', [{
+      id: uuidv4(),
+      company_id: companyId,
+      directory_id: terminalDir.id,
+      module_id: companyModuleId,
+      created_at: now,
+      updated_at: now
+    }], { returning: true });
+    const bankStatementCompanyDir = await queryInterface.bulkInsert('company_directories', [{
+      id: uuidv4(),
+      company_id: companyId,
+      directory_id: bankStatementDir.id,
+      module_id: companyModuleId,
+      created_at: now,
+      updated_at: now
+    }], { returning: true });
+
+    // Create Directory Records for new directories
+    const receiptsRecordId = uuidv4();
+    const terminalRecordId = uuidv4();
+    const bankStatementRecordId = uuidv4();
+    await queryInterface.bulkInsert('directory_records', [
+      {
+        id: receiptsRecordId,
+        company_directory_id: receiptsCompanyDir[0]?.id || receiptsCompanyDir,
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: terminalRecordId,
+        company_directory_id: terminalCompanyDir[0]?.id || terminalCompanyDir,
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: bankStatementRecordId,
+        company_directory_id: bankStatementCompanyDir[0]?.id || bankStatementCompanyDir,
+        created_at: now,
+        updated_at: now
+      }
+    ]);
+
+    // Create demo values for Receipts
+    await queryInterface.bulkInsert('directory_values', [
+      // Receipts
+      {
+        id: uuidv4(),
+        directory_record_id: receiptsRecordId,
+        field_id: receiptsFields.find(f => f.name === 'receipt_number')?.id,
+        value: 'RCP-2024-0001',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: receiptsRecordId,
+        field_id: receiptsFields.find(f => f.name === 'date')?.id,
+        value: '2024-06-13',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: receiptsRecordId,
+        field_id: receiptsFields.find(f => f.name === 'customer_name')?.id,
+        value: 'Jane Smith',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: receiptsRecordId,
+        field_id: receiptsFields.find(f => f.name === 'total_amount')?.id,
+        value: '250000',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: receiptsRecordId,
+        field_id: receiptsFields.find(f => f.name === 'payment_method')?.id,
+        value: 'card',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: receiptsRecordId,
+        field_id: receiptsFields.find(f => f.name === 'cashier')?.id,
+        value: 'Ali Valiyev',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: receiptsRecordId,
+        field_id: receiptsFields.find(f => f.name === 'items')?.id,
+        value: JSON.stringify([
+          { name: 'Product A', qty: 2, price: 50000 },
+          { name: 'Product B', qty: 1, price: 150000 }
+        ]),
+        created_at: now,
+        updated_at: now
+      },
+      // Bank Statement
+      {
+        id: uuidv4(),
+        directory_record_id: bankStatementRecordId,
+        field_id: bankStatementFields.find(f => f.name === 'statement_number')?.id,
+        value: 'BS-2024-06',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: bankStatementRecordId,
+        field_id: bankStatementFields.find(f => f.name === 'period_start')?.id,
+        value: '2024-06-01',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: bankStatementRecordId,
+        field_id: bankStatementFields.find(f => f.name === 'period_end')?.id,
+        value: '2024-06-13',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: bankStatementRecordId,
+        field_id: bankStatementFields.find(f => f.name === 'account_number')?.id,
+        value: '20208000900000000001',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: bankStatementRecordId,
+        field_id: bankStatementFields.find(f => f.name === 'bank_name')?.id,
+        value: 'NBU',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: bankStatementRecordId,
+        field_id: bankStatementFields.find(f => f.name === 'opening_balance')?.id,
+        value: '1000000',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: bankStatementRecordId,
+        field_id: bankStatementFields.find(f => f.name === 'closing_balance')?.id,
+        value: '1250000',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: bankStatementRecordId,
+        field_id: bankStatementFields.find(f => f.name === 'transactions')?.id,
+        value: JSON.stringify([
+          { date: '2024-06-02', type: 'credit', amount: 250000, description: 'Payment received' },
+          { date: '2024-06-10', type: 'debit', amount: 100000, description: 'Supplier payment' }
+        ]),
+        created_at: now,
+        updated_at: now
+      },
+      // Terminal
+      {
+        id: uuidv4(),
+        directory_record_id: terminalRecordId,
+        field_id: terminalFields.find(f => f.name === 'terminal_id')?.id,
+        value: 'T-001',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: terminalRecordId,
+        field_id: terminalFields.find(f => f.name === 'location')?.id,
+        value: 'Main Hall',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: terminalRecordId,
+        field_id: terminalFields.find(f => f.name === 'model')?.id,
+        value: 'Ingenico iWL250',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: terminalRecordId,
+        field_id: terminalFields.find(f => f.name === 'serial_number')?.id,
+        value: 'SN123456789',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: terminalRecordId,
+        field_id: terminalFields.find(f => f.name === 'status')?.id,
+        value: 'active',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: terminalRecordId,
+        field_id: terminalFields.find(f => f.name === 'last_service_date')?.id,
+        value: '2024-05-20',
+        created_at: now,
+        updated_at: now
+      },
+      {
+        id: uuidv4(),
+        directory_record_id: terminalRecordId,
+        field_id: terminalFields.find(f => f.name === 'assigned_employee')?.id,
+        value: 'Aziz Karimov',
+        created_at: now,
+        updated_at: now
+      }
+    ]);
   },
 
   down: async (queryInterface, Sequelize) => {
     // Delete in reverse order to handle foreign key constraints
     await queryInterface.bulkDelete('directory_values', null, {});
-    await queryInterface.bulkDelete('company_directories', null, {});
+    await queryInterface.bulkDelete('directory_records', null, {});
     await queryInterface.bulkDelete('directory_fields', null, {});
+    await queryInterface.bulkDelete('company_directories', null, {});
     await queryInterface.bulkDelete('directories', null, {});
   }
 };

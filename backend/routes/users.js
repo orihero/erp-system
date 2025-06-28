@@ -1,3 +1,4 @@
+console.log("USERS.JS LOADED");
 const express = require("express");
 const router = express.Router();
 const UserFactory = require("../factories/UserFactory");
@@ -147,22 +148,27 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Get user profile
-router.get("/profile", authenticateUser, async (req, res) => {
+// Get user navigation (modules, companyDirectories, systemDirectories)
+router.get("/navigation", authenticateUser, async (req, res) => {
+  console.log("NAVIGATION ENDPOINT CALLED");
   try {
     const user = await userFactory.findById(req.user.id);
+    console.log("[STEP] User fetched:", user && user.id);
     if (!user) {
+      console.log("[STEP] No user found, returning 404");
       return res.status(404).json({ error: "User not found" });
     }
     // Fetch roles for this user and company
     let roles;
     try {
       roles = await UserFactory.getUserRoles(user.id, user.company_id);
+      console.log("[STEP] Roles fetched:", roles && roles.map(r => r.name));
     } catch (err) {
-      console.error("Error fetching user roles:", err);
+      console.log("[STEP] Error fetching roles");
       return res.status(500).json({ error: "Failed to retrieve user roles" });
     }
     if (!roles || roles.length === 0) {
+      console.log("[STEP] No roles assigned, returning 403");
       return res.status(403).json({ error: "No roles assigned to user" });
     }
     // Check for elevated access (super admin)
@@ -181,13 +187,11 @@ router.get("/profile", authenticateUser, async (req, res) => {
         where: { company_id: user.company_id },
         include: [{ model: Directory, as: 'directory' }]
       });
+      console.log("[STEP] Enabled company modules fetched:", enabledCompanyModules.map(cm => cm.module && cm.module.name));
     } catch (err) {
-      console.error("Error fetching modules or directories:", err);
+      console.log("[STEP] Error fetching modules or directories");
       return res.status(500).json({ error: "Failed to retrieve modules or directories" });
     }
-
-    // Helper: deduplicate by id
-    const uniqueById = arr => Object.values(arr.reduce((acc, item) => { acc[item.id] = item; return acc; }, {}));
 
     let accessibleModules = [];
     let accessibleDirectories = [];
@@ -195,26 +199,26 @@ router.get("/profile", authenticateUser, async (req, res) => {
 
     try {
       if (isSuperAdmin && !user.company_id) {
-        // Super admin with no company: fetch all modules and all directories
         accessibleModules = await Module.findAll();
         accessibleDirectories = await Directory.findAll();
+        console.log("[STEP] SuperAdmin (no company): all modules and directories fetched");
       } else if (isSuperAdmin) {
-        // Super admin: all enabled modules and all directories for their company
         accessibleModules = enabledCompanyModules.map(cm => cm.module).filter(Boolean);
         accessibleCompanyModules = enabledCompanyModules;
         accessibleDirectories = companyDirectories.map(cd => cd.directory).filter(Boolean);
+        console.log("[STEP] SuperAdmin (with company): modules and directories filtered");
       } else {
-        // Aggregate permissions from all roles
+        console.log("[STEP] About to process permissions for regular user");
         const userPermissions = [];
         roles.forEach(role => {
           (role.permissions || []).forEach(permission => {
             userPermissions.push(permission);
           });
         });
-        // Deduplicate permissions by module_id and directory_id
         const modulePerms = {};
         const directoryPerms = {};
         userPermissions.forEach(p => {
+          // Only allow modules with 'read' or 'manage' permissions (no other types)
           if (p.module_id && (p.type === 'read' || p.type === 'manage') && !p.directory_id) {
             modulePerms[p.module_id] = true;
           }
@@ -222,26 +226,40 @@ router.get("/profile", authenticateUser, async (req, res) => {
             directoryPerms[p.directory_id] = true;
           }
         });
-        // Accessible company modules: those where user has permission for the abstract module
+        console.log("[STEP] modulePerms:", modulePerms);
+        // Strictly filter enabled company modules to only those with correct permissions
         accessibleCompanyModules = enabledCompanyModules.filter(cm => modulePerms[cm.module_id]);
-        // Accessible modules: the abstract modules for which the user has permission and are enabled for the company
+        // Only include modules for which the user has permission (do not fallback to all enabled modules)
         accessibleModules = accessibleCompanyModules.map(cm => cm.module).filter(Boolean);
-        // Accessible directories: those bound to accessible company modules, and of type 'Module'
-        accessibleDirectories = companyDirectories
-          .filter(cd => {
-            if (!cd.directory) return false;
-            if (cd.directory.directory_type !== 'Module') return false;
-            // Directory-level permission
-            if (directoryPerms[cd.directory.id]) return true;
-            // Module-level permission (abstract module_id from company module)
-            const cm = enabledCompanyModules.find(m => m.id === cd.module_id);
-            if (cm && modulePerms[cm.module_id]) return true;
-            return false;
-          })
-          .map(cd => cd.directory);
+        // Defensive: filter out any modules not in modulePerms (double check)
+        accessibleModules = accessibleModules.filter(m => modulePerms[m.id]);
+        console.log('[STEP] Accessible modules after filtering:', accessibleModules.map(m => m.name));
+        // For each accessible module, include all directories belonging to that module
+        const moduleIdToDirectories = {};
+        companyDirectories.forEach(cd => {
+          if (!cd.directory) return;
+          if (cd.directory.directory_type !== 'Module') return;
+          // Find the company module for this directory
+          const cm = enabledCompanyModules.find(m => m.id === cd.module_id);
+          if (!cm) return;
+          const moduleId = cm.module.id;
+          if (!moduleIdToDirectories[moduleId]) moduleIdToDirectories[moduleId] = [];
+          moduleIdToDirectories[moduleId].push(cd.directory);
+        });
+        console.log('[DEBUG] moduleIdToDirectories:', Object.fromEntries(Object.entries(moduleIdToDirectories).map(([k, v]) => [k, v.map(d => d.name)])));
+        // Compose modules with their directories
+        accessibleModules = accessibleModules.map(mod => {
+          const plainMod = typeof mod.toJSON === 'function' ? mod.toJSON() : mod;
+          return {
+            ...plainMod,
+            directories: (moduleIdToDirectories[plainMod.id] || []).map(dir =>
+              typeof dir.toJSON === 'function' ? dir.toJSON() : dir
+            )
+          };
+        });
       }
     } catch (err) {
-      console.error("Error aggregating permissions:", err);
+      console.log("[STEP] Error aggregating permissions", err);
       return res.status(500).json({ error: "Failed to aggregate user permissions" });
     }
 
@@ -253,65 +271,77 @@ router.get("/profile", authenticateUser, async (req, res) => {
       }
     });
 
-    // Build a map of companyModuleId -> directories of type 'Module'
-    const companyModuleIdToDirectories = {};
+    // Build a map of moduleId -> directories of type 'Module'
+    const moduleIdToDirectories = {};
     if (isSuperAdmin && !user.company_id) {
-      // For global super admin, associate all Module-type directories to all modules
       directoriesByType.Module.forEach(dir => {
         accessibleModules.forEach(mod => {
-          if (!companyModuleIdToDirectories[mod.id]) companyModuleIdToDirectories[mod.id] = [];
-          companyModuleIdToDirectories[mod.id].push(dir);
+          if (!moduleIdToDirectories[mod.id]) moduleIdToDirectories[mod.id] = [];
+          moduleIdToDirectories[mod.id].push(dir);
         });
       });
     } else {
       companyDirectories.forEach(cd => {
         if (!cd.directory) return;
         if (cd.directory.directory_type !== 'Module') return;
-        // Only include if in accessibleDirectories (for non-superadmin)
         if (!isSuperAdmin && !accessibleDirectories.find(d => d.id === cd.directory.id)) return;
-        const cmId = cd.module_id;
-        if (!companyModuleIdToDirectories[cmId]) companyModuleIdToDirectories[cmId] = [];
-        companyModuleIdToDirectories[cmId].push(cd.directory);
+        const cm = enabledCompanyModules.find(m => m.id === cd.module_id);
+        if (!cm) return;
+        const moduleId = cm.module.id;
+        if (!moduleIdToDirectories[moduleId]) moduleIdToDirectories[moduleId] = [];
+        moduleIdToDirectories[moduleId].push(cd.directory);
       });
     }
 
-    // Structure primary navigation: enabled company modules with at least one directory of type 'Module'
-    const primary = [];
-    for (const cm of accessibleCompanyModules) {
-      const subItems = (companyModuleIdToDirectories[cm.id] || []).map(dir => ({
-        id: dir.id,
-        name: dir.name,
-        icon: dir.icon_name,
-        directory_type: dir.directory_type
-      }));
-      if (subItems.length > 0) {
-        primary.push({
-          id: cm.module.id, // keep using abstract module id for frontend routing
-          name: cm.module.name,
-          icon: cm.module.icon_name,
-          subItems
-        });
-      }
+    // Use the accessibleModules array (with directories attached) as the final modules array
+    const modules = accessibleModules;
+
+    // Company directories (type Company)
+    const companyDirectoriesArr = companyDirectories
+      .filter(cd => cd.directory && cd.directory.directory_type === 'Company')
+      .map(cd => ({ ...cd.directory.toJSON() }));
+
+    // System directories (type System)
+    const systemDirectoriesArr = companyDirectories
+      .filter(cd => cd.directory && cd.directory.directory_type === 'System')
+      .map(cd => ({ ...cd.directory.toJSON() }));
+
+    res.json({
+      modules,
+      companyDirectories: companyDirectoriesArr,
+      systemDirectories: systemDirectoriesArr
+    });
+  } catch (error) {
+    console.error("Error fetching user navigation:", error);
+    res.status(500).json({ error: "An unexpected error occurred while fetching user navigation" });
+  }
+});
+
+// Get user profile
+router.get("/profile", authenticateUser, async (req, res) => {
+  try {
+    const user = await userFactory.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
-
-    // Structure secondary navigation: directories of type 'Company' or 'System', grouped together
-    const secondary = [
-      ...directoriesByType.Company,
-      ...directoriesByType.System
-    ].map(dir => ({
-      id: dir.id,
-      name: dir.name,
-      icon: dir.icon_name,
-      directory_type: dir.directory_type
-    }));
-
+    // Fetch roles for this user and company
+    let roles;
+    try {
+      roles = await UserFactory.getUserRoles(user.id, user.company_id);
+    } catch (err) {
+      console.error("Error fetching user roles:", err);
+      return res.status(500).json({ error: "Failed to retrieve user roles" });
+    }
+    if (!roles || roles.length === 0) {
+      return res.status(403).json({ error: "No roles assigned to user" });
+    }
     res.json({
       ...user.toJSON(),
       roles: roles.map(role => ({
         id: role.id,
         name: role.name,
         description: role.description,
-        is_super_admin: role.is_super_admin, // for frontend debugging, can be removed
+        is_super_admin: role.is_super_admin,
         permissions: (role.permissions || []).map(permission => ({
           id: permission.id,
           name: permission.name,
@@ -319,14 +349,11 @@ router.get("/profile", authenticateUser, async (req, res) => {
           type: permission.type,
           module_id: permission.module_id,
           directory_id: permission.directory_id,
-          // RolePermission join table fields:
           effective_from: permission.RolePermission?.effective_from,
           effective_until: permission.RolePermission?.effective_until,
           constraint_data: permission.RolePermission?.constraint_data
         }))
-      })),
-      navigation: primary,
-      secondaryNavigation: secondary
+      }))
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);

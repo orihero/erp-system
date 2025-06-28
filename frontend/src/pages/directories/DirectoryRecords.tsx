@@ -1,82 +1,83 @@
-import type { RootState } from '@/store';
-import { fetchCompanyDirectories } from '@/store/slices/companyDirectoriesSlice';
-import { fetchDirectoryRecords } from '@/store/slices/directoryRecordsSlice';
-import { fetchDirectoryFieldsStart } from '@/store/slices/directoriesSlice';
-import { Icon } from '@iconify/react';
-import { Box, Button, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { Suspense, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import AddDirectoryRecordDrawer from './components/AddDirectoryRecordDrawer';
+import { useDirectoryRecords } from '@/hooks/useDirectoryRecords';
+import { getDirectoryPageComponent } from './directoryPageRegistry';
 import DirectoryRecordsTable from './components/DirectoryRecordsTable';
+import type { DirectoryEntry, DirectoryField as APIDirectoryField } from '@/api/services/directories';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
+import AddDirectoryRecordDrawer from './components/AddDirectoryRecordDrawer';
+import { Button, Box } from '@mui/material';
+
+// DirectoryField type compatible with both backend and frontend
+interface DirectoryField extends Omit<APIDirectoryField, 'relation_id'> {
+  relation_id: string | null;
+}
+
+interface FullDataResponse {
+  directory: Record<string, unknown>;
+  companyDirectory: Record<string, unknown>;
+  directoryRecords: DirectoryEntry[];
+  fields: DirectoryField[];
+}
 
 const DirectoryRecords: React.FC = () => {
-  const { t } = useTranslation();
   const { directoryId } = useParams<{ directoryId: string }>();
-  const dispatch = useDispatch();
-  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
-  const user = useSelector((state: RootState) => state.auth.user);
-  const { companyDirectories } = useSelector((state: RootState) => state.companyDirectories);
-  const records = useSelector((state: RootState) => state.directoryRecords.records);
+  const companyId = useSelector((state: RootState) => state.auth.user?.company_id);
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
-  const directory = companyDirectories.find(dir => dir.id === directoryId) as any;
-  console.log('====================================');
-  console.log({ records });
-  console.log('====================================');
-  useEffect(() => {
-    if (user && user.company_id) {
-      dispatch(fetchCompanyDirectories(user.company_id));
-    } else if (user && user.company && user.company.id) {
-      dispatch(fetchCompanyDirectories(user.company.id));
-    }
-  }, [user, dispatch]);
+  // Debug logs
+  console.log('DirectoryRecords Debug:', { directoryId, companyId });
 
-  useEffect(() => {
-    if (directoryId && companyDirectories.length > 0) {
+  const {
+    data: fullData,
+    isLoading: recordsLoading,
+    error: recordsError,
+  } = useDirectoryRecords(directoryId || '', companyId || '') as unknown as { data: FullDataResponse; isLoading: boolean; error: unknown };
 
+  // Ensure fields always have relation_id as string | null
+  const directoryFields: DirectoryField[] = (fullData?.fields || []).map((f) => ({
+    ...f,
+    relation_id: f.relation_id === undefined ? null : f.relation_id,
+  }));
 
-      dispatch(fetchDirectoryRecords({ companyDirectoryId: directory.company_directory_id }));
-      dispatch(fetchDirectoryFieldsStart(directory.id));
-    } else {
-      console.log('DirectoryRecords - No matching directory found for ID:', directoryId);
-    }
-  }, [directoryId, companyDirectories, dispatch]);
+  const records = fullData?.directoryRecords || [];
 
-  console.log('====================================');
-  console.log({ companyDirectories, directory });
-  console.log('====================================');
-  // Note: Added type assertion 'as any' to handle company_directory_id which might not be in the type definition.
+  // Get the correct component to render
+  const metadata = (fullData?.directory?.metadata || {}) as Record<string, unknown>;
+  const componentName = metadata?.componentName as string | undefined;
+  const DirectoryComponent = getDirectoryPageComponent(componentName);
+
+  if (recordsLoading) return <div>Loading directories...</div>;
+  if (recordsError) return <div>Error loading directories: {String(recordsError)}</div>;
+  if (!fullData?.directory) return <div>Directory not found.</div>;
+  if (!fullData?.companyDirectory) return <div>Company Directory mapping not found.</div>;
+
+  if (componentName) {
+    return (
+      <Suspense fallback={<div>Loading...</div>}>
+        <DirectoryComponent />
+      </Suspense>
+    );
+  }
 
   return (
-    <Box sx={{ p: 4, width: '100%' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, width: '100%' }}>
-        <Typography variant="h4" fontWeight={700}>
-          {directory ? directory.name : t('directories.records.title')}
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Icon icon="ph:plus" />}
-          onClick={() => setIsAddDrawerOpen(true)}
-          sx={{
-            borderRadius: 999,
-            textTransform: 'none',
-            bgcolor: '#3b82f6',
-            '&:hover': {
-              bgcolor: '#2563eb',
-            },
-          }}
-        >
-          {t('directories.records.addNew')}
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button variant="contained" color="primary" onClick={() => setDrawerOpen(true)}>
+          + Create
         </Button>
       </Box>
-
-      <DirectoryRecordsTable companyDirectoryId={(directory as any)?.company_directory_id} />
-
+      <DirectoryRecordsTable
+        records={records}
+        loading={recordsLoading}
+        error={recordsError}
+        fields={directoryFields}
+      />
       <AddDirectoryRecordDrawer
-        open={isAddDrawerOpen}
-        onClose={() => setIsAddDrawerOpen(false)}
-        companyDirectoryId={(directory as any)?.company_directory_id}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        companyDirectoryId={fullData?.companyDirectory?.id ? String(fullData.companyDirectory.id) : undefined}
         directoryId={directoryId}
       />
     </Box>

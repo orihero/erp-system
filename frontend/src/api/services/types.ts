@@ -26,11 +26,24 @@ export interface Permission {
   constraint_data?: unknown;
 }
 
-export interface NavigationItem {
-  label: string;
-  path: string;
-  icon?: string;
-  children?: NavigationItem[];
+export interface Directory {
+  id: string;
+  name: string;
+  icon_name: string;
+  directory_type: 'Module' | 'Company' | 'System';
+  created_at: string;
+  updated_at: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface NavigationModule extends Module {
+  directories: Directory[];
+}
+
+export interface NavigationResponse {
+  modules: NavigationModule[];
+  companyDirectories: Directory[];
+  systemDirectories: Directory[];
 }
 
 export interface User {
@@ -45,5 +58,4 @@ export interface User {
     id: string;
     name: string;
   };
-  navigation?: NavigationItem[];
 } 
