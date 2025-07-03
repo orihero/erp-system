@@ -4,10 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../store/hooks';
 import { logout } from '../store/slices/authSlice';
 import { authService } from '../api/services/auth.service';
+import { useTranslation } from 'react-i18next';
 
 const UnauthorizedPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     // Clear authentication state
@@ -30,13 +32,13 @@ const UnauthorizedPage: React.FC = () => {
       }}
     >
       <Typography variant="h1" component="h1" gutterBottom>
-        403
+        {t('unauthorized.403', '403')}
       </Typography>
       <Typography variant="h4" component="h2" gutterBottom>
-        Unauthorized Access
+        {t('unauthorized.title', 'Unauthorized Access')}
       </Typography>
       <Typography variant="body1" color="text.secondary" paragraph>
-        You don't have permission to access this page.
+        {t('unauthorized.permission', "You don't have permission to access this page.")}
       </Typography>
       <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
         <Button
@@ -44,14 +46,14 @@ const UnauthorizedPage: React.FC = () => {
           color="primary"
           onClick={() => navigate('/')}
         >
-          Return to Home
+          {t('unauthorized.returnHome', 'Return to Home')}
         </Button>
         <Button
           variant="outlined"
           color="error"
           onClick={handleLogout}
         >
-          Logout
+          {t('unauthorized.logout', 'Logout')}
         </Button>
       </Stack>
     </Box>

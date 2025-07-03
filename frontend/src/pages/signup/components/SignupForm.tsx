@@ -94,7 +94,7 @@ const SignupForm: React.FC = () => {
       <input
         type="email"
           {...register('email')}
-        placeholder="mail@website.com"
+        placeholder={t('signup.emailPlaceholder', 'mail@website.com')}
           className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.email ? 'border-red-500' : 'border-gray-200'
           }`}
@@ -122,7 +122,7 @@ const SignupForm: React.FC = () => {
             onClick={() => setShowPassword(!showPassword)}
           tabIndex={-1}
         >
-            {showPassword ? 'Hide' : 'Show'}
+            {showPassword ? t('signup.hide', 'Hide') : t('signup.show', 'Show')}
         </button>
         </div>
         {errors.password && (

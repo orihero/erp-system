@@ -24,6 +24,8 @@ import UserRoles from './pages/roles';
 import type { NavigationItem } from './api/services/types';
 import Settings from './pages/Settings';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Snackbar } from './components/Snackbar';
+import FullScreenSpreadsheet from './pages/reports/FullScreenSpreadsheet';
 
 type SubItemWithModule = { directory_type: string; name: string; path?: string };
 
@@ -92,6 +94,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/signup" element={!isAuthenticated ? <Signup /> : <Navigate to="/" />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
+        <Route path="/reports/create/fullscreen" element={<FullScreenSpreadsheet />} />
 
         {/* Protected Routes */}
         <Route element={
@@ -228,6 +231,7 @@ const App: React.FC = () => {
         <ThemeProvider theme={theme}>
           <Router>
             <AppRoutes />
+            <Snackbar />
           </Router>
         </ThemeProvider>
       </QueryClientProvider>

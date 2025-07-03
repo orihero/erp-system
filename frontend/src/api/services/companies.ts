@@ -1,4 +1,5 @@
 import api from '../config';
+import { ReportTemplate } from '../../types/reportTemplate';
 
 export interface Company {
   id: string;
@@ -28,6 +29,11 @@ export interface CompaniesResponse {
   };
 }
 
+export interface CompanyTreeNode extends Company {
+  children: CompanyTreeNode[];
+  parent_company_id?: string | null;
+}
+
 export const companiesApi = {
   getCompanies: (params?: { page?: number; limit?: number }) =>
     api.get<CompaniesResponse>('/api/admin/companies', { params }),
@@ -36,4 +42,11 @@ export const companiesApi = {
   deleteCompany: (id: string) => api.delete(`/api/admin/companies/${id}`),
   getCompanyEmployees: (companyId: string, params?: { page?: number; limit?: number; search?: string }) =>
     api.get(`/api/companies/${companyId}/employees`, { params }),
+  getCompanyReports: (companyId: string) =>
+    api.get<ReportTemplate[]>(`/api/report-templates?companyId=${companyId}`),
+  bindReportToCompany: (reportId: string, data: { companyId: string; [key: string]: unknown }) =>
+    api.post(`/api/report-templates/${reportId}/bindings`, { ...data, bindingType: 'company' }),
+  unbindReportFromCompany: (reportId: string, bindingId: string) =>
+    api.delete(`/api/report-templates/${reportId}/bindings/${bindingId}`),
+  getCompanyHierarchy: () => api.get<CompanyTreeNode[]>("/api/companies/hierarchy"),
 }; 

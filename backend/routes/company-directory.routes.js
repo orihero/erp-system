@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const companyDirectoryController = require('../controllers/company-directory.controller');
+const companyDirectoryController = require('../controllers/companyDirectory.controller');
 const { authenticateUser, checkRole } = require('../middleware/auth');
 const { authorize } = require('../middleware/permissionMiddleware');
 const { PERMISSION_TYPES, USER_ROLES, ENTITY_TYPES } = require('../utils/constants');

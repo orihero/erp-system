@@ -174,6 +174,21 @@ class CompanyFactory {
       }
     };
   }
+
+  static async getHierarchy() {
+    const companies = await Company.findAll({ raw: true });
+    const companyMap = {};
+    companies.forEach(c => { companyMap[c.id] = { ...c, children: [] }; });
+    const roots = [];
+    companies.forEach(c => {
+      if (c.parent_company_id && companyMap[c.parent_company_id]) {
+        companyMap[c.parent_company_id].children.push(companyMap[c.id]);
+      } else {
+        roots.push(companyMap[c.id]);
+      }
+    });
+    return roots;
+  }
 }
 
 module.exports = CompanyFactory; 

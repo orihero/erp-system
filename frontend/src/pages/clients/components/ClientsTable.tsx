@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { fetchUsersStart, deleteUserStart, editUserStart, User } from '../../../store/slices/usersSlice';
 import EditUserDrawer from './EditUserDrawer';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { useTranslation } from 'react-i18next';
 
 interface ClientsTableProps {
   setDrawerOpen: (open: boolean) => void;
@@ -19,6 +20,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
   const { check } = usePermissions();
+  const { t } = useTranslation();
 
   // Check permissions
   const canEditClients = check({ requiredType: 'edit', entityType: 'user' });
@@ -70,7 +72,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
     setEditModalOpen(true);
   };
 
-  const handleEditSave = (id: string, data: Partial<User>) => {
+  const handleEditSave = () => {
     dispatch(editUserStart());
     setEditModalOpen(false);
     setUserToEdit(null);
@@ -95,7 +97,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
         <Paper component="form" sx={{ display: 'flex', alignItems: 'center', borderRadius: 999, boxShadow: 'none', bgcolor: '#fff', py: 0.5, minWidth: 200, pl: 2, pr: .5 }}>
           <InputBase
             sx={{ ml: 1, flex: 1, fontSize: 16 }}
-            placeholder="Search clients..."
+            placeholder={t('clients.search', 'Search clients...')}
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
             endAdornment={<IconButton size="medium" sx={{ color: '#222', bgcolor: 'transparent' }}><Icon icon="ep:search" width={24} height={24} /></IconButton>}
@@ -107,7 +109,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
           sx={{ borderRadius: 999, textTransform: 'none', fontWeight: 500, fontSize: 16, bgcolor: '#3b82f6', color: '#fff', pl: 3, height: 48, '&:hover': { bgcolor: '#2563eb' }, pr: 3 }}
           onClick={() => setDrawerOpen(true)}
         >
-          Add client
+          {t('clients.addClient', 'Add client')}
         </Button>
       </Box>
       <TableContainer component={Paper} sx={{ borderRadius: 4, boxShadow: '0 4px 24px 0 rgba(0,0,0,0.04)' }}>
@@ -115,13 +117,13 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
           <TableHead>
             <TableRow>
               <TableCell></TableCell>
-              <TableCell>First Name</TableCell>
-              <TableCell>Last Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Role</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Company</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell>{t('clients.firstName', 'First Name')}</TableCell>
+              <TableCell>{t('clients.lastName', 'Last Name')}</TableCell>
+              <TableCell>{t('clients.email', 'Email')}</TableCell>
+              <TableCell>{t('clients.role', 'Role')}</TableCell>
+              <TableCell>{t('clients.status', 'Status')}</TableCell>
+              <TableCell>{t('clients.company', 'Company')}</TableCell>
+              <TableCell align="right">{t('clients.actions', 'Actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -182,7 +184,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
             )) : (
               <TableRow>
                 <TableCell colSpan={8} align="center" style={{ color: '#888', fontSize: 20, minHeight: 300 }}>
-                  No clients found.
+                  {t('clients.noClients', 'No clients found.')}
                 </TableCell>
               </TableRow>
             )}
@@ -204,14 +206,14 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ setDrawerOpen }) => {
       </TableContainer>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
-        <DialogTitle>Delete User</DialogTitle>
+        <DialogTitle>{t('clients.deleteUser', 'Delete User')}</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete this user?</Typography>
+          <Typography>{t('clients.deleteConfirm', 'Are you sure you want to delete this user?')}</Typography>
           <Typography sx={{ fontWeight: 600, mt: 1 }}>{userToDelete?.firstname} {userToDelete?.lastname} ({userToDelete?.email})</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDeleteCancel}>Cancel</Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">Delete</Button>
+          <Button onClick={handleDeleteCancel}>{t('common.cancel', 'Cancel')}</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">{t('common.delete', 'Delete')}</Button>
         </DialogActions>
       </Dialog>
       {/* Edit User Drawer */}

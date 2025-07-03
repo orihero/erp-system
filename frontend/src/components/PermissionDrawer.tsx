@@ -3,6 +3,7 @@ import { Drawer, Box, Typography, TextField, MenuItem, Button } from '@mui/mater
 import type { Module } from '@/api/services/types';
 import type { Directory } from '@/api/services/directories';
 import type { Permission } from '@/api/services/permissions';
+import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback';
 
 interface PermissionForm {
   name: string;
@@ -25,13 +26,8 @@ interface PermissionDrawerProps {
   mode: 'add' | 'edit';
 }
 
-const typeOptions = [
-  { value: 'read', label: 'Read' },
-  { value: 'write', label: 'Write' },
-  { value: 'manage', label: 'Manage (read+write)' },
-];
-
 const PermissionDrawer: React.FC<PermissionDrawerProps> = ({ open, onClose, onSubmit, initialData, modules, directories, mode }) => {
+  const { tWithFallback } = useTranslationWithFallback();
   const [form, setForm] = useState<PermissionForm>({
     name: '',
     description: '',
@@ -88,6 +84,12 @@ const PermissionDrawer: React.FC<PermissionDrawerProps> = ({ open, onClose, onSu
     onSubmit(payload);
   };
 
+  const typeOptions = [
+    { value: 'read', label: tWithFallback('permission.type.read', 'Read') },
+    { value: 'write', label: tWithFallback('permission.type.write', 'Write') },
+    { value: 'manage', label: tWithFallback('permission.type.manage', 'Manage (read+write)') },
+  ];
+
   return (
     <Drawer
       anchor="right"
@@ -96,13 +98,13 @@ const PermissionDrawer: React.FC<PermissionDrawerProps> = ({ open, onClose, onSu
       PaperProps={{ sx: { width: 400, p: 3 } }}
     >
       <Box sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>{mode === 'edit' ? 'Edit Permission' : 'Create Permission'}</Typography>
+        <Typography variant="h6" sx={{ mb: 2 }}>{mode === 'edit' ? tWithFallback('permission.edit', 'Edit Permission') : tWithFallback('permission.create', 'Create Permission')}</Typography>
         <form onSubmit={handleSubmit}>
-          <TextField label="Name" name="name" value={form.name} onChange={handleChange} required fullWidth sx={{ mb: 2 }} />
-          <TextField label="Description" name="description" value={form.description} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+          <TextField label={tWithFallback('permission.name', 'Name')} name="name" value={form.name} onChange={handleChange} required fullWidth sx={{ mb: 2 }} />
+          <TextField label={tWithFallback('permission.description', 'Description')} name="description" value={form.description} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
           <TextField
             select
-            label="Type"
+            label={tWithFallback('permission.type', 'Type')}
             name="type"
             value={form.type}
             onChange={handleChange}
@@ -116,34 +118,34 @@ const PermissionDrawer: React.FC<PermissionDrawerProps> = ({ open, onClose, onSu
           </TextField>
           <TextField
             select
-            label="Module"
+            label={tWithFallback('permission.module', 'Module')}
             name="module_id"
             value={form.module_id}
             onChange={handleChange}
             fullWidth
             sx={{ mb: 2 }}
           >
-            <MenuItem value="">None</MenuItem>
+            <MenuItem value="">{tWithFallback('common.none', 'None')}</MenuItem>
             {modules.map((mod) => (
               <MenuItem key={mod.id} value={mod.id}>{mod.name}</MenuItem>
             ))}
           </TextField>
           <TextField
             select
-            label="Directory"
+            label={tWithFallback('permission.directory', 'Directory')}
             name="directory_id"
             value={form.directory_id}
             onChange={handleChange}
             fullWidth
             sx={{ mb: 2 }}
           >
-            <MenuItem value="">None</MenuItem>
+            <MenuItem value="">{tWithFallback('common.none', 'None')}</MenuItem>
             {directories.map((dir) => (
               <MenuItem key={dir.id} value={dir.id}>{dir.name}</MenuItem>
             ))}
           </TextField>
           <TextField
-            label="Effective From"
+            label={tWithFallback('permission.effectiveFrom', 'Effective From')}
             name="effective_from"
             type="date"
             value={form.effective_from}
@@ -153,7 +155,7 @@ const PermissionDrawer: React.FC<PermissionDrawerProps> = ({ open, onClose, onSu
             InputLabelProps={{ shrink: true }}
           />
           <TextField
-            label="Effective Until"
+            label={tWithFallback('permission.effectiveUntil', 'Effective Until')}
             name="effective_until"
             type="date"
             value={form.effective_until}
@@ -163,7 +165,7 @@ const PermissionDrawer: React.FC<PermissionDrawerProps> = ({ open, onClose, onSu
             InputLabelProps={{ shrink: true }}
           />
           <TextField
-            label="Constraint Data (JSON)"
+            label={tWithFallback('permission.constraintData', 'Constraint Data (JSON)')}
             name="constraint_data"
             value={form.constraint_data}
             onChange={handleChange}
@@ -173,8 +175,8 @@ const PermissionDrawer: React.FC<PermissionDrawerProps> = ({ open, onClose, onSu
             sx={{ mb: 2 }}
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button type="submit" variant="contained">{mode === 'edit' ? 'Save' : 'Create'}</Button>
+            <Button onClick={onClose}>{tWithFallback('common.cancel', 'Cancel')}</Button>
+            <Button type="submit" variant="contained">{mode === 'edit' ? tWithFallback('common.save', 'Save') : tWithFallback('common.create', 'Create')}</Button>
           </Box>
         </form>
       </Box>

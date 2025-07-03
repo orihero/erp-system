@@ -10,6 +10,7 @@ import { modulesApi } from '@/api/services/modules';
 import { directoriesService } from '@/api/services/directories.service';
 import type { Module } from '@/api/services/types';
 import type { Directory } from '@/api/services/directories';
+import { useTranslation } from 'react-i18next';
 
 const UserRoles: React.FC = () => {
   const dispatch = useDispatch();
@@ -22,6 +23,7 @@ const UserRoles: React.FC = () => {
   const [directories, setDirectories] = useState<Directory[]>([]);
   const [roleSearch, setRoleSearch] = useState('');
   const [permissionSearch, setPermissionSearch] = useState('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     dispatch(fetchRolesStart());
@@ -46,17 +48,17 @@ const UserRoles: React.FC = () => {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" fontWeight={700} sx={{ mb: 3 }}>
-        User Roles
+        {t('roles.title', 'User Roles')}
       </Typography>
       <Paper sx={{ p: 4, borderRadius: 3 }}>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} indicatorColor="primary" textColor="primary" sx={{ mb: 3 }}>
-          <Tab label="Roles" />
-          <Tab label="Permissions" />
+          <Tab label={t('roles.rolesTab', 'Roles')} />
+          <Tab label={t('roles.permissionsTab', 'Permissions')} />
         </Tabs>
         {tab === 0 && (
           <>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">List of Roles</Typography>
+              <Typography variant="h6">{t('roles.listOfRoles', 'List of Roles')}</Typography>
               <Button
                 variant="contained"
                 color="primary"
@@ -64,12 +66,12 @@ const UserRoles: React.FC = () => {
                 onClick={handleCreateRole}
                 sx={{ borderRadius: 999, textTransform: 'none' }}
               >
-                Create Role
+                {t('roles.createRole', 'Create Role')}
               </Button>
             </Box>
             <Box sx={{ mb: 2 }}>
               <TextField
-                placeholder="Search roles..."
+                placeholder={t('roles.searchRoles', 'Search roles...')}
                 value={roleSearch}
                 onChange={e => setRoleSearch(e.target.value)}
                 size="small"
@@ -96,7 +98,7 @@ const UserRoles: React.FC = () => {
         {tab === 1 && (
           <>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Permissions</Typography>
+              <Typography variant="h6">{t('roles.permissionsTab', 'Permissions')}</Typography>
               <Button
                 variant="contained"
                 color="primary"
@@ -104,12 +106,12 @@ const UserRoles: React.FC = () => {
                 onClick={() => setDrawerOpen(true)}
                 sx={{ borderRadius: 999, textTransform: 'none' }}
               >
-                Add Permission
+                {t('roles.addPermission', 'Add Permission')}
               </Button>
             </Box>
             <Box sx={{ mb: 2 }}>
               <TextField
-                placeholder="Search permissions..."
+                placeholder={t('roles.searchPermissions', 'Search permissions...')}
                 value={permissionSearch}
                 onChange={e => setPermissionSearch(e.target.value)}
                 size="small"
@@ -119,12 +121,12 @@ const UserRoles: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Module</TableCell>
-                  <TableCell>Directory</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell>{t('roles.name', 'Name')}</TableCell>
+                  <TableCell>{t('roles.description', 'Description')}</TableCell>
+                  <TableCell>{t('roles.type', 'Type')}</TableCell>
+                  <TableCell>{t('roles.module', 'Module')}</TableCell>
+                  <TableCell>{t('roles.directory', 'Directory')}</TableCell>
+                  <TableCell align="right">{t('common.actions', 'Actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

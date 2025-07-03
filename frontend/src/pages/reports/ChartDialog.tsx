@@ -25,6 +25,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Line, Bar, Pie } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 
 // Register ChartJS components
 ChartJS.register(
@@ -42,9 +43,9 @@ ChartJS.register(
 interface ChartDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (chartData: any) => void;
+  onSave: (chartData: unknown) => void;
   selectedRange: string;
-  spreadsheetData: any;
+  spreadsheetData: unknown;
 }
 
 const ChartDialog: React.FC<ChartDialogProps> = ({
@@ -54,9 +55,10 @@ const ChartDialog: React.FC<ChartDialogProps> = ({
   selectedRange,
   spreadsheetData,
 }) => {
+  const { t } = useTranslation();
   const [chartType, setChartType] = useState<'line' | 'bar' | 'pie'>('line');
   const [chartTitle, setChartTitle] = useState('');
-  const [chartData, setChartData] = useState<any>(null);
+  const [chartData, setChartData] = useState<unknown>(null);
 
   useEffect(() => {
     console.log('ChartDialog mounted/updated:', {
@@ -229,24 +231,24 @@ const ChartDialog: React.FC<ChartDialogProps> = ({
       maxWidth="md"
       fullWidth
     >
-      <DialogTitle>Create Chart</DialogTitle>
+      <DialogTitle>{t('reports.chartDialog.createChart', 'Create Chart')}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
           <FormControl fullWidth>
-            <InputLabel>Chart Type</InputLabel>
+            <InputLabel>{t('reports.chartDialog.chartType', 'Chart Type')}</InputLabel>
             <Select
               value={chartType}
-              label="Chart Type"
+              label={t('reports.chartDialog.chartType', 'Chart Type')}
               onChange={(e) => setChartType(e.target.value as 'line' | 'bar' | 'pie')}
             >
-              <MenuItem value="line">Line Chart</MenuItem>
-              <MenuItem value="bar">Bar Chart</MenuItem>
-              <MenuItem value="pie">Pie Chart</MenuItem>
+              <MenuItem value="line">{t('reports.chartDialog.lineChart', 'Line Chart')}</MenuItem>
+              <MenuItem value="bar">{t('reports.chartDialog.barChart', 'Bar Chart')}</MenuItem>
+              <MenuItem value="pie">{t('reports.chartDialog.pieChart', 'Pie Chart')}</MenuItem>
             </Select>
           </FormControl>
 
           <TextField
-            label="Chart Title"
+            label={t('reports.chartDialog.chartTitle', 'Chart Title')}
             value={chartTitle}
             onChange={(e) => setChartTitle(e.target.value)}
             fullWidth

@@ -1,4 +1,5 @@
 import api from "@/api/config";
+import { ReportTemplate } from '../../types/reportTemplate';
 
 export interface Module {
   id: string;
@@ -21,4 +22,10 @@ export const modulesApi = {
   update: (id: string, data: Partial<Module>) =>
     api.put<Module>(`/api/modules/${id}`, data),
   delete: (id: string) => api.delete(`/api/modules/${id}`),
+  getModuleReports: (moduleId: string) =>
+    api.get<ReportTemplate[]>(`/api/report-templates?moduleId=${moduleId}`),
+  bindReportToModule: (reportId: string, data: { moduleId: string; [key: string]: unknown }) =>
+    api.post(`/api/report-templates/${reportId}/bindings`, { ...data, bindingType: 'module' }),
+  unbindReportFromModule: (reportId: string, bindingId: string) =>
+    api.delete(`/api/report-templates/${reportId}/bindings/${bindingId}`),
 };

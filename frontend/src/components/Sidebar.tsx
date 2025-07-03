@@ -5,16 +5,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/store';
 import type { Directory } from '@/api/services/types';
+import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback';
 
 // Static sidebar config for super_admin
 const superAdminSidebar = [
-  { label: 'Dashboard', path: '/', icon: 'si:dashboard-line' },
-  { label: 'Companies', path: '/companies', icon: 'solar:shop-linear' },
-  { label: 'Directories', path: '/directories', icon: 'solar:folder-outline' },
-  { label: 'Clients', path: '/clients', icon: 'solar:users-group-rounded-linear' },
-  { label: 'User Roles', path: '/user-roles', icon: 'solar:user-id-linear' },
-  { label: 'Modules', path: '/modules', icon: 'streamline-flex:module-puzzle-2-remix' },
-  { label: 'Reports', path: '/reports', icon: 'streamline-plump:file-report' },
+  { label: 'sidebar.dashboard', defaultLabel: 'Dashboard', path: '/', icon: 'si:dashboard-line' },
+  { label: 'sidebar.companies', defaultLabel: 'Companies', path: '/companies', icon: 'solar:shop-linear' },
+  { label: 'sidebar.directories', defaultLabel: 'Directories', path: '/directories', icon: 'solar:folder-outline' },
+  { label: 'sidebar.clients', defaultLabel: 'Clients', path: '/clients', icon: 'solar:users-group-rounded-linear' },
+  { label: 'sidebar.userRoles', defaultLabel: 'User Roles', path: '/user-roles', icon: 'solar:user-id-linear' },
+  { label: 'sidebar.modules', defaultLabel: 'Modules', path: '/modules', icon: 'streamline-flex:module-puzzle-2-remix' },
+  { label: 'sidebar.reports', defaultLabel: 'Reports', path: '/reports', icon: 'streamline-plump:file-report' },
 ];
 
 const Sidebar: React.FC = () => {
@@ -24,13 +25,14 @@ const Sidebar: React.FC = () => {
   const modules = useSelector((state: RootState) => state.navigation.modules);
   const companyDirectories = useSelector((state: RootState) => state.navigation.companyDirectories);
   const systemDirectories = useSelector((state: RootState) => state.navigation.systemDirectories);
+  const { tWithFallback } = useTranslationWithFallback();
 
   // Determine if user is super_admin with no company
   const isSuperAdmin = user && Array.isArray(user.roles) && user.roles.some((role) => role.name === 'super_admin') && (user.company_id === null || user.company_id === undefined);
 
   // Settings item for the bottom
   const settingsItem = {
-    label: 'Settings',
+    label: tWithFallback('sidebar.settings', 'Settings'),
     path: '/settings',
     icon: 'solar:settings-bold',
   };
@@ -125,7 +127,7 @@ const Sidebar: React.FC = () => {
                   </ListItemIcon>
                 )}
                 <ListItemText
-                  primary={item.label}
+                  primary={tWithFallback(item.label, item.defaultLabel)}
                   primaryTypographyProps={{ fontSize: 15, fontWeight: 500, color: '#1a1e1c' }}
                 />
               </ListItemButton>
@@ -146,7 +148,7 @@ const Sidebar: React.FC = () => {
                       <Icon icon="solar:folder-outline" width={22} height={22} />
                     </ListItemIcon>
                     <ListItemText
-                      primary="Directories"
+                      primary={tWithFallback('sidebar.directories', 'Directories')}
                       primaryTypographyProps={{ fontSize: 15, fontWeight: 500, color: '#1a1e1c' }}
                     />
                     <Icon icon={directoriesExpanded ? 'solar:arrow-up-linear' : 'solar:arrow-down-linear'} width={16} height={16} />
@@ -162,7 +164,7 @@ const Sidebar: React.FC = () => {
               {systemDirectories && systemDirectories.length > 0 && (
                 <>
                   <Divider sx={{ my: 2 }} />
-                  <ListSubheader sx={{ pl: 2, fontWeight: 600, color: '#888' }}>System Directories</ListSubheader>
+                  <ListSubheader sx={{ pl: 2, fontWeight: 600, color: '#888' }}>{tWithFallback('sidebar.systemDirectories', 'System Directories')}</ListSubheader>
                   {renderDirectoryList(systemDirectories)}
                 </>
               )}

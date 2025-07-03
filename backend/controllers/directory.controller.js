@@ -5,11 +5,12 @@ const directoryController = {
   // Create a new directory
   create: async (req, res) => {
     try {
-      const { name, icon_name, fields } = req.body;
+      const { name, icon_name, directory_type, fields } = req.body;
       
       const directory = await Directory.create({
         name,
-        icon_name
+        icon_name,
+        directory_type
       });
 
       if (fields && fields.length > 0) {

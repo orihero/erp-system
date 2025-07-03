@@ -7,7 +7,8 @@ module.exports = (sequelize, DataTypes) => {
       // Define associations here
       DirectoryField.belongsTo(models.Directory, {
         foreignKey: 'directory_id',
-        as: 'directory'
+        as: 'directory',
+        onDelete: 'CASCADE'
       });
       DirectoryField.belongsTo(models.Directory, {
         foreignKey: 'relation_id',

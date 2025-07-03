@@ -66,7 +66,7 @@ const AddDirectoryRecordDrawer: React.FC<{ open: boolean; onClose: () => void; c
                 <Divider sx={{ mb: 3 }} />
                 <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
                     {loading ? (
-                        <Typography>Loading fields...</Typography>
+                        <Typography>{t('directories.records.loadingFields', 'Loading fields...')}</Typography>
                     ) : (
                         directoryFields.map((field) => (
                             <TextField

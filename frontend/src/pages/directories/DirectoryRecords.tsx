@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import AddDirectoryRecordDrawer from './components/AddDirectoryRecordDrawer';
 import { Button, Box } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 // DirectoryField type compatible with both backend and frontend
 interface DirectoryField extends Omit<APIDirectoryField, 'relation_id'> {
@@ -25,6 +26,7 @@ const DirectoryRecords: React.FC = () => {
   const { directoryId } = useParams<{ directoryId: string }>();
   const companyId = useSelector((state: RootState) => state.auth.user?.company_id);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const { t } = useTranslation();
 
   // Debug logs
   console.log('DirectoryRecords Debug:', { directoryId, companyId });
@@ -48,10 +50,10 @@ const DirectoryRecords: React.FC = () => {
   const componentName = metadata?.componentName as string | undefined;
   const DirectoryComponent = getDirectoryPageComponent(componentName);
 
-  if (recordsLoading) return <div>Loading directories...</div>;
-  if (recordsError) return <div>Error loading directories: {String(recordsError)}</div>;
-  if (!fullData?.directory) return <div>Directory not found.</div>;
-  if (!fullData?.companyDirectory) return <div>Company Directory mapping not found.</div>;
+  if (recordsLoading) return <div>{t('directories.records.loadingDirectories', 'Loading directories...')}</div>;
+  if (recordsError) return <div>{t('directories.records.errorLoadingDirectories', 'Error loading directories:')} {String(recordsError)}</div>;
+  if (!fullData?.directory) return <div>{t('directories.records.notFound', 'Directory not found.')}</div>;
+  if (!fullData?.companyDirectory) return <div>{t('directories.records.companyDirectoryNotFound', 'Company Directory mapping not found.')}</div>;
 
   if (componentName) {
     return (
@@ -65,7 +67,7 @@ const DirectoryRecords: React.FC = () => {
     <Box sx={{ width: '100%' }}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <Button variant="contained" color="primary" onClick={() => setDrawerOpen(true)}>
-          + Create
+          {t('directories.records.create', '+ Create')}
         </Button>
       </Box>
       <DirectoryRecordsTable

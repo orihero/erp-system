@@ -6,10 +6,12 @@ import { fetchCompaniesStart, deleteCompanyStart, setCompaniesPage, setCompanies
 import EditCompanyDrawer from './EditCompanyDrawer';
 import type { Company } from '@/api/services/companies';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const CompaniesTable: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { companies, loading, error, page, limit, pagination } = useAppSelector(state => state.companies);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [companyToDelete, setCompanyToDelete] = useState<string | null>(null);
@@ -60,11 +62,11 @@ const CompaniesTable: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Employee Count</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell>{t('companies.name', 'Name')}</TableCell>
+              <TableCell>{t('companies.email', 'Email')}</TableCell>
+              <TableCell>{t('companies.employeeCount', 'Employee Count')}</TableCell>
+              <TableCell>{t('companies.status', 'Status')}</TableCell>
+              <TableCell align="right">{t('companies.actions', 'Actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -105,11 +107,11 @@ const CompaniesTable: React.FC = () => {
         </Table>
       </TableContainer>
       <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
-        <DialogTitle>Delete Company</DialogTitle>
-        <DialogContent>Are you sure you want to delete this company?</DialogContent>
+        <DialogTitle>{t('companies.deleteCompany', 'Delete Company')}</DialogTitle>
+        <DialogContent>{t('companies.deleteConfirm', 'Are you sure you want to delete this company?')}</DialogContent>
         <DialogActions>
-          <Button onClick={handleDeleteCancel}>Cancel</Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">Delete</Button>
+          <Button onClick={handleDeleteCancel}>{t('common.cancel', 'Cancel')}</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">{t('common.delete', 'Delete')}</Button>
         </DialogActions>
       </Dialog>
       <EditCompanyDrawer open={editDrawerOpen} onClose={handleEditDrawerClose} company={editCompany} />

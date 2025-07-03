@@ -27,12 +27,12 @@ import {
 } from '@/store/slices/permissionsSlice';
 import type { Permission as BasePermission } from '@/api/services/permissions';
 import Autocomplete from '@mui/material/Autocomplete';
-import MenuItem from '@mui/material/MenuItem';
 import { modulesApi } from '@/api/services/modules';
 import { directoriesService } from '@/api/services/directories.service';
 import type { Module } from '@/api/services/types';
 import type { Directory } from '@/api/services/directories';
 import PermissionDrawer from '@/components/PermissionDrawer';
+import { useTranslation } from 'react-i18next';
 
 interface RoleManagementDrawerProps {
   open: boolean;
@@ -56,6 +56,7 @@ const RoleManagementDrawer: React.FC<RoleManagementDrawerProps> = ({ open, onClo
   const [modules, setModules] = useState<Module[]>([]);
   const [directories, setDirectories] = useState<Directory[]>([]);
   const [autocompleteValue, setAutocompleteValue] = useState<Permission | undefined>(undefined);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (open) {
@@ -83,7 +84,7 @@ const RoleManagementDrawer: React.FC<RoleManagementDrawerProps> = ({ open, onClo
 
   const handleAddRole = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(createRoleStart(form));
+    dispatch(createRoleStart());
     setForm({ name: '', description: '' });
     onClose();
   };
@@ -134,7 +135,7 @@ const RoleManagementDrawer: React.FC<RoleManagementDrawerProps> = ({ open, onClo
     >
       <Box sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-          <Typography variant="h5" fontWeight={700}>Role Management</Typography>
+          <Typography variant="h5" fontWeight={700}>{t('roles.drawer.title', 'Role Management')}</Typography>
           <IconButton onClick={onClose}>
             <Icon icon="ph:x" width={28} />
           </IconButton>
@@ -149,7 +150,7 @@ const RoleManagementDrawer: React.FC<RoleManagementDrawerProps> = ({ open, onClo
             ) : (
               (() => {
                 const role = roles.find(r => r.id === roleId);
-                if (!role) return <Typography color="text.secondary">Role not found.</Typography>;
+                if (!role) return <Typography color="text.secondary">{t('roles.drawer.roleNotFound', 'Role not found.')}</Typography>;
                 return (
                   <Box>
                     <Typography variant="h6" sx={{ mb: 1 }}>{role.name}</Typography>
@@ -160,43 +161,42 @@ const RoleManagementDrawer: React.FC<RoleManagementDrawerProps> = ({ open, onClo
             )}
             {/* Permissions assignment with searchable dropdown */}
             <Box sx={{ mt: 4 }}>
-              <Typography variant="h6" sx={{ mb: 2 }}>Assign Permissions</Typography>
+              <Typography variant="h6" sx={{ mb: 2 }}>{t('roles.drawer.assignPermissions', 'Assign Permissions')}</Typography>
               <Autocomplete
                 value={autocompleteValue}
-                onChange={(_, newValue) => {
+                onChange={(_, newValue: Permission | { id: string; name: string } | null) => {
                   if (!newValue) return;
-                  if ((newValue as any).id === 'create') {
+                  if ('id' in newValue && newValue.id === 'create') {
                     openAddPermissionDrawer();
                     setAutocompleteValue(undefined);
-                  } else {
-                    handleAssignPermission((newValue as Permission).id);
+                  } else if ('id' in newValue) {
+                    handleAssignPermission(newValue.id);
                     setAutocompleteValue(undefined);
                   }
                 }}
                 options={permissions.filter(perm => !isPermissionAssigned(perm.id))}
                 getOptionLabel={option => (option as Permission).name}
-                filterOptions={(options, { inputValue }) =>
+                filterOptions={(options: (Permission | { id: string; name: string })[], { inputValue }) =>
                   [
                     ...options.filter(opt =>
-                      ((opt as Permission).name.toLowerCase().includes(inputValue.toLowerCase()) ||
-                      ((opt as Permission).description && (opt as Permission).description!.toLowerCase().includes(inputValue.toLowerCase())))
+                      'name' in opt && opt.name.toLowerCase().includes(inputValue.toLowerCase()) ||
+                      ('description' in opt && typeof opt.description === 'string' && opt.description.toLowerCase().includes(inputValue.toLowerCase()))
                     ).slice(0, 5),
-                    { id: 'create', name: 'Create new permission' }
+                    { id: 'create', name: t('roles.drawer.createNewPermission', 'Create new permission') }
                   ]
                 }
                 renderInput={params => (
-                  <TextField {...params} label="Search permissions..." variant="outlined" size="small" />
+                  <TextField {...params} label={t('roles.drawer.searchPermissions', 'Search permissions...')} variant="outlined" size="small" />
                 )}
-                renderOption={(props, option) => {
-                  const opt = option as Permission | { id: string; name: string };
-                  if (opt.id === 'create') {
+                renderOption={(props, option: Permission | { id: string; name: string }) => {
+                  if ('id' in option && option.id === 'create') {
                     return (
                       <li {...props} key="create-permission" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6', fontWeight: 500 }}>
-                        <Icon icon="ph:plus" style={{ marginRight: 8 }} /> Create new permission
+                        <Icon icon="ph:plus" style={{ marginRight: 8 }} /> {t('roles.drawer.createNewPermission', 'Create new permission')}
                       </li>
                     );
                   }
-                  const perm = opt as Permission;
+                  const perm = option as Permission;
                   return (
                     <li {...props} key={perm.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', padding: 8 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
@@ -207,8 +207,12 @@ const RoleManagementDrawer: React.FC<RoleManagementDrawerProps> = ({ open, onClo
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
                         {perm.module_id && <Typography variant="caption" color="text.secondary">Module: {getModuleName(perm.module_id)}</Typography>}
                         {perm.directory_id && <Typography variant="caption" color="text.secondary">Directory: {getDirectoryName(perm.directory_id)}</Typography>}
-                        {perm.effective_from && <Typography variant="caption" color="text.secondary">From: {perm.effective_from}</Typography>}
-                        {perm.effective_until && <Typography variant="caption" color="text.secondary">Until: {perm.effective_until}</Typography>}
+                        {typeof (perm as any).effective_from === 'string' && (perm as any).effective_from && (
+                          <Typography variant="caption" color="text.secondary">From: {(perm as any).effective_from}</Typography>
+                        )}
+                        {typeof (perm as any).effective_until === 'string' && (perm as any).effective_until && (
+                          <Typography variant="caption" color="text.secondary">Until: {(perm as any).effective_until}</Typography>
+                        )}
                       </Box>
                     </li>
                   );
@@ -220,7 +224,7 @@ const RoleManagementDrawer: React.FC<RoleManagementDrawerProps> = ({ open, onClo
               />
               {/* List of currently assigned permissions */}
               <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>Assigned Permissions</Typography>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>{t('roles.drawer.assignedPermissions', 'Assigned Permissions')}</Typography>
                 {permissionsLoading ? (
                   <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}><CircularProgress size={20} /></Box>
                 ) : (
@@ -241,8 +245,12 @@ const RoleManagementDrawer: React.FC<RoleManagementDrawerProps> = ({ open, onClo
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
                             {perm.module_id && <Typography variant="caption" color="text.secondary">Module: {getModuleName(perm.module_id)}</Typography>}
                             {perm.directory_id && <Typography variant="caption" color="text.secondary">Directory: {getDirectoryName(perm.directory_id)}</Typography>}
-                            {perm.effective_from && <Typography variant="caption" color="text.secondary">From: {perm.effective_from}</Typography>}
-                            {perm.effective_until && <Typography variant="caption" color="text.secondary">Until: {perm.effective_until}</Typography>}
+                            {typeof (perm as any).effective_from === 'string' && (perm as any).effective_from && (
+                              <Typography variant="caption" color="text.secondary">From: {(perm as any).effective_from}</Typography>
+                            )}
+                            {typeof (perm as any).effective_until === 'string' && (perm as any).effective_until && (
+                              <Typography variant="caption" color="text.secondary">Until: {(perm as any).effective_until}</Typography>
+                            )}
                           </Box>
                         </Box>
                       </ListItem>
@@ -273,12 +281,12 @@ const RoleManagementDrawer: React.FC<RoleManagementDrawerProps> = ({ open, onClo
         ) : (
           // Render the create role form directly in the drawer
           <Box component="form" onSubmit={handleAddRole} sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>Create New Role</Typography>
-            <TextField label="Role Name" name="name" value={form.name} onChange={handleFormChange} required fullWidth />
-            <TextField label="Description" name="description" value={form.description} onChange={handleFormChange} fullWidth />
+            <Typography variant="h6" sx={{ mb: 2 }}>{t('roles.drawer.createNewRole', 'Create New Role')}</Typography>
+            <TextField label={t('roles.drawer.roleName', 'Role Name')} name="name" value={form.name} onChange={handleFormChange} required fullWidth />
+            <TextField label={t('roles.drawer.description', 'Description')} name="description" value={form.description} onChange={handleFormChange} fullWidth />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-              <Button onClick={onClose}>Cancel</Button>
-              <Button type="submit" variant="contained">Add</Button>
+              <Button onClick={onClose}>{t('common.cancel', 'Cancel')}</Button>
+              <Button type="submit" variant="contained">{t('common.add', 'Add')}</Button>
             </Box>
           </Box>
         )}

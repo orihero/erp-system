@@ -8,6 +8,7 @@ import type { RootState } from '../../../store';
 import { useAppDispatch } from '../../../store/hooks';
 import { loginStart } from '../../../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -23,7 +24,8 @@ const LoginForm: React.FC = () => {
   const { loading } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
-  const navigation = useSelector((state: RootState) => state.navigation.navigation);
+  const navigation = useSelector((state: RootState) => state.navigation.modules);
+  const { t } = useTranslation();
 
   const {
     register,
@@ -45,26 +47,17 @@ const LoginForm: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated && Array.isArray(navigation) && navigation.length > 0) {
-      // Helper to recursively find the first module directory with directory_type === 'module'
-      type NavItem = { path?: string; directory_type?: string; children?: NavItem[] };
-      function findFirstModuleDirectory(navItems: NavItem[]): string | null {
-        for (const item of navItems) {
-          // If this is a module (has children), look for a directory child with type 'module'
-          if (item.children && item.children.length > 0) {
-            // Try to find a directory child with type 'module'
-            for (const child of item.children) {
-              if (child.directory_type === 'module' && child.path) {
-                return child.path as string;
-              }
-            }
-            // Otherwise, recurse into children
-            const found = findFirstModuleDirectory(item.children);
-            if (found) return found;
+      // Find the first directory with type 'module' in any module
+      let firstModuleDirectoryPath: string | null = null;
+      for (const module of navigation) {
+        if (Array.isArray(module.directories)) {
+          const dir = module.directories.find(d => d.directory_type === 'Module');
+          if (dir && dir.id) {
+            firstModuleDirectoryPath = `/directories/${dir.id}`;
+            break;
           }
         }
-        return null;
       }
-      const firstModuleDirectoryPath = findFirstModuleDirectory(navigation);
       if (firstModuleDirectoryPath) {
         navigate(firstModuleDirectoryPath, { replace: true });
       } else {
@@ -86,14 +79,14 @@ const LoginForm: React.FC = () => {
         disabled
       >
         <img src="https://media.wired.com/photos/5926ffe47034dc5f91bed4e8/3:2/w_2560%2Cc_limit/google-logo.jpg" alt="Google" className="w-8 h-5" />
-        <span className="font-medium text-gray-700">Sign in with Google</span>
+        <span className="font-medium text-gray-700">{t('login.google', 'Sign in with Google')}</span>
       </button>
-      <div className="text-center text-gray-400 text-xs mb-2">or Sign in with Email</div>
+      <div className="text-center text-gray-400 text-xs mb-2">{t('login.orEmail', 'or Sign in with Email')}</div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.email')}*</label>
         <input
           type="email"
-          placeholder="mail@website.com"
+          placeholder={t('login.emailPlaceholder', 'mail@website.com')}
           className={`w-full border ${errors.email ? 'border-red-500' : 'border-gray-200'} rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
           {...register('email')}
         />
@@ -102,11 +95,11 @@ const LoginForm: React.FC = () => {
         )}
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Password*</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.password')}*</label>
         <div className="relative">
           <input
             type={showPassword ? 'text' : 'password'}
-            placeholder="Min. 8 character"
+            placeholder={t('login.min8', 'Min. 8 character')}
             className={`w-full border ${errors.password ? 'border-red-500' : 'border-gray-200'} rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             {...register('password')}
           />
@@ -116,7 +109,7 @@ const LoginForm: React.FC = () => {
             onClick={() => setShowPassword(!showPassword)}
             tabIndex={-1}
           >
-            {showPassword ? 'Hide' : 'Show'}
+            {showPassword ? t('login.hide', 'Hide') : t('login.show', 'Show')}
           </button>
         </div>
         {errors.password && (
@@ -130,10 +123,10 @@ const LoginForm: React.FC = () => {
             className="mr-2 accent-blue-600"
             {...register('remember')}
           />
-          <span className="text-gray-700">Remember me</span>
+          <span className="text-gray-700">{t('login.rememberMe', 'Remember me')}</span>
         </label>
         <a href="/forgot-password" className="text-blue-600 text-sm hover:underline">
-          Forgot password?
+          {t('auth.forgotPassword')}
         </a>
       </div>
       <button
@@ -141,12 +134,12 @@ const LoginForm: React.FC = () => {
         className="w-full bg-blue-600 text-white rounded-lg py-2 font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={loading}
       >
-        {loading ? 'Logging in...' : 'Login'}
+        {loading ? t('login.loggingIn', 'Logging in...') : t('common.login')}
       </button>
       <div className="text-center text-sm text-gray-600">
-        Not registered yet?{' '}
+        {t('login.notRegistered', 'Not registered yet?')}{' '}
         <a href="/signup" className="text-blue-600 hover:underline">
-          Create an Account
+          {t('login.createAccount', 'Create an Account')}
         </a>
       </div>
     </form>

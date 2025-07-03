@@ -3,15 +3,17 @@ import { Box, Button, Typography } from '@mui/material';
 import { Icon } from '@iconify/react';
 import CompaniesTable from './components/CompaniesTable';
 import AddCompanyDrawer from './components/AddCompanyDrawer';
+import { useTranslation } from 'react-i18next';
 
 const Companies: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <Box sx={{ p: 4, width: '100%' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, width: '100%' }}>
         <Typography variant="h4" fontWeight={700}>
-          Companies
+          {t('companies.title', 'Companies')}
         </Typography>
         <Button
           variant="contained"
@@ -26,7 +28,7 @@ const Companies: React.FC = () => {
             },
           }}
         >
-          Add Company
+          {t('companies.addCompany', 'Add Company')}
         </Button>
       </Box>
       <CompaniesTable />

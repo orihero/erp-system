@@ -57,6 +57,16 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: true
       },
+      parent_company_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'companies',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
+      },
       contacts: {
         type: Sequelize.JSONB,
         allowNull: true,
@@ -360,7 +370,8 @@ module.exports = {
         references: {
           model: 'directories',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
       name: {
         type: Sequelize.STRING,

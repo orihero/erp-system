@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback';
 
 const Navbar: React.FC = () => {
-  const { t } = useTranslation();
+  const { tWithFallback, t } = useTranslationWithFallback();
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
@@ -15,7 +15,7 @@ const Navbar: React.FC = () => {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="text-xl font-bold text-blue-600">
-                ERP System
+                {tWithFallback('app.name', 'ERP System')}
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

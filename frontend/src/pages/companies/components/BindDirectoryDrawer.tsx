@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import type { Module as BaseModule } from '@/api/services/modules';
+import { useTranslation } from 'react-i18next';
 
 interface Directory {
   id: string;
@@ -37,6 +38,8 @@ const BindDirectoryDrawer: React.FC<BindDirectoryDrawerProps> = ({
   allDirectories,
   onBind
 }) => {
+  const { t } = useTranslation();
+
   // Deduplicate allDirectories by id
   const uniqueAllDirectories = useMemo(() => {
     const map = new Map<string, Directory>();
@@ -69,7 +72,7 @@ const BindDirectoryDrawer: React.FC<BindDirectoryDrawerProps> = ({
     <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: 400 } }}>
       <Box p={3} display="flex" flexDirection="column" height="100%">
         <Typography variant="h6" mb={2}>
-          Bind Directory to {module?.name}
+          {t('companies.bindDirectoryTo', { module: module?.name })}
         </Typography>
         <List>
           {uniqueAllDirectories.map(directory => (
@@ -90,13 +93,13 @@ const BindDirectoryDrawer: React.FC<BindDirectoryDrawerProps> = ({
           ))}
           {uniqueAllDirectories.length === 0 && (
             <ListItem>
-              <ListItemText primary="No directories available to bind." />
+              <ListItemText primary={t('companies.noDirectoriesToBind', 'No directories available to bind.')} />
             </ListItem>
           )}
         </List>
         <Box mt="auto" display="flex" gap={2}>
           <Button variant="outlined" onClick={onClose} fullWidth>
-            Cancel
+            {t('common.cancel', 'Cancel')}
           </Button>
           <Button
             variant="contained"
@@ -104,7 +107,7 @@ const BindDirectoryDrawer: React.FC<BindDirectoryDrawerProps> = ({
             disabled={selected.length === 0}
             fullWidth
           >
-            Bind Selected
+            {t('companies.bindSelected', 'Bind Selected')}
           </Button>
         </Box>
       </Box>

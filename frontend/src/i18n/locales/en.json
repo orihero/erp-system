@@ -17,7 +17,13 @@
     "error": "Error",
     "success": "Success",
     "actions": "Actions",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "close": "Close",
+    "none": "None",
+    "user": "User",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "add": "Add"
   },
   "auth": {
     "email": "Email",
@@ -25,7 +31,6 @@
     "confirmPassword": "Confirm Password",
     "forgotPassword": "Forgot Password?",
     "rememberMe": "Remember Me",
-    "loginSuccess": "Login Successful",
     "loginError": "Invalid email or password",
     "registerSuccess": "Registration Successful",
     "registerError": "Registration Error",
@@ -76,27 +81,35 @@
   },
   "directories": {
     "title": "Directories",
-    "new": "New Directory",
+    "addNew": "Add Directory",
     "name": "Name",
-    "type": "Type",
-    "attributes": "Attributes",
-    "entries": "Entries",
-    "addEntry": "Add Entry",
-    "editEntry": "Edit Entry",
-    "deleteEntry": "Delete Entry",
-    "addNew": "Add New Directory",
-    "editDirectory": "Edit Directory",
-    "deleteConfirm": "Delete Directory",
-    "deleteWarning": "Are you sure you want to delete this directory? This action cannot be undone.",
-    "noDirectories": "No directories found",
-    "status": "Status",
-    "createdAt": "Created At",
     "iconName": "Icon Name",
+    "type": "Type",
+    "createdAt": "Created At",
+    "noDirectories": "No directories found.",
+    "records": {
+      "id": "ID",
+      "actions": "Actions",
+      "loading": "Loading records...",
+      "error": "Error loading records",
+      "noRecords": "No records found.",
+      "loadingFields": "Loading fields...",
+      "loadingDirectories": "Loading directories...",
+      "errorLoadingDirectories": "Error loading directories:",
+      "notFound": "Directory not found.",
+      "companyDirectoryNotFound": "Company Directory mapping not found.",
+      "create": "+ Create"
+    },
+    "typeOptions": {
+      "module": "Module",
+      "company": "Company",
+      "system": "System"
+    },
     "fields": "Fields",
     "fieldName": "Field Name",
     "fieldType": "Field Type",
-    "addField": "Add Field",
     "relatedDirectory": "Related Directory",
+    "addField": "Add Field",
     "fieldTypes": {
       "string": "Text",
       "number": "Number",
@@ -110,56 +123,66 @@
       "text": "Long Text",
       "decimal": "Decimal",
       "integer": "Integer"
-    },
-    "types": {
-      "customer": "Customer",
-      "supplier": "Supplier",
-      "employee": "Employee"
-    },
-    "statuses": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "errors": {
-      "fetchFailed": "Failed to fetch directories",
-      "createFailed": "Failed to create directory",
-      "updateFailed": "Failed to update directory",
-      "deleteFailed": "Failed to delete directory"
-    },
-    "records": {
-      "title": "Directory Records",
-      "id": "ID",
-      "actions": "Actions",
-      "noRecords": "No records found",
-      "addNew": "Add New Record"
     }
   },
   "companies": {
     "title": "Companies",
-    "new": "New Company",
-    "name": "Company Name",
-    "address": "Address",
-    "phone": "Phone",
+    "addCompany": "Add Company",
+    "aboutTab": "About",
+    "modulesTab": "Modules",
+    "directoriesTab": "Directories",
+    "name": "Name",
     "email": "Email",
-    "users": "Users",
-    "settings": "Company Settings",
+    "employeeCount": "Employee Count",
+    "status": "Status",
+    "actions": "Actions",
+    "deleteCompany": "Delete Company",
+    "deleteConfirm": "Are you sure you want to delete this company?",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "role": "Role",
+    "searchEmployees": "Search employees...",
+    "noEmployees": "No employees found.",
+    "bindDirectoryTo": "Bind Directory to {{module}}",
+    "noDirectoriesToBind": "No directories available to bind.",
+    "bindSelected": "Bind Selected",
+    "directories": {
+      "title": "Directories",
+      "name": "Name",
+      "icon": "Icon",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noDirectories": "No directories found"
+    },
+    "bindDirectories": "Bind Directories",
+    "modules": {
+      "title": "Modules",
+      "noDirectories": "No directories bound to this module",
+      "noModules": "No modules available"
+    },
+    "employees": "Employees",
+    "employeesFetchError": "Failed to fetch employees.",
+    "noEmployees": "No employees found.",
     "addNew": "Add New Company",
     "editCompany": "Edit Company",
     "mainInfo": "Main Information",
     "addressAndLogo": "Address & Logo",
     "companyDetails": "Company Details",
     "additionalContacts": "Additional Contacts",
+    "contactName": "Contact Name",
+    "contactValue": "Contact Value",
     "adminEmail": "Admin Email",
-    "employeeCount": "Employee Count",
     "logo": "Logo URL",
     "description": "Description",
     "website": "Website",
+    "phone": "Phone",
     "taxId": "Tax ID",
     "registrationNumber": "Registration Number",
     "industry": "Industry",
     "foundedYear": "Founded Year",
-    "contactName": "Contact Name",
-    "contactValue": "Contact Value",
+    "boundDirectories": "Bound Directories",
+    "showEmployees": "Show Employees",
     "employeeCountOptions": {
       "lessThan10": "Less than 10",
       "10to50": "10 to 50",
@@ -168,12 +191,246 @@
       "500to1000": "500 to 1000",
       "moreThan1000": "More than 1000"
     },
-    "status": "Status",
     "statusOptions": {
       "active": "Active",
       "inactive": "Inactive"
+    }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "companies": "Companies",
+    "directories": "Directories",
+    "clients": "Clients",
+    "userRoles": "User Roles",
+    "modules": "Modules",
+    "reports": "Reports",
+    "settings": "Settings",
+    "systemDirectories": "System Directories"
+  },
+  "permission": {
+    "edit": "Edit Permission",
+    "create": "Create Permission",
+    "name": "Name",
+    "description": "Description",
+    "type": "Type",
+    "module": "Module",
+    "directory": "Directory",
+    "effectiveFrom": "Effective From",
+    "effectiveUntil": "Effective Until",
+    "constraintData": "Constraint Data (JSON)",
+    "type": {
+      "read": "Read",
+      "write": "Write",
+      "manage": "Manage (read+write)"
+    }
+  },
+  "language": {
+    "english": "English",
+    "russian": "Russian",
+    "uzbek": "Uzbek"
+  },
+  "app": {
+    "name": "ERP System"
+  },
+  "footer": {
+    "copyright": "©2024 YourApp. All rights reserved."
+  },
+  "keyValueEditor": {
+    "key": "Key",
+    "type": "Type",
+    "value": "Value",
+    "type": {
+      "string": "String",
+      "number": "Number",
+      "boolean": "Boolean"
     },
-    "boundDirectories": "Bound Directories",
-    "showEmployees": "Show Employees"
+    "boolean": {
+      "true": "true",
+      "false": "false"
+    }
+  },
+  "settings": {
+    "profileTab": "Profile",
+    "directoriesTab": "Directories",
+    "systemDirectories": "System Directories",
+    "noSystemDirectories": "No system directories found."
+  },
+  "unauthorized": {
+    "403": "403",
+    "title": "Unauthorized Access",
+    "permission": "You don't have permission to access this page.",
+    "returnHome": "Return to Home",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "loadingStats": "Loading statistics...",
+    "noStats": "No statistics available.",
+    "viewInventory": "View Inventory",
+    "manageUsers": "Manage Users",
+    "totalPatients": "Total patients",
+    "viewMore": "View more",
+    "receipts": "Receipts",
+    "uniqueClients": "Unique Clients",
+    "revenue": "Revenue"
+  },
+  "login": {
+    "heading": "Login",
+    "subtitle": "See your growth and get consulting support!",
+    "google": "Sign in with Google",
+    "orEmail": "or Sign in with Email",
+    "emailPlaceholder": "mail@website.com",
+    "min8": "Min. 8 character",
+    "hide": "Hide",
+    "show": "Show",
+    "rememberMe": "Remember me",
+    "loggingIn": "Logging in...",
+    "notRegistered": "Not registered yet?",
+    "createAccount": "Create an Account",
+    "marketing": {
+      "rewards": "Rewards",
+      "points": "Points",
+      "lastYear": "Last year",
+      "ideas": "Turn your ideas into reality.",
+      "consistency": "Consistent quality and experience across all platforms and devices."
+    }
+  },
+  "signup": {
+    "heading": "Sign Up",
+    "subtitle": "Create your account to get started!",
+    "screenshotPlaceholder": "[Screenshot Placeholder]",
+    "emailPlaceholder": "mail@website.com",
+    "hide": "Hide",
+    "show": "Show"
+  },
+  "clients": {
+    "title": "Clients",
+    "search": "Search clients...",
+    "addClient": "Add client",
+    "editClient": "Edit Client",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "role": "Role",
+    "roles": "Roles",
+    "status": "Status",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "company": "Company",
+    "actions": "Actions",
+    "noClients": "No clients found.",
+    "deleteUser": "Delete User",
+    "deleteConfirm": "Are you sure you want to delete this user?",
+    "noClientSelected": "No client selected for editing.",
+    "saveChanges": "Save Changes"
+  },
+  "modules": {
+    "title": "Modules",
+    "name": "Name",
+    "icon": "Icon",
+    "actions": "Actions",
+    "noModules": "No modules found",
+    "editIcon": "Edit Module Icon",
+    "iconName": "Icon Name",
+    "iconNameHelp": "Enter the icon name from Iconify"
+  },
+  "bankStatement": {
+    "management": "Bank Statement Management",
+    "processing": "Processing bank statement...",
+    "parsing": "AI is parsing your Excel file",
+    "dropHere": "Drop the file here",
+    "upload": "Upload Bank Statement",
+    "dragDrop": "Drag and drop an Excel file here, or click to select",
+    "chooseFile": "Choose File",
+    "supportedFormats": "Supported formats: .xlsx, .xls (Max 10MB)",
+    "uploaded": "Uploaded Bank Statements",
+    "editTitle": "Edit Bank Statement: {{fileName}}",
+    "addRecord": "Add Record",
+    "saveChanges": "Save Changes",
+    "saveError": "Failed to save records: {{error}}",
+    "unsavedChanges": "You have unsaved changes. Don't forget to save!",
+    "records": "Records",
+    "totalDebit": "Total Debit",
+    "totalCredit": "Total Credit",
+    "confirmDelete": "Confirm Delete",
+    "deleteWarning": "Are you sure you want to delete this record? This action cannot be undone.",
+    "deleteWarningFile": "Are you sure you want to delete \"{{file}}\"? This action cannot be undone.",
+    "documentDate": "Document Date",
+    "account": "Account",
+    "organization": "Organization",
+    "docNumber": "Doc Number",
+    "docType": "Doc Type",
+    "branch": "Branch",
+    "debit": "Debit",
+    "credit": "Credit",
+    "paymentPurpose": "Payment Purpose",
+    "cashSymbol": "Cash Symbol",
+    "taxId": "Tax ID"
+  },
+  "permissions": {
+    "management": "Permissions Management",
+    "permissionsTab": "Permissions",
+    "rolePermissionsTab": "Role Permissions",
+    "addPermission": "Add Permission",
+    "name": "Name",
+    "description": "Description",
+    "type": "Type",
+    "deletePermission": "Delete Permission",
+    "deleteConfirm": "Are you sure you want to delete the permission \"{{name}}\"?",
+    "permission": "Permission",
+    "assigned": "Assigned",
+    "remove": "Remove",
+    "assign": "Assign"
+  },
+  "roles": {
+    "title": "User Roles",
+    "rolesTab": "Roles",
+    "permissionsTab": "Permissions",
+    "listOfRoles": "List of Roles",
+    "createRole": "Create Role",
+    "searchRoles": "Search roles...",
+    "addPermission": "Add Permission",
+    "searchPermissions": "Search permissions...",
+    "name": "Name",
+    "description": "Description",
+    "type": "Type",
+    "module": "Module",
+    "directory": "Directory",
+    "drawer": {
+      "title": "Role Management",
+      "roleNotFound": "Role not found.",
+      "assignPermissions": "Assign Permissions",
+      "searchPermissions": "Search permissions...",
+      "createNewPermission": "Create new permission",
+      "assignedPermissions": "Assigned Permissions",
+      "createNewRole": "Create New Role",
+      "roleName": "Role Name",
+      "description": "Description"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "createReportStructure": "Create Report Structure",
+    "structure": "Report Structure",
+    "createChart": "Create Chart",
+    "financial": {
+      "title": "Financial Reports",
+      "description": "View and analyze financial data, including revenue, expenses, and profit margins."
+    },
+    "inventory": {
+      "title": "Inventory Reports",
+      "description": "Track inventory levels, stock movements, and product performance."
+    },
+    "sales": {
+      "title": "Sales Reports",
+      "description": "Analyze sales performance, customer trends, and revenue metrics."
+    },
+    "chartDialog": {
+      "createChart": "Create Chart",
+      "chartType": "Chart Type",
+      "lineChart": "Line Chart",
+      "barChart": "Bar Chart",
+      "pieChart": "Pie Chart",
+      "chartTitle": "Chart Title"
+    }
   }
 }

@@ -15,7 +15,15 @@
     "search": "Поиск",
     "loading": "Загрузка...",
     "error": "Ошибка",
-    "success": "Успешно"
+    "success": "Успешно",
+    "close": "Закрыть",
+    "none": "Нет",
+    "user": "Пользователь",
+    "enabled": "Включено",
+    "disabled": "Отключено",
+    "add": "Добавить",
+    "saveChanges": "Сохранить изменения",
+    "actions": "Действия"
   },
   "auth": {
     "email": "Электронная почта",
@@ -78,17 +86,67 @@
     "entries": "Записи",
     "addEntry": "Добавить запись",
     "editEntry": "Редактировать запись",
-    "deleteEntry": "Удалить запись"
+    "deleteEntry": "Удалить запись",
+    "addNew": "Добавить справочник",
+    "iconName": "Имя иконки",
+    "createdAt": "Дата создания",
+    "noDirectories": "Справочники не найдены.",
+    "records": {
+      "id": "ID",
+      "actions": "Действия",
+      "loading": "Загрузка записей...",
+      "error": "Ошибка загрузки записей",
+      "noRecords": "Записи не найдены."
+    },
+    "typeOptions": {
+      "module": "Модуль",
+      "company": "Компания",
+      "system": "Система"
+    },
+    "fields": "Поля",
+    "fieldName": "Имя поля",
+    "fieldType": "Тип поля",
+    "relatedDirectory": "Связанный справочник",
+    "addField": "Добавить поле",
+    "fieldTypes": {
+      "string": "Текст",
+      "number": "Число",
+      "file": "Файл",
+      "bool": "Булево",
+      "date": "Дата",
+      "time": "Время",
+      "json": "JSON",
+      "datetime": "Дата и время",
+      "relation": "Связь",
+      "text": "Длинный текст",
+      "decimal": "Десятичное число",
+      "integer": "Целое число"
+    },
+    "loadingFields": "Загрузка полей...",
+    "loadingDirectories": "Загрузка справочников...",
+    "errorLoadingDirectories": "Ошибка загрузки справочников:",
+    "notFound": "Справочник не найден.",
+    "companyDirectoryNotFound": "Связь с компанией не найдена.",
+    "create": "+ Создать"
   },
   "companies": {
     "title": "Компании",
-    "new": "Новая компания",
-    "name": "Название компании",
-    "address": "Адрес",
-    "phone": "Телефон",
-    "email": "Email",
-    "users": "Пользователи",
-    "settings": "Настройки компании",
+    "addCompany": "Добавить компанию",
+    "aboutTab": "О компании",
+    "modulesTab": "Модули",
+    "directoriesTab": "Справочники",
+    "name": "Название",
+    "email": "Эл. почта",
+    "employeeCount": "Количество сотрудников",
+    "status": "Статус",
+    "actions": "Действия",
+    "deleteCompany": "Удалить компанию",
+    "deleteConfirm": "Вы уверены, что хотите удалить эту компанию?",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "role": "Роль",
+    "searchEmployees": "Поиск сотрудников...",
+    "noEmployees": "Сотрудники не найдены.",
     "addNew": "Добавить новую компанию",
     "editCompany": "Редактировать компанию",
     "mainInfo": "Основная информация",
@@ -96,10 +154,10 @@
     "companyDetails": "Детали компании",
     "additionalContacts": "Дополнительные контакты",
     "adminEmail": "Email администратора",
-    "employeeCount": "Количество сотрудников",
     "logo": "URL логотипа",
     "description": "Описание",
     "website": "Веб-сайт",
+    "phone": "Телефон",
     "taxId": "ИНН",
     "registrationNumber": "Регистрационный номер",
     "industry": "Отрасль",
@@ -114,12 +172,270 @@
       "500to1000": "500 до 1000",
       "moreThan1000": "Более 1000"
     },
-    "status": "Статус",
     "statusOptions": {
       "active": "Активна",
       "inactive": "Неактивна"
     },
     "boundDirectories": "Связанные справочники",
-    "showEmployees": "Показать сотрудников"
+    "showEmployees": "Показать сотрудников",
+    "bindDirectoryTo": "Привязать справочник к {{module}}",
+    "noDirectoriesToBind": "Нет доступных справочников для привязки.",
+    "bindSelected": "Привязать выбранные",
+    "directories": "Справочники",
+    "bindDirectories": "Привязать справочники",
+    "modules": {
+      "title": "Модули",
+      "noDirectories": "К этому модулю не привязано справочников",
+      "noModules": "Нет доступных модулей"
+    },
+    "directories": {
+      "title": "Справочники",
+      "name": "Название",
+      "icon": "Иконка",
+      "status": "Статус",
+      "active": "Активен",
+      "inactive": "Неактивен",
+      "noDirectories": "Справочники не найдены"
+    },
+    "employees": "Сотрудники",
+    "employeesFetchError": "Не удалось получить сотрудников.",
+    "noEmployees": "Сотрудники не найдены."
+  },
+  "sidebar": {
+    "dashboard": "Панель",
+    "companies": "Компании",
+    "directories": "Справочники",
+    "clients": "Клиенты",
+    "userRoles": "Роли пользователей",
+    "modules": "Модули",
+    "reports": "Отчеты",
+    "settings": "Настройки",
+    "systemDirectories": "Системные справочники"
+  },
+  "permission": {
+    "edit": "Редактировать разрешение",
+    "create": "Создать разрешение",
+    "name": "Название",
+    "description": "Описание",
+    "type": "Тип",
+    "module": "Модуль",
+    "directory": "Справочник",
+    "effectiveFrom": "Действует с",
+    "effectiveUntil": "Действует до",
+    "constraintData": "Ограничения (JSON)",
+    "type": {
+      "read": "Чтение",
+      "write": "Запись",
+      "manage": "Управление (чтение+запись)"
+    }
+  },
+  "language": {
+    "english": "Английский",
+    "russian": "Русский",
+    "uzbek": "Узбекский"
+  },
+  "app": {
+    "name": "ERP система"
+  },
+  "footer": {
+    "copyright": "©2024 ВашаПрограмма. Все права защищены."
+  },
+  "keyValueEditor": {
+    "key": "Ключ",
+    "type": "Тип",
+    "value": "Значение",
+    "type": {
+      "string": "Строка",
+      "number": "Число",
+      "boolean": "Булево"
+    },
+    "boolean": {
+      "true": "истина",
+      "false": "ложь"
+    }
+  },
+  "settings": {
+    "profileTab": "Профиль",
+    "directoriesTab": "Справочники",
+    "systemDirectories": "Системные справочники",
+    "noSystemDirectories": "Системные справочники не найдены."
+  },
+  "unauthorized": {
+    "403": "403",
+    "title": "Нет доступа",
+    "permission": "У вас нет прав для доступа к этой странице.",
+    "returnHome": "На главную",
+    "logout": "Выйти"
+  },
+  "dashboard": {
+    "loadingStats": "Загрузка статистики...",
+    "noStats": "Нет доступной статистики.",
+    "viewInventory": "Просмотр инвентаря",
+    "manageUsers": "Управление пользователями",
+    "totalPatients": "Всего пациентов",
+    "viewMore": "Подробнее",
+    "receipts": "Чеки",
+    "uniqueClients": "Уникальные клиенты",
+    "revenue": "Доход"
+  },
+  "login": {
+    "heading": "Вход",
+    "subtitle": "Следите за своим ростом и получайте консультационную поддержку!",
+    "google": "Войти через Google",
+    "orEmail": "или войдите по Email",
+    "emailPlaceholder": "mail@website.com",
+    "min8": "Мин. 8 символов",
+    "hide": "Скрыть",
+    "show": "Показать",
+    "rememberMe": "Запомнить меня",
+    "loggingIn": "Вход...",
+    "notRegistered": "Еще не зарегистрированы?",
+    "createAccount": "Создать аккаунт",
+    "marketing": {
+      "rewards": "Награды",
+      "points": "Баллы",
+      "lastYear": "Прошлый год",
+      "ideas": "Воплотите свои идеи в реальность.",
+      "consistency": "Последовательное качество и опыт на всех платформах и устройствах."
+    }
+  },
+  "signup": {
+    "heading": "Регистрация",
+    "subtitle": "Создайте аккаунт, чтобы начать!",
+    "screenshotPlaceholder": "[Место для скриншота]",
+    "emailPlaceholder": "mail@website.com",
+    "hide": "Скрыть",
+    "show": "Показать"
+  },
+  "clients": {
+    "title": "Клиенты",
+    "search": "Поиск клиентов...",
+    "addClient": "Добавить клиента",
+    "editClient": "Редактировать клиента",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "email": "Эл. почта",
+    "role": "Роль",
+    "roles": "Роли",
+    "status": "Статус",
+    "statusActive": "Активен",
+    "statusInactive": "Неактивен",
+    "company": "Компания",
+    "actions": "Действия",
+    "noClients": "Клиенты не найдены.",
+    "deleteUser": "Удалить пользователя",
+    "deleteConfirm": "Вы уверены, что хотите удалить этого пользователя?",
+    "noClientSelected": "Клиент не выбран для редактирования.",
+    "saveChanges": "Сохранить изменения"
+  },
+  "modules": {
+    "title": "Модули",
+    "name": "Название",
+    "icon": "Иконка",
+    "actions": "Действия",
+    "noModules": "Модули не найдены",
+    "editIcon": "Редактировать иконку модуля",
+    "iconName": "Имя иконки",
+    "iconNameHelp": "Введите имя иконки из Iconify"
+  },
+  "bankStatement": {
+    "management": "Управление банковскими выписками",
+    "processing": "Обработка банковской выписки...",
+    "parsing": "ИИ анализирует ваш Excel файл",
+    "dropHere": "Перетащите файл сюда",
+    "upload": "Загрузить банковскую выписку",
+    "dragDrop": "Перетащите Excel файл сюда или кликните для выбора",
+    "chooseFile": "Выбрать файл",
+    "supportedFormats": "Поддерживаемые форматы: .xlsx, .xls (Макс 10МБ)",
+    "uploaded": "Загруженные выписки",
+    "editTitle": "Редактировать выписку: {{fileName}}",
+    "addRecord": "Добавить запись",
+    "saveChanges": "Сохранить изменения",
+    "saveError": "Не удалось сохранить записи: {{error}}",
+    "unsavedChanges": "У вас есть несохранённые изменения. Не забудьте сохранить!",
+    "records": "Записей",
+    "totalDebit": "Всего дебет",
+    "totalCredit": "Всего кредит",
+    "confirmDelete": "Подтвердите удаление",
+    "deleteWarning": "Вы уверены, что хотите удалить эту запись? Это действие необратимо.",
+    "deleteWarningFile": "Вы уверены, что хотите удалить \"{{file}}\"? Это действие необратимо.",
+    "documentDate": "Дата документа",
+    "account": "Счёт",
+    "organization": "Организация",
+    "docNumber": "№ документа",
+    "docType": "Тип документа",
+    "branch": "Филиал",
+    "debit": "Дебет",
+    "credit": "Кредит",
+    "paymentPurpose": "Назначение платежа",
+    "cashSymbol": "Код символа",
+    "taxId": "ИНН"
+  },
+  "permissions": {
+    "management": "Управление правами",
+    "permissionsTab": "Права",
+    "rolePermissionsTab": "Права ролей",
+    "addPermission": "Добавить право",
+    "name": "Название",
+    "description": "Описание",
+    "type": "Тип",
+    "deletePermission": "Удалить право",
+    "deleteConfirm": "Вы уверены, что хотите удалить право \"{{name}}\"?",
+    "permission": "Право",
+    "assigned": "Назначено",
+    "remove": "Удалить",
+    "assign": "Назначить"
+  },
+  "roles": {
+    "title": "Роли пользователей",
+    "rolesTab": "Роли",
+    "permissionsTab": "Права",
+    "listOfRoles": "Список ролей",
+    "createRole": "Создать роль",
+    "searchRoles": "Поиск ролей...",
+    "addPermission": "Добавить право",
+    "searchPermissions": "Поиск прав...",
+    "name": "Название",
+    "description": "Описание",
+    "type": "Тип",
+    "module": "Модуль",
+    "directory": "Справочник",
+    "drawer": {
+      "title": "Управление ролью",
+      "roleNotFound": "Роль не найдена.",
+      "assignPermissions": "Назначить права",
+      "searchPermissions": "Поиск прав...",
+      "createNewPermission": "Создать новое право",
+      "assignedPermissions": "Назначенные права",
+      "createNewRole": "Создать новую роль",
+      "roleName": "Название роли",
+      "description": "Описание"
+    }
+  },
+  "reports": {
+    "title": "Отчеты",
+    "createReportStructure": "Создать структуру отчета",
+    "structure": "Структура отчета",
+    "createChart": "Создать график",
+    "financial": {
+      "title": "Финансовые отчеты",
+      "description": "Просмотр и анализ финансовых данных, включая доходы, расходы и прибыль."
+    },
+    "inventory": {
+      "title": "Отчеты по складу",
+      "description": "Отслеживайте уровни запасов, перемещения и эффективность товаров."
+    },
+    "sales": {
+      "title": "Отчеты по продажам",
+      "description": "Анализируйте продажи, тенденции клиентов и показатели выручки."
+    },
+    "chartDialog": {
+      "createChart": "Создать график",
+      "chartType": "Тип графика",
+      "lineChart": "Линейный график",
+      "barChart": "Столбчатый график",
+      "pieChart": "Круговая диаграмма",
+      "chartTitle": "Название графика"
+    }
   }
 } 

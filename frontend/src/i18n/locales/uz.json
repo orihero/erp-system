@@ -15,7 +15,15 @@
     "search": "Qidirish",
     "loading": "Yuklanmoqda...",
     "error": "Xato",
-    "success": "Muvaffaqiyatli"
+    "success": "Muvaffaqiyatli",
+    "close": "Yopish",
+    "none": "Yo'q",
+    "user": "Foydalanuvchi",
+    "enabled": "Faol",
+    "disabled": "Faol emas",
+    "add": "Qo'shish",
+    "saveChanges": "O'zgarishlarni saqlash",
+    "actions": "Harakatlar"
   },
   "auth": {
     "email": "Elektron pochta",
@@ -76,12 +84,58 @@
     "entries": "Yozuvlar",
     "addEntry": "Yozuv qo'shish",
     "editEntry": "Yozuvni tahrirlash",
-    "deleteEntry": "Yozuvni o'chirish"
+    "deleteEntry": "Yozuvni o'chirish",
+    "addNew": "Ma'lumotnoma qo'shish",
+    "iconName": "Belgi nomi",
+    "createdAt": "Yaratilgan sana",
+    "noDirectories": "Ma'lumotnomalar topilmadi.",
+    "records": {
+      "id": "ID",
+      "actions": "Harakatlar",
+      "loading": "Yozuvlar yuklanmoqda...",
+      "error": "Yozuvlarni yuklashda xatolik",
+      "noRecords": "Yozuvlar topilmadi.",
+      "noRecords": "Yozuvlar topilmadi."
+    },
+    "typeOptions": {
+      "module": "Modul",
+      "company": "Kompaniya",
+      "system": "Tizim"
+    },
+    "fields": "Maydonlar",
+    "fieldName": "Maydon nomi",
+    "fieldType": "Maydon turi",
+    "relatedDirectory": "Bog'langan ma'lumotnoma",
+    "addField": "Maydon qo'shish",
+    "fieldTypes": {
+      "string": "Matn",
+      "number": "Raqam",
+      "file": "Fayl",
+      "bool": "Mantiqiy",
+      "date": "Sana",
+      "time": "Vaqt",
+      "json": "JSON",
+      "datetime": "Sana va vaqt",
+      "relation": "Bog'lanish",
+      "text": "Uzun matn",
+      "decimal": "O'nlik son",
+      "integer": "Butun son"
+    },
+    "loadingFields": "Maydonlar yuklanmoqda...",
+    "loadingDirectories": "Ma'lumotnomalar yuklanmoqda...",
+    "errorLoadingDirectories": "Ma'lumotnomalarni yuklashda xatolik:",
+    "notFound": "Ma'lumotnoma topilmadi.",
+    "companyDirectoryNotFound": "Kompaniya ma'lumotnomasi mosligi topilmadi.",
+    "create": "+ Yaratish"
   },
   "companies": {
     "title": "Kompaniyalar",
+    "addCompany": "Kompaniya qo'shish",
+    "aboutTab": "Kompaniya haqida",
+    "modulesTab": "Modullar",
+    "directoriesTab": "Ma'lumotnomalar",
     "new": "Yangi kompaniya",
-    "name": "Kompaniya nomi",
+    "name": "Nomi",
     "address": "Manzil",
     "phone": "Telefon",
     "email": "Email",
@@ -93,9 +147,9 @@
     "addressAndLogo": "Manzil va logotip",
     "companyDetails": "Kompaniya tafsilotlari",
     "additionalContacts": "Qo'shimcha kontaktlar",
-    "adminEmail": "Administrator emaili",
+    "adminEmail": "Admin email",
     "employeeCount": "Xodimlar soni",
-    "logo": "Logotip URL manzili",
+    "logo": "Logotip URL",
     "description": "Tavsif",
     "website": "Veb-sayt",
     "taxId": "STIR",
@@ -112,12 +166,278 @@
       "500to1000": "500 dan 1000 gacha",
       "moreThan1000": "1000 tadan ko'p"
     },
-    "status": "Holati",
     "statusOptions": {
       "active": "Faol",
-      "inactive": "Faol emas"
+      "inactive": "Nofaol"
     },
     "boundDirectories": "Bog'langan ma'lumotnomalar",
-    "showEmployees": "Xodimlarni ko'rsatish"
+    "showEmployees": "Xodimlarni ko'rsatish",
+    "actions": "Harakatlar",
+    "deleteCompany": "Kompaniyani o'chirish",
+    "deleteConfirm": "Ushbu kompaniyani o'chirishga ishonchingiz komilmi?",
+    "firstName": "Ism",
+    "lastName": "Familiya",
+    "role": "Rol",
+    "searchEmployees": "Xodimlarni qidirish...",
+    "noEmployees": "Xodimlar topilmadi.",
+    "bindDirectoryTo": "Ma'lumotnomani {{module}} ga bog'lash",
+    "noDirectoriesToBind": "Bog'lash uchun mavjud ma'lumotnomalar yo'q.",
+    "bindSelected": "Tanlanganlarni bog'lash",
+    "directories": "Ma'lumotnomalar",
+    "bindDirectories": "Ma'lumotnomalarni bog'lash",
+    "modules": {
+      "title": "Modullar",
+      "noDirectories": "Ushbu modulga hech qanday ma'lumotnoma bog'lanmagan",
+      "noModules": "Mavjud modullar yo'q"
+    },
+    "directories": {
+      "title": "Ma'lumotnomalar",
+      "name": "Nomi",
+      "icon": "Belgi",
+      "status": "Holat",
+      "active": "Faol",
+      "inactive": "Nofaol",
+      "noDirectories": "Ma'lumotnomalar topilmadi"
+    },
+    "employees": "Xodimlar",
+    "employeesFetchError": "Xodimlarni olishda xatolik yuz berdi.",
+    "noEmployees": "Xodimlar topilmadi."
+  },
+  "sidebar": {
+    "dashboard": "Boshqaruv paneli",
+    "companies": "Kompaniyalar",
+    "directories": "Ma'lumotnomalar",
+    "clients": "Mijozlar",
+    "userRoles": "Foydalanuvchi rollari",
+    "modules": "Modullar",
+    "reports": "Hisobotlar",
+    "settings": "Sozlamalar",
+    "systemDirectories": "Tizim ma'lumotnomalari"
+  },
+  "permission": {
+    "edit": "Ruxsatni tahrirlash",
+    "create": "Ruxsat yaratish",
+    "name": "Nomi",
+    "description": "Tavsif",
+    "type": "Turi",
+    "module": "Modul",
+    "directory": "Ma'lumotnoma",
+    "effectiveFrom": "Boshlanish sanasi",
+    "effectiveUntil": "Tugash sanasi",
+    "constraintData": "Cheklovlar (JSON)",
+    "type": {
+      "read": "O'qish",
+      "write": "Yozish",
+      "manage": "Boshqarish (o'qish+yozish)"
+    }
+  },
+  "language": {
+    "english": "Inglizcha",
+    "russian": "Ruscha",
+    "uzbek": "O'zbekcha"
+  },
+  "app": {
+    "name": "ERP tizimi"
+  },
+  "footer": {
+    "copyright": "©2024 SizningDastur. Barcha huquqlar himoyalangan."
+  },
+  "keyValueEditor": {
+    "key": "Kalit",
+    "type": "Turi",
+    "value": "Qiymat",
+    "type": {
+      "string": "Satr",
+      "number": "Raqam",
+      "boolean": "Mantiqiy"
+    },
+    "boolean": {
+      "true": "rost",
+      "false": "yolg'on"
+    }
+  },
+  "settings": {
+    "profileTab": "Profil",
+    "directoriesTab": "Ma'lumotnomalar",
+    "systemDirectories": "Tizim ma'lumotnomalari",
+    "noSystemDirectories": "Tizim ma'lumotnomalari topilmadi."
+  },
+  "unauthorized": {
+    "403": "403",
+    "title": "Ruxsat yo'q",
+    "permission": "Sizda ushbu sahifaga kirish uchun ruxsat yo'q.",
+    "returnHome": "Bosh sahifaga qaytish",
+    "logout": "Chiqish"
+  },
+  "dashboard": {
+    "loadingStats": "Statistika yuklanmoqda...",
+    "noStats": "Statistika mavjud emas.",
+    "viewInventory": "Inventarni ko'rish",
+    "manageUsers": "Foydalanuvchilarni boshqarish",
+    "totalPatients": "Jami bemorlar",
+    "viewMore": "Batafsil",
+    "receipts": "Cheklar",
+    "uniqueClients": "Unikal mijozlar",
+    "revenue": "Daromad"
+  },
+  "login": {
+    "heading": "Kirish",
+    "subtitle": "O'sishingizni kuzating va maslahat oling!",
+    "google": "Google orqali kirish",
+    "orEmail": "yoki Email orqali kirish",
+    "emailPlaceholder": "mail@website.com",
+    "min8": "Kamida 8 ta belgi",
+    "hide": "Yashirish",
+    "show": "Ko'rsatish",
+    "rememberMe": "Meni eslab qol",
+    "loggingIn": "Kirilmoqda...",
+    "notRegistered": "Hali ro'yxatdan o'tmaganmisiz?",
+    "createAccount": "Hisob yaratish",
+    "marketing": {
+      "rewards": "Mukofotlar",
+      "points": "Ballar",
+      "lastYear": "O'tgan yil",
+      "ideas": "Goyalaringizni haqiqatga aylantiring.",
+      "consistency": "Barcha platforma va qurilmalarda bir xil sifat va tajriba."
+    }
+  },
+  "signup": {
+    "heading": "Ro'yxatdan o'tish",
+    "subtitle": "Hisobingizni yaratib boshlang!",
+    "screenshotPlaceholder": "[Skrinshot uchun joy]",
+    "emailPlaceholder": "mail@website.com",
+    "hide": "Yashirish",
+    "show": "Ko'rsatish"
+  },
+  "clients": {
+    "title": "Mijozlar",
+    "search": "Mijozlarni qidirish...",
+    "addClient": "Mijoz qo'shish",
+    "editClient": "Mijozni tahrirlash",
+    "firstName": "Ism",
+    "lastName": "Familiya",
+    "email": "Email",
+    "role": "Rol",
+    "roles": "Rollar",
+    "status": "Holat",
+    "statusActive": "Faol",
+    "statusInactive": "Nofaol",
+    "company": "Kompaniya",
+    "actions": "Harakatlar",
+    "noClients": "Mijozlar topilmadi.",
+    "deleteUser": "Foydalanuvchini o'chirish",
+    "deleteConfirm": "Ushbu foydalanuvchini o'chirishga ishonchingiz komilmi?",
+    "noClientSelected": "Tahrirlash uchun mijoz tanlanmagan.",
+    "saveChanges": "O'zgarishlarni saqlash"
+  },
+  "modules": {
+    "title": "Modullar",
+    "name": "Nomi",
+    "icon": "Belgi",
+    "actions": "Harakatlar",
+    "noModules": "Modullar topilmadi",
+    "editIcon": "Modul belgisi tahriri",
+    "iconName": "Belgi nomi",
+    "iconNameHelp": "Iconify dan belgi nomini kiriting"
+  },
+  "bankStatement": {
+    "management": "Bank ko'chirmalarini boshqarish",
+    "processing": "Bank ko'chirmasi qayta ishlanmoqda...",
+    "parsing": "AI sizning Excel faylingizni tahlil qilmoqda",
+    "dropHere": "Faylni shu yerga tashlang",
+    "upload": "Bank ko'chirmasini yuklash",
+    "dragDrop": "Excel faylini shu yerga tashlang yoki tanlash uchun bosing",
+    "chooseFile": "Faylni tanlash",
+    "supportedFormats": "Qo'llab-quvvatlanadigan formatlar: .xlsx, .xls (Maks 10MB)",
+    "uploaded": "Yuklangan bank ko'chirmalari",
+    "editTitle": "Bank ko'chirmasini tahrirlash: {{fileName}}",
+    "addRecord": "Yozuv qo'shish",
+    "saveChanges": "O'zgarishlarni saqlash",
+    "saveError": "Yozuvlarni saqlab bo'lmadi: {{error}}",
+    "unsavedChanges": "Saqlanmagan o'zgarishlaringiz bor. Saqlashni unutmang!",
+    "records": "Yozuvlar",
+    "totalDebit": "Jami debet",
+    "totalCredit": "Jami kredit",
+    "confirmDelete": "O'chirishni tasdiqlang",
+    "deleteWarning": "Ushbu yozuvni o'chirishga ishonchingiz komilmi? Bu amal qaytarilmaydi.",
+    "deleteWarningFile": "\"{{file}}\" faylini o'chirishga ishonchingiz komilmi? Bu amal qaytarilmaydi.",
+    "documentDate": "Hujjat sanasi",
+    "account": "Hisob raqami",
+    "organization": "Tashkilot",
+    "docNumber": "Hujjat raqami",
+    "docType": "Hujjat turi",
+    "branch": "Filial",
+    "debit": "Debet",
+    "credit": "Kredit",
+    "paymentPurpose": "To'lov maqsadi",
+    "cashSymbol": "Naqd belgi",
+    "taxId": "STIR"
+  },
+  "permissions": {
+    "management": "Ruxsatlarni boshqarish",
+    "permissionsTab": "Ruxsatlar",
+    "rolePermissionsTab": "Rol ruxsatlari",
+    "addPermission": "Ruxsat qo'shish",
+    "name": "Nomi",
+    "description": "Tavsif",
+    "type": "Turi",
+    "deletePermission": "Ruxsatni o'chirish",
+    "deleteConfirm": "\"{{name}}\" ruxsatini o'chirishga ishonchingiz komilmi?",
+    "permission": "Ruxsat",
+    "assigned": "Biriktirilgan",
+    "remove": "O'chirish",
+    "assign": "Biriktirish"
+  },
+  "roles": {
+    "title": "Foydalanuvchi rollari",
+    "rolesTab": "Rollar",
+    "permissionsTab": "Huquqlar",
+    "listOfRoles": "Rollar ro'yxati",
+    "createRole": "Rol yaratish",
+    "searchRoles": "Rollarni qidirish...",
+    "addPermission": "Huquq qo'shish",
+    "searchPermissions": "Huquqlarni qidirish...",
+    "name": "Nomi",
+    "description": "Tavsif",
+    "type": "Turi",
+    "module": "Modul",
+    "directory": "Ma'lumotnoma",
+    "drawer": {
+      "title": "Rolni boshqarish",
+      "roleNotFound": "Rol topilmadi.",
+      "assignPermissions": "Huquqlarni biriktirish",
+      "searchPermissions": "Huquqlarni qidirish...",
+      "createNewPermission": "Yangi huquq yaratish",
+      "assignedPermissions": "Biriktirilgan huquqlar",
+      "createNewRole": "Yangi rol yaratish",
+      "roleName": "Rol nomi",
+      "description": "Tavsif"
+    }
+  },
+  "reports": {
+    "title": "Hisobotlar",
+    "createReportStructure": "Hisobot tuzilmasini yaratish",
+    "structure": "Hisobot tuzilmasi",
+    "createChart": "Diagramma yaratish",
+    "financial": {
+      "title": "Moliyaviy hisobotlar",
+      "description": "Daromad, xarajatlar va foyda marjasini ko'rish va tahlil qilish."
+    },
+    "inventory": {
+      "title": "Ombor hisobotlari",
+      "description": "Ombordagi zaxiralar, harakatlar va mahsulot samaradorligini kuzatish."
+    },
+    "sales": {
+      "title": "Sotuvlar hisobotlari",
+      "description": "Sotuvlar natijalari, mijozlar tendensiyalari va daromad ko'rsatkichlarini tahlil qilish."
+    },
+    "chartDialog": {
+      "createChart": "Diagramma yaratish",
+      "chartType": "Diagramma turi",
+      "lineChart": "Chiziqli diagramma",
+      "barChart": "Ustunli diagramma",
+      "pieChart": "Doira diagramma",
+      "chartTitle": "Diagramma nomi"
+    }
   }
 } 

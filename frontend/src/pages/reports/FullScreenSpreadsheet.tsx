@@ -6,15 +6,17 @@ import Spreadsheet from 'x-data-spreadsheet';
 import 'x-data-spreadsheet/dist/xspreadsheet.css';
 import ChartDialog from './ChartDialog';
 import { Line, Bar, Pie } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 
 interface ChartData {
   type: 'line' | 'bar' | 'pie';
   title: string;
-  data: any;
+  data: unknown;
   range: string;
 }
 
 const FullScreenSpreadsheet: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const spreadsheetRef = useRef<HTMLDivElement>(null);
   const spreadsheetInstanceRef = useRef<Spreadsheet | null>(null);
@@ -25,7 +27,13 @@ const FullScreenSpreadsheet: React.FC = () => {
   const [showCharts, setShowCharts] = useState(false);
 
   useEffect(() => {
+    console.log("RENDERING SPREADSHEET");
     if (!spreadsheetRef.current) return;
+
+    const container = spreadsheetRef.current;
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
 
     const options = {
       mode: 'edit' as const,
@@ -106,7 +114,7 @@ const FullScreenSpreadsheet: React.FC = () => {
   const handleCreateChart = (chartType: 'line' | 'bar' | 'pie') => {
     console.log('Creating chart of type:', chartType);
     console.log('Selected range:', selectedRange);
-    
+
     if (!selectedRange) {
       console.error('No range selected for chart creation');
       return;
@@ -129,7 +137,7 @@ const FullScreenSpreadsheet: React.FC = () => {
 
     // Extract data from the selected range
     const [startRow, startCol] = selectedRange.split(':').map(Number);
-    
+
     // Get headers (first row)
     const headers = Object.keys(data)
       .filter(key => {
@@ -228,7 +236,7 @@ const FullScreenSpreadsheet: React.FC = () => {
       width: '100vw',
       display: 'flex',
       flexDirection: 'column',
-      bgcolor: '#fff'
+      bgcolor: '#fff',
     }}>
       <Box sx={{
         display: 'flex',
@@ -238,12 +246,12 @@ const FullScreenSpreadsheet: React.FC = () => {
         borderBottom: '1px solid #e0e0e0'
       }}>
         <Typography variant="h6" component="h1">
-          Report Structure
+          {t('reports.structure', 'Report Structure')}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <IconButton
             onClick={handleChartMenuOpen}
-            title="Create Chart"
+            title={t('reports.createChart', 'Create Chart')}
           >
             <Icon icon="solar:chart-2-linear" width={24} height={24} />
           </IconButton>
@@ -278,10 +286,12 @@ const FullScreenSpreadsheet: React.FC = () => {
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
+        bgcolor: '#fff'
       }}>
         {showCharts && charts.length > 0 && (
           <Box sx={{
             p: 2,
+            pb: 0,
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
             gap: 2,
@@ -312,7 +322,7 @@ const FullScreenSpreadsheet: React.FC = () => {
             ))}
           </Box>
         )}
-        <Box sx={{ flex: 1, overflow: 'hidden' }}>
+        <Box sx={{ flex: 1, overflow: 'hidden', height: '100%', }}>
           <div ref={spreadsheetRef} style={{ height: '100%', width: '100%' }} />
         </Box>
       </Box>

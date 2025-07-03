@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import DirectoryFieldsEditor from './DirectoryFieldsEditor';
 import { DirectoryField } from '@/api/services/directories';
+import KeyValueEditor, { KeyValueObject } from '@/components/KeyValueEditor';
 
 interface AddDirectoryDrawerProps {
   open: boolean;
@@ -28,6 +29,7 @@ const AddDirectoryDrawer: React.FC<AddDirectoryDrawerProps> = ({ open, onClose }
     directory_type: 'Company',
   });
   const [fields, setFields] = useState<DirectoryField[]>([]);
+  const [metadata, setMetadata] = useState<KeyValueObject>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
@@ -38,7 +40,7 @@ const AddDirectoryDrawer: React.FC<AddDirectoryDrawerProps> = ({ open, onClose }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(createDirectoryStart({ ...form, fields }));
+    dispatch(createDirectoryStart({ ...form, fields, metadata }));
     onClose();
   };
 
@@ -77,11 +79,16 @@ const AddDirectoryDrawer: React.FC<AddDirectoryDrawerProps> = ({ open, onClose }
             required
             SelectProps={{ native: true }}
           >
-            <option value="Module">Module</option>
-            <option value="Company">Company</option>
-            <option value="System">System</option>
+            <option value="Module">{t('directories.typeOptions.module', 'Module')}</option>
+            <option value="Company">{t('directories.typeOptions.company', 'Company')}</option>
+            <option value="System">{t('directories.typeOptions.system', 'System')}</option>
           </TextField>
           <DirectoryFieldsEditor fields={fields} onFieldsChange={setFields} />
+          <KeyValueEditor
+            value={metadata}
+            onChange={setMetadata}
+            label={t('directories.metadata', 'Metadata')}
+          />
           <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
             <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 999, textTransform: 'none' }}>
               {t('common.cancel')}

@@ -30,6 +30,7 @@ import {
 } from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
 import { fileParserService } from '@/api/services/fileParser.service';
+import { useTranslation } from 'react-i18next';
 
 interface BankStatementGroup {
   fileName: string;
@@ -45,6 +46,7 @@ interface BankStatementUploadProps {
 }
 
 const BankStatementUpload: React.FC<BankStatementUploadProps> = ({ onViewRecords }) => {
+  const { t } = useTranslation();
   const [uploadedFiles, setUploadedFiles] = useState<BankStatementGroup[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -158,7 +160,7 @@ Rules:
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" fontWeight={700} mb={3}>
-        Bank Statement Management
+        {t('bankStatement.management', 'Bank Statement Management')}
       </Typography>
 
       {/* Upload Area */}
@@ -187,26 +189,26 @@ Rules:
               <Box>
                 <CircularProgress size={48} sx={{ mb: 2 }} />
                 <Typography variant="h6" color="text.secondary">
-                  Processing bank statement...
+                  {t('bankStatement.processing', 'Processing bank statement...')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  AI is parsing your Excel file
+                  {t('bankStatement.parsing', 'AI is parsing your Excel file')}
                 </Typography>
               </Box>
             ) : (
               <Box>
                 <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
                 <Typography variant="h6" gutterBottom>
-                  {isDragActive ? 'Drop the file here' : 'Upload Bank Statement'}
+                  {isDragActive ? t('bankStatement.dropHere', 'Drop the file here') : t('bankStatement.upload', 'Upload Bank Statement')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" mb={2}>
-                  Drag and drop an Excel file here, or click to select
+                  {t('bankStatement.dragDrop', 'Drag and drop an Excel file here, or click to select')}
                 </Typography>
                 <Button variant="contained" component="span" disabled={isUploading}>
-                  Choose File
+                  {t('bankStatement.chooseFile', 'Choose File')}
                 </Button>
                 <Typography variant="caption" display="block" mt={1} color="text.secondary">
-                  Supported formats: .xlsx, .xls (Max 10MB)
+                  {t('bankStatement.supportedFormats', 'Supported formats: .xlsx, .xls (Max 10MB)')}
                 </Typography>
               </Box>
             )}
@@ -225,7 +227,7 @@ Rules:
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Uploaded Bank Statements
+              {t('bankStatement.uploaded', 'Uploaded Bank Statements')}
             </Typography>
             
             <TableContainer component={Paper} variant="outlined">
@@ -319,16 +321,16 @@ Rules:
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle>{t('bankStatement.confirmDelete', 'Confirm Delete')}</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete "{fileToDelete}"? This action cannot be undone.
+            {t('bankStatement.deleteWarningFile', { file: fileToDelete })}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDeleteConfirmOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
           <Button onClick={confirmDelete} color="error" variant="contained">
-            Delete
+            {t('common.delete', 'Delete')}
           </Button>
         </DialogActions>
       </Dialog>
