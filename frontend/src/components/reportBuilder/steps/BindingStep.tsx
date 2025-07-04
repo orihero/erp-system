@@ -3,7 +3,6 @@ import { WizardStepProps, BindingData } from '../../../types/wizard';
 import { TemplateBinding, Company, Module } from '../../../types/reportTemplate';
 import { Button } from '../../reportBuilder/ReportWizard/Button';
 import { Modal } from '../../reportBuilder/ReportWizard/Modal';
-import './BindingStep.scss';
 
 // Placeholder hooks and components for missing dependencies
 const useCompanies = () => ({ companies: [], isLoading: false, getCompanyHierarchy: async () => null });

@@ -1,27 +1,30 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // TODO: Update these imports when actual component locations are known
-import { WizardProgress } from '../WizardProgress';
-import { WizardStep } from '../WizardStep';
+import { WizardProgress } from "./WizardProgress";
+import { WizardStep } from "./WizardStep";
 import { useReportWizard } from '../hooks/useReportWizard';
 // import { useTemplateValidation } from '../hooks/useTemplateValidation'; // Not used in code
 import { ReportTemplate } from '../../../types/reportTemplate';
+import { WizardStepData } from '../../../types/wizard';
 // TODO: Update these imports when actual component locations are known
-import { Button } from '../../common/Button/Button';
-import { Modal } from '../../common/Modal/Modal';
-import './ReportWizard.scss';
+import { Button } from "./Button";
+import { Modal } from "./Modal";
 
 interface ReportWizardProps {
   onComplete?: (template: ReportTemplate) => void;
   onCancel?: () => void;
+  templateId?: string;
 }
 
 export const ReportWizard: React.FC<ReportWizardProps> = ({
   onComplete,
-  onCancel
+  onCancel,
+  templateId: propTemplateId,
 }) => {
   const navigate = useNavigate();
-  const { templateId } = useParams<{ templateId?: string }>();
+  const { templateId: routeTemplateId } = useParams<{ templateId?: string }>();
+  const templateId = propTemplateId || routeTemplateId;
   
   const {
     currentStep,
@@ -53,11 +56,11 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({
   }, [templateId, loadTemplate]);
   
   const handleStepDataChange = useCallback(async (stepId: string, data: unknown) => {
-    updateStepData(stepId, data);
+    updateStepData(stepId, data as WizardStepData);
     
     // Validate step data in background
     try {
-      await validateStep(stepId, data);
+      await validateStep(stepId, data as WizardStepData);
     } catch (error) {
       console.warn(`Step ${stepId} validation failed:`, error);
     }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { WizardStepProps } from '../../../types/wizard';
 import { useReportWizard } from '../hooks/useReportWizard';
-import { reportTemplateAPI } from '../../services/api/reportTemplates';
+import { reportTemplateAPI } from '../../../services/api/reportTemplates';
 
 const PREVIEW_FORMATS = [
   { value: 'html', label: 'HTML' },

@@ -1,3 +1,5 @@
+const { sequelize } = require('../models');
+
 class ValidationService {
   
   static async validateTemplateData(templateData) {
@@ -30,26 +32,72 @@ class ValidationService {
       errors.push({ field: 'templateType', message: 'Invalid template type' });
     }
     
-    // Validate dataSourceConfig
+    // Deep validation for dataSourceConfig
     if (!templateData.dataSourceConfig || typeof templateData.dataSourceConfig !== 'object') {
       errors.push({ field: 'dataSourceConfig', message: 'Data source configuration is required' });
     } else {
       const dsErrors = this.validateDataSourceConfig(templateData.dataSourceConfig);
       errors.push(...dsErrors);
+      // Deep checks for database type
+      if (templateData.dataSourceConfig.type === 'database') {
+        if (!templateData.dataSourceConfig.queryMode || !['visual', 'sql'].includes(templateData.dataSourceConfig.queryMode)) {
+          errors.push({ field: 'dataSourceConfig.queryMode', message: 'Query mode must be visual or sql' });
+        }
+        if (templateData.dataSourceConfig.queryMode === 'sql') {
+          if (!templateData.dataSourceConfig.sqlQuery || typeof templateData.dataSourceConfig.sqlQuery !== 'string') {
+            errors.push({ field: 'dataSourceConfig.sqlQuery', message: 'SQL query is required for SQL mode' });
+          }
+        }
+        if (templateData.dataSourceConfig.queryMode === 'visual') {
+          if (!templateData.dataSourceConfig.tables || !Array.isArray(templateData.dataSourceConfig.tables) || templateData.dataSourceConfig.tables.length === 0) {
+            errors.push({ field: 'dataSourceConfig.tables', message: 'At least one table is required for visual mode' });
+          }
+          if (!templateData.dataSourceConfig.fields || !Array.isArray(templateData.dataSourceConfig.fields) || templateData.dataSourceConfig.fields.length === 0) {
+            errors.push({ field: 'dataSourceConfig.fields', message: 'At least one field is required for visual mode' });
+          }
+        }
+      }
     }
     
-    // Validate layoutConfig
+    // Deep validation for layoutConfig
     if (!templateData.layoutConfig || typeof templateData.layoutConfig !== 'object') {
       errors.push({ field: 'layoutConfig', message: 'Layout configuration is required' });
     } else {
       const layoutErrors = this.validateLayoutConfig(templateData.layoutConfig);
       errors.push(...layoutErrors);
+      // Deep checks for sections
+      if (!templateData.layoutConfig.sections || !Array.isArray(templateData.layoutConfig.sections) || templateData.layoutConfig.sections.length === 0) {
+        errors.push({ field: 'layoutConfig.sections', message: 'At least one section is required' });
+      } else {
+        templateData.layoutConfig.sections.forEach((section, idx) => {
+          if (!section.type) {
+            errors.push({ field: `layoutConfig.sections[${idx}].type`, message: 'Section type is required' });
+          }
+          if (!section.fields || !Array.isArray(section.fields)) {
+            errors.push({ field: `layoutConfig.sections[${idx}].fields`, message: 'Section fields must be an array' });
+          }
+        });
+      }
     }
     
-    // Validate parametersConfig
+    // Deep validation for parametersConfig
     if (templateData.parametersConfig) {
       const paramErrors = this.validateParametersConfig(templateData.parametersConfig);
       errors.push(...paramErrors);
+      // Deep checks for required fields, types, and constraints
+      if (Array.isArray(templateData.parametersConfig)) {
+        templateData.parametersConfig.forEach((param, idx) => {
+          if (!param.name || typeof param.name !== 'string') {
+            errors.push({ field: `parametersConfig[${idx}].name`, message: 'Parameter name is required and must be a string' });
+          }
+          if (!param.type || typeof param.type !== 'string') {
+            errors.push({ field: `parametersConfig[${idx}].type`, message: 'Parameter type is required and must be a string' });
+          }
+          if (param.required && (param.defaultValue === undefined || param.defaultValue === null)) {
+            errors.push({ field: `parametersConfig[${idx}].defaultValue`, message: 'Required parameter should have a default value or be handled in UI.' });
+          }
+        });
+      }
     }
     
     return {
@@ -248,29 +296,29 @@ class ValidationService {
   
   static validateBindingStep(stepData) {
     const errors = [];
-    
-    if (!stepData.bindings || stepData.bindings.length === 0) {
+    if (!stepData.bindings || !Array.isArray(stepData.bindings) || stepData.bindings.length === 0) {
       errors.push({ field: 'bindings', message: 'At least one binding is required' });
+    } else {
+      stepData.bindings.forEach((binding, index) => {
+        if (!binding.bindingType) {
+          errors.push({ field: `bindings[${index}].bindingType`, message: 'Binding type is required' });
+        }
+        if (binding.bindingType === 'company' && (!binding.companyId || typeof binding.companyId !== 'number')) {
+          errors.push({ field: `bindings[${index}].companyId`, message: 'Valid companyId is required for company binding' });
+        }
+        if (binding.bindingType === 'module' && (!binding.moduleId || typeof binding.moduleId !== 'number')) {
+          errors.push({ field: `bindings[${index}].moduleId`, message: 'Valid moduleId is required for module binding' });
+        }
+        if (binding.bindingType === 'company_module') {
+          if (!binding.companyId || typeof binding.companyId !== 'number') {
+            errors.push({ field: `bindings[${index}].companyId`, message: 'Valid companyId is required for company-module binding' });
+          }
+          if (!binding.moduleId || typeof binding.moduleId !== 'number') {
+            errors.push({ field: `bindings[${index}].moduleId`, message: 'Valid moduleId is required for company-module binding' });
+          }
+        }
+      });
     }
-    
-    stepData.bindings?.forEach((binding, index) => {
-      if (!binding.bindingType) {
-        errors.push({ field: `bindings[${index}].bindingType`, message: 'Binding type is required' });
-      }
-      
-      if (binding.bindingType === 'company' && !binding.companyId) {
-        errors.push({ field: `bindings[${index}].companyId`, message: 'Company is required for company binding' });
-      }
-      
-      if (binding.bindingType === 'module' && !binding.moduleId) {
-        errors.push({ field: `bindings[${index}].moduleId`, message: 'Module is required for module binding' });
-      }
-      
-      if (binding.bindingType === 'company_module' && (!binding.companyId || !binding.moduleId)) {
-        errors.push({ field: `bindings[${index}]`, message: 'Both company and module are required for company-module binding' });
-      }
-    });
-    
     return { isValid: errors.length === 0, errors };
   }
   
@@ -294,6 +342,41 @@ class ValidationService {
   static validateReviewStep(allWizardData) {
     // Validate the complete template configuration
     return this.validateTemplateData(allWizardData);
+  }
+  
+  /**
+   * Validate a SQL query using EXPLAIN. Only allows SELECT queries. Returns errors if invalid or unsafe.
+   * @param {string} sqlQuery
+   * @returns {Promise<{isValid: boolean, errors: Array}>}
+   */
+  static async validateQuery(sqlQuery) {
+    const errors = [];
+    if (!sqlQuery || typeof sqlQuery !== 'string' || sqlQuery.trim().length === 0) {
+      errors.push({ field: 'sqlQuery', message: 'SQL query is required' });
+      return { isValid: false, errors };
+    }
+    // Only allow SELECT queries
+    const trimmed = sqlQuery.trim().toLowerCase();
+    if (!trimmed.startsWith('select')) {
+      errors.push({ field: 'sqlQuery', message: 'Only SELECT queries are allowed' });
+      return { isValid: false, errors };
+    }
+    // Disallow forbidden statements
+    const forbidden = ['insert', 'update', 'delete', 'drop', 'alter', 'truncate', 'create', 'grant', 'revoke'];
+    for (const keyword of forbidden) {
+      if (trimmed.includes(keyword + ' ')) {
+        errors.push({ field: 'sqlQuery', message: `Query contains forbidden statement: ${keyword}` });
+        return { isValid: false, errors };
+      }
+    }
+    // Try EXPLAIN
+    try {
+      await sequelize.query('EXPLAIN ' + sqlQuery, { type: sequelize.QueryTypes.SELECT });
+    } catch (err) {
+      errors.push({ field: 'sqlQuery', message: 'SQL query is invalid: ' + (err.message || err.toString()) });
+      return { isValid: false, errors };
+    }
+    return { isValid: errors.length === 0, errors };
   }
 }
 

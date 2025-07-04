@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Card, CardContent, Typography, IconButton, CircularProgress, Grid } from '@mui/material';
+import { Box, Button, Card, CardContent, Typography, IconButton, CircularProgress, Grid, Dialog } from '@mui/material';
 import { Icon } from '@iconify/react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import reportService from '../../services/reportService';
 import { ReportTemplate } from '../../types/report';
+import { ReportWizard } from '../../components/reportBuilder/ReportWizard/ReportWizard';
 
 const Reports: React.FC = () => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [reportStructures, setReportStructures] = useState<ReportTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [editTemplateId, setEditTemplateId] = useState<string | null>(null);
 
   const fetchReports = async () => {
     setLoading(true);
@@ -28,11 +29,13 @@ const Reports: React.FC = () => {
   }, []);
 
   const handleCreateReport = () => {
-    navigate('/reports/create/fullscreen');
+    setEditTemplateId(null);
+    setWizardOpen(true);
   };
 
   const handleEdit = (id: string) => {
-    navigate(`/reports/edit/${id}`);
+    setEditTemplateId(id);
+    setWizardOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -43,6 +46,17 @@ const Reports: React.FC = () => {
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const handleWizardClose = () => {
+    setWizardOpen(false);
+    setEditTemplateId(null);
+  };
+
+  const handleWizardComplete = () => {
+    setWizardOpen(false);
+    setEditTemplateId(null);
+    fetchReports();
   };
 
   return (
@@ -104,6 +118,14 @@ const Reports: React.FC = () => {
           ))}
         </Grid>
       )}
+      <Dialog open={wizardOpen} onClose={handleWizardClose} maxWidth="xl" fullWidth>
+        <ReportWizard
+          key={editTemplateId || 'new'}
+          onComplete={handleWizardComplete}
+          onCancel={handleWizardClose}
+          templateId={editTemplateId || undefined}
+        />
+      </Dialog>
     </Box>
   );
 };

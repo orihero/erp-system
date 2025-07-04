@@ -2,7 +2,7 @@ import { ReportTemplate, TemplateBinding } from '../../types/reportTemplate';
 import { WizardStepData, WizardStepValidation } from '../../types/wizard';
 import { DataSource } from '../../types/report';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 class ReportTemplateAPI {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {

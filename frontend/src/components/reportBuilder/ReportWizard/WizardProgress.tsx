@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from 'react';
 import { WizardStep, WizardStepValidation } from '../../../types/wizard';
-import './WizardProgress.scss';
 
 // Placeholder translation function
 declare function t(key: string, params?: Record<string, unknown>): string;
