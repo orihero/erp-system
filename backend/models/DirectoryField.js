@@ -44,16 +44,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     type: {
       type: DataTypes.ENUM(
-        'string',
-        'number',
+        'text',
         'file',
         'bool',
         'date',
         'time',
-        'json',
         'datetime',
+        'json',
         'relation',
-        'text',
         'decimal',
         'integer'
       ),

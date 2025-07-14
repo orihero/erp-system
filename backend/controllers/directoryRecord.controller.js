@@ -65,7 +65,15 @@ const directoryRecordController = {
   // New: Get all directory data, company_directory, and directory_records by directory_id and company_id
   getFullDirectoryData: async (req, res) => {
     try {
-      const { directory_id, company_id } = req.query;
+      const { directory_id, company_id, sortField, sortOrder = 'asc', groupBy } = req.query;
+      // Parse filters from query (filters[field_id]=value)
+      const filters = {};
+      Object.keys(req.query).forEach((key) => {
+        if (key.startsWith('filters[') && key.endsWith(']')) {
+          const fieldId = key.slice(8, -1);
+          filters[fieldId] = req.query[key];
+        }
+      });
       if (!directory_id || !company_id) {
         return res.status(400).json({ message: 'directory_id and company_id are required' });
       }
@@ -84,22 +92,46 @@ const directoryRecordController = {
       if (!companyDirectory) {
         return res.status(404).json({ message: 'CompanyDirectory not found' });
       }
+      // Build include for DirectoryValue with filtering
+      const valueInclude = {
+        model: DirectoryValue,
+        as: 'recordValues',
+        include: [
+          {
+            model: DirectoryField,
+            as: 'field'
+          }
+        ],
+        required: false
+      };
+      // Filtering by field values
+      if (Object.keys(filters).length > 0) {
+        valueInclude.where = {
+          [require('sequelize').Op.and]: Object.entries(filters).map(([field_id, value]) => ({
+            field_id,
+            value
+          }))
+        };
+        valueInclude.required = true; // Only records matching filters
+      }
+      // Sorting by a field value
+      let order = [['created_at', 'DESC']];
+      let include = [valueInclude];
+      if (sortField) {
+        // Join DirectoryValue as a separate alias for sorting
+        include.push({
+          model: DirectoryValue,
+          as: 'sortValue',
+          required: false,
+          where: { field_id: sortField },
+        });
+        order = [[{ model: DirectoryValue, as: 'sortValue' }, 'value', sortOrder]];
+      }
       // Get all directory records for this company_directory
       const directoryRecords = await DirectoryRecord.findAll({
         where: { company_directory_id: companyDirectory.id },
-        include: [
-          {
-            model: DirectoryValue,
-            as: 'recordValues',
-            include: [
-              {
-                model: DirectoryField,
-                as: 'field'
-              }
-            ]
-          }
-        ],
-        order: [['created_at', 'DESC']]
+        include,
+        order
       });
       // Extract fields from directory and remove from directory and companyDirectory.directory
       const directory = companyDirectory.directory?.toJSON ? companyDirectory.directory.toJSON() : companyDirectory.directory;
@@ -110,10 +142,22 @@ const directoryRecordController = {
       if (companyDirectoryObj.directory && companyDirectoryObj.directory.fields) {
         delete companyDirectoryObj.directory.fields;
       }
+      // Grouping
+      let grouped = null;
+      if (groupBy) {
+        grouped = {};
+        for (const record of directoryRecords) {
+          // Find the value for the groupBy field
+          const valueObj = (record.recordValues || []).find(v => v.field_id === groupBy);
+          const groupValue = valueObj ? valueObj.value : 'undefined';
+          if (!grouped[groupValue]) grouped[groupValue] = [];
+          grouped[groupValue].push(record);
+        }
+      }
       res.json({
         directory,
         companyDirectory: companyDirectoryObj,
-        directoryRecords,
+        directoryRecords: grouped || directoryRecords,
         fields
       });
     } catch (error) {

@@ -1,6 +1,16 @@
 const axios = require("axios");
 const XLSX = require("xlsx");
 
+// Helper to robustly extract the first JSON array from a string
+function extractJsonArray(text) {
+  // Try to extract the first JSON array in the text
+  const match = text.match(/\[\s*[\{\[].*?\][\s\]]*/s);
+  if (match) {
+    return JSON.parse(match[0]);
+  }
+  throw new Error('No JSON array found in AI response');
+}
+
 class AIParser {
   constructor() {
     this.openRouterApiKey = process.env.OPENROUTER_API_KEY;
@@ -69,7 +79,7 @@ Expected output: JSON array of objects`;
       const response = await axios.post(
         `${this.openRouterBaseUrl}/chat/completions`,
         {
-          model: "meta-llama/llama-3.1-8b-instruct:free",
+          model: "google/gemini-2.5-flash-preview-05-20",
           messages: [
             {
               role: "system",
@@ -106,20 +116,17 @@ Expected output: JSON array of objects`;
       try {
         parsedData = JSON.parse(cleanedResponse);
       } catch (parseError) {
-        // Try to extract JSON from response if it contains extra text
-        const jsonMatch = cleanedResponse.match(/\[.*\]/s);
-        if (jsonMatch) {
-          try {
-            parsedData = JSON.parse(jsonMatch[0]);
-          } catch (jsonExtractError) {
-            // Log the cleaned string with visible whitespace and char codes
-            console.error('AI response (cleaned, invalid JSON):', cleanedResponse.split('').map(c => `${c} (U+${c.charCodeAt(0).toString(16).padStart(4, '0')})`).join(''));
-            throw new Error('AI response could not be parsed as JSON. Please check the AI output format.');
-          }
-        } else {
-          // Log the cleaned string with visible whitespace and char codes
-          console.error('AI response (cleaned, invalid JSON):', cleanedResponse.split('').map(c => `${c} (U+${c.charCodeAt(0).toString(16).padStart(4, '0')})`).join(''));
-          throw new Error('AI response is not valid JSON and no JSON array could be extracted.');
+        // Try to extract JSON array using robust helper
+        try {
+          parsedData = extractJsonArray(cleanedResponse);
+        } catch (jsonExtractError) {
+          // Log the raw and cleaned AI response for debugging
+          console.error('AI response (raw):', aiResponse);
+          console.error('AI response (cleaned, invalid JSON):', cleanedResponse);
+          throw new Error(
+            'AI response is not valid JSON and no JSON array could be extracted. ' +
+            'First 500 chars: ' + cleanedResponse.slice(0, 500)
+          );
         }
       }
 

@@ -8,7 +8,13 @@ import { fetchDirectoryFieldsStart } from '@/store/slices/directoriesSlice';
 import { addDirectoryRecord } from '@/store/slices/directoryRecordsSlice';
 import { RootState } from '@/store';
 
-const AddDirectoryRecordDrawer: React.FC<{ open: boolean; onClose: () => void; companyDirectoryId: string | undefined; directoryId?: string }> = ({ open, onClose, companyDirectoryId, directoryId }) => {
+const AddDirectoryRecordDrawer: React.FC<{
+  open: boolean;
+  onClose: () => void;
+  companyDirectoryId: string | undefined;
+  directoryId?: string;
+  onSuccess?: () => void;
+}> = ({ open, onClose, companyDirectoryId, directoryId, onSuccess }) => {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const { fields, fieldsLoading } = useSelector((state: RootState) => state.directories);
@@ -48,6 +54,7 @@ const AddDirectoryRecordDrawer: React.FC<{ open: boolean; onClose: () => void; c
                 value
             }));
             dispatch(addDirectoryRecord({ companyDirectoryId, values }));
+            if (onSuccess) onSuccess();
         }
         onClose();
     };

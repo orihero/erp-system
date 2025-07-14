@@ -221,6 +221,12 @@ module.exports = {
       }
     ];
 
+    // Stringify metadata for each field
+    bankStatementFields.forEach(field => {
+      if (field.metadata) {
+        field.metadata = JSON.stringify(field.metadata);
+      }
+    });
     // Insert new fields
     await queryInterface.bulkInsert('directory_fields', bankStatementFields);
   },

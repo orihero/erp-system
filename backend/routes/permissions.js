@@ -49,6 +49,15 @@ router.post(
   permissionsController.assignPermissionToRole
 );
 
+// Get all permissions assigned to a role
+router.get(
+  "/roles/:roleId/permissions",
+  authenticateUser,
+  authorize('read', null, null, null, 'role_permissions.view'),
+  checkRole(["super_admin"]),
+  permissionsController.getRolePermissions
+);
+
 // Revoke permission from role
 router.delete(
   "/roles/:roleId/permissions/:permissionId",

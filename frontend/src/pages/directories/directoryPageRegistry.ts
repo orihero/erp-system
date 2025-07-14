@@ -9,7 +9,7 @@ export const DEFAULT_DIRECTORY_COMPONENT_NAME = 'Default';
 // Only register custom pages here, all as lazy components
 const registry: Record<string, React.LazyExoticComponent<ComponentType<object>>> = {
   BankStatement: BankStatementPage,
-  // CustomDirectory: React.lazy(() => import('./CustomDirectoryPage')), // Example registration
+  // Reciepts: React.lazy(() => import('./CustomDirectoryPage')), // Example registration
 };
 
 export function registerDirectoryPage(name: string, component: React.LazyExoticComponent<ComponentType<object>>) {

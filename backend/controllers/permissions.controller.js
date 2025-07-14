@@ -141,5 +141,42 @@ module.exports = {
       console.error("Error revoking permission from role:", error);
       res.status(500).json({ error: "Failed to revoke permission from role: " + error.message });
     }
+  },
+
+  async getRolePermissions(req, res) {
+    try {
+      const { roleId } = req.params;
+      const rolePermissions = await models.RolePermission.findAll({
+        where: { role_id: roleId },
+        include: [
+          {
+            model: models.Permission,
+            as: 'permission',
+            include: [
+              { model: models.Module, as: 'module' },
+              { model: models.Directory, as: 'directory' }
+            ]
+          }
+        ]
+      });
+      // Flatten the response to return permission details with assignment info
+      const result = rolePermissions.map(rp => {
+        const { id, effective_from, effective_until, constraint_data } = rp;
+        const permission = rp.permission ? rp.permission.toJSON() : null;
+        return {
+          id,
+          role_id: roleId,
+          permission_id: permission ? permission.id : null,
+          effective_from,
+          effective_until,
+          constraint_data,
+          ...permission
+        };
+      });
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching role permissions:", error);
+      res.status(500).json({ error: "Failed to fetch role permissions: " + error.message });
+    }
   }
 }; 
