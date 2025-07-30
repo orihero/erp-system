@@ -17,6 +17,17 @@ const sequelize = new Sequelize(
       min: 0,
       acquire: 30000,
       idle: 10000
+    },
+    // Add explicit UTF-8 charset configuration
+    dialectOptions: {
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci',
+      supportBigNumbers: true,
+      bigNumberStrings: true
+    },
+    define: {
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci'
     }
   }
 );

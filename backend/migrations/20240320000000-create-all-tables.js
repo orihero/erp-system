@@ -1,90 +1,60 @@
 'use strict';
 
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    // Create companies table
-    await queryInterface.createTable('companies', {
+  async up(queryInterface, Sequelize) {
+    // Create users table
+    await queryInterface.createTable('users', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true
       },
-      name: {
+      email: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+          isEmail: true
+        }
+      },
+      password: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      admin_email: {
+      first_name: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      employee_count: {
-        type: Sequelize.ENUM('less_than_10', '10_to_50', '50_to_100', '100_to_500', '500_to_1000'),
+      last_name: {
+        type: Sequelize.STRING,
         allowNull: false
       },
-      logo: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      address: {
-        type: Sequelize.TEXT,
-        allowNull: true
-      },
-      description: {
-        type: Sequelize.TEXT,
-        allowNull: true
-      },
-      website: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      phone: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      tax_id: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      registration_number: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      industry: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      founded_year: {
-        type: Sequelize.INTEGER,
-        allowNull: true
-      },
-      parent_company_id: {
+      company_id: {
         type: Sequelize.UUID,
         allowNull: true,
         references: {
           model: 'companies',
           key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
+        }
       },
-      contacts: {
-        type: Sequelize.JSONB,
-        allowNull: true,
-        defaultValue: {}
-      },
-      status: {
-        type: Sequelize.ENUM('active', 'inactive', 'suspended'),
-        defaultValue: 'active',
-        allowNull: false
+      is_active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
       },
       created_at: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: false,
+        defaultValue: Sequelize.NOW
       },
       updated_at: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: false,
+        defaultValue: Sequelize.NOW
       }
+    }, {
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci'
     });
 
     // Create user_roles table
@@ -167,6 +137,9 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false
       }
+    }, {
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci'
     });
 
     // Create permissions table
@@ -269,54 +242,6 @@ module.exports = {
       name: 'unique_role_permission'
     });
 
-    // Create users table
-    await queryInterface.createTable('users', {
-      id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        primaryKey: true
-      },
-      email: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
-      },
-      password: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      firstname: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      lastname: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      status: {
-        type: Sequelize.ENUM('active', 'inactive'),
-        allowNull: false
-      },
-      company_id: {
-        type: Sequelize.UUID,
-        references: {
-          model: 'companies',
-          key: 'id'
-        }
-      },
-      last_login: {
-        type: Sequelize.DATE
-      },
-      created_at: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      updated_at: {
-        type: Sequelize.DATE,
-        allowNull: false
-      }
-    });
-
     // Create user_role_assignments table
     await queryInterface.createTable('user_role_assignments', {
       id: {
@@ -401,6 +326,9 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false
       }
+    }, {
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci'
     });
 
     // Create company_directories table
@@ -432,6 +360,9 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false
       }
+    }, {
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci'
     });
 
     // Create directory_values table
@@ -466,6 +397,9 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false
       }
+    }, {
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci'
     });
   },
 

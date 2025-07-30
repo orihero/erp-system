@@ -9,12 +9,15 @@ import {
   Typography,
   Paper,
   Divider,
+  Tooltip,
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { DirectoryField, Directory } from '@/api/services/directories';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { fetchDirectoriesStart } from '@/store/slices/directoriesSlice';
+import DirectoryFieldMetadataEditor from './DirectoryFieldMetadataEditor';
+import { KeyValueObject } from '@/components/KeyValueEditor';
 
 interface DirectoryFieldsEditorProps {
   fields: DirectoryField[];
@@ -34,6 +37,8 @@ const DirectoryFieldsEditor: React.FC<DirectoryFieldsEditorProps> = ({
     name: '',
     type: 'string',
   });
+  const [metadataEditorOpen, setMetadataEditorOpen] = useState(false);
+  const [selectedFieldForMetadata, setSelectedFieldForMetadata] = useState<DirectoryField | null>(null);
 
   useEffect(() => {
     dispatch(fetchDirectoriesStart());
@@ -83,6 +88,18 @@ const DirectoryFieldsEditor: React.FC<DirectoryFieldsEditorProps> = ({
 
   const handleNewFieldChange = (changes: Partial<DirectoryField>) => {
     setNewField(prev => ({ ...prev, ...changes }));
+  };
+
+  const handleMetadataEdit = (field: DirectoryField) => {
+    setSelectedFieldForMetadata(field);
+    setMetadataEditorOpen(true);
+  };
+
+  const handleMetadataSave = (metadata: KeyValueObject) => {
+    if (selectedFieldForMetadata) {
+      handleFieldChange(selectedFieldForMetadata.id, { metadata });
+      setSelectedFieldForMetadata(null);
+    }
   };
 
   const renderFieldInputs = (field: DirectoryField, isNew: boolean = false) => {
@@ -141,12 +158,24 @@ const DirectoryFieldsEditor: React.FC<DirectoryFieldsEditorProps> = ({
       {fields.map((field) => (
         <Paper key={field.id} sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
           {renderFieldInputs(field)}
-          <IconButton
-            onClick={() => handleRemoveField(field.id)}
-            sx={{ color: '#ef4444' }}
-          >
-            <Icon icon="ph:trash" width={20} />
-          </IconButton>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Tooltip title={t('directories.editMetadata', 'Edit Metadata')}>
+              <IconButton
+                onClick={() => handleMetadataEdit(field)}
+                sx={{ color: '#3b82f6' }}
+              >
+                <Icon icon="ph:gear" width={20} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t('directories.deleteField', 'Delete Field')}>
+              <IconButton
+                onClick={() => handleRemoveField(field.id)}
+                sx={{ color: '#ef4444' }}
+              >
+                <Icon icon="ph:trash" width={20} />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Paper>
       ))}
 
@@ -164,6 +193,19 @@ const DirectoryFieldsEditor: React.FC<DirectoryFieldsEditorProps> = ({
           {t('directories.addField')}
         </Button>
       </Paper>
+
+      {/* Metadata Editor Dialog */}
+      {selectedFieldForMetadata && (
+        <DirectoryFieldMetadataEditor
+          open={metadataEditorOpen}
+          onClose={() => {
+            setMetadataEditorOpen(false);
+            setSelectedFieldForMetadata(null);
+          }}
+          field={selectedFieldForMetadata}
+          onSave={handleMetadataSave}
+        />
+      )}
     </Box>
   );
 };

@@ -1,9 +1,11 @@
 const multer = require('multer');
 const xlsx = require('xlsx');
-const { DirectoryRecord, DirectoryValue, DirectoryField, CompanyDirectory, Directory } = require('../models');
+const models = require('../models');
+const { DirectoryRecord, DirectoryValue, DirectoryField, CompanyDirectory, Directory } = models;
+const { sequelize } = models;
 const { v4: uuidv4 } = require('uuid');
 
-// Configure multer for file uploads
+// Configure multer for file uploads with UTF-8 support
 const storage = multer.memoryStorage();
 const upload = multer({ 
   storage,
@@ -63,17 +65,26 @@ const fileParserController = {
       // Get directory fields ordered by fieldOrder
       const fields = await DirectoryField.findAll({
         where: { directory_id: directoryId },
-        order: [['metadata', 'fieldOrder', 'ASC']]
+        order: [sequelize.literal("metadata->>'fieldOrder' ASC")]
       });
 
       if (fields.length === 0) {
         return res.status(400).json({ message: 'No fields found for this directory' });
       }
 
-      // Parse the Excel file
+      // Parse the Excel file with UTF-8 encoding support
       let workbook;
       try {
-        workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+        workbook = xlsx.read(req.file.buffer, { 
+          type: 'buffer',
+          cellText: false,
+          cellDates: true,
+          cellNF: false,
+          cellStyles: false,
+          // Add UTF-8 encoding options
+          codepage: 65001, // UTF-8
+          WTF: false
+        });
       } catch (error) {
         return res.status(400).json({ message: 'Failed to parse Excel file. Please check the file format.' });
       }
@@ -86,7 +97,11 @@ const fileParserController = {
       }
 
       const worksheet = workbook.Sheets[sheetName];
-      const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+      const data = xlsx.utils.sheet_to_json(worksheet, { 
+        header: 1,
+        defval: '',
+        blankrows: false
+      });
 
       if (data.length < verticalOffset + 1) {
         return res.status(400).json({ message: 'File is empty or has insufficient data rows' });
@@ -142,7 +157,8 @@ const fileParserController = {
       // Create directory records
       const createdRecords = [];
       let recordsCount = 0;
-      const fileName = req.file.originalname;
+      // Ensure filename is properly encoded as UTF-8
+      const fileName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
 
       for (const row of dataRows) {
         if (row.length === 0 || row.every(cell => !cell)) continue; // Skip empty rows
@@ -186,7 +202,10 @@ const fileParserController = {
                   processedValue = parseFloat(cellValue) || 0;
                   break;
                 default:
-                  processedValue = String(cellValue);
+                  // Ensure string values are properly UTF-8 encoded
+                  processedValue = typeof cellValue === 'string' 
+                    ? Buffer.from(cellValue, 'latin1').toString('utf8')
+                    : String(cellValue);
               }
             }
 

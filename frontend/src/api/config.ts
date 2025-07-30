@@ -6,10 +6,13 @@ import { showNotification } from '@/store/slices/notificationSlice';
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-cache',
     'Pragma': 'no-cache',
   },
+  // Add response type configuration for proper UTF-8 handling
+  responseType: 'json',
+  responseEncoding: 'utf8',
 });
 
 // Add request interceptor to add auth token

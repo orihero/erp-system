@@ -62,6 +62,107 @@ const directoryRecordController = {
     }
   },
 
+  // Bulk delete directory records by group (filename)
+  bulkDeleteByGroup: async (req, res) => {
+    try {
+      const { directory_id, company_id, groupValue } = req.query;
+      
+      if (!directory_id || !company_id || !groupValue) {
+        return res.status(400).json({ 
+          message: 'directory_id, company_id, and groupValue are required' 
+        });
+      }
+
+      const { CompanyDirectory, Directory, DirectoryField, DirectoryRecord, DirectoryValue } = require('../models');
+      
+      // Find the company_directory
+      const companyDirectory = await CompanyDirectory.findOne({
+        where: { directory_id, company_id },
+        include: [
+          {
+            model: Directory,
+            as: 'directory',
+            include: [{ model: DirectoryField, as: 'fields' }]
+          }
+        ]
+      });
+
+      if (!companyDirectory) {
+        return res.status(404).json({ message: 'CompanyDirectory not found' });
+      }
+
+      // Get directory metadata for groupBy field
+      const directory = companyDirectory.directory;
+      const directoryMetadata = directory.metadata || {};
+      const groupBy = directoryMetadata.groupBy;
+
+      if (!groupBy) {
+        return res.status(400).json({ 
+          message: 'Directory does not have groupBy configuration' 
+        });
+      }
+
+      // Find the groupBy field
+      const fields = directory.fields || [];
+      const groupByField = fields.find(f => f.name === groupBy);
+      
+      if (!groupByField) {
+        return res.status(400).json({ 
+          message: `GroupBy field '${groupBy}' not found in directory fields` 
+        });
+      }
+
+      // Find all records that have the specified groupValue
+      const recordsToDelete = await DirectoryRecord.findAll({
+        where: { company_directory_id: companyDirectory.id },
+        include: [
+          {
+            model: DirectoryValue,
+            as: 'recordValues',
+            where: {
+              field_id: groupByField.id,
+              value: groupValue
+            },
+            required: true
+          }
+        ]
+      });
+
+      if (recordsToDelete.length === 0) {
+        return res.status(404).json({ 
+          message: `No records found for group: ${groupValue}` 
+        });
+      }
+
+      // Delete all records and their values
+      const recordIds = recordsToDelete.map(record => record.id);
+      
+      // Delete directory values first (due to foreign key constraints)
+      await DirectoryValue.destroy({
+        where: {
+          directory_record_id: recordIds
+        }
+      });
+
+      // Delete directory records
+      await DirectoryRecord.destroy({
+        where: {
+          id: recordIds
+        }
+      });
+
+      res.json({
+        message: `Successfully deleted ${recordsToDelete.length} records from group: ${groupValue}`,
+        deletedCount: recordsToDelete.length,
+        groupValue
+      });
+
+    } catch (error) {
+      console.error('Bulk delete error:', error);
+      res.status(500).json({ message: error.message });
+    }
+  },
+
   // New: Get all directory data, company_directory, and directory_records by directory_id and company_id
   getFullDirectoryData: async (req, res) => {
     try {

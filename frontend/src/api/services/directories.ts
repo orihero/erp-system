@@ -96,6 +96,12 @@ export const directoriesApi = {
   deleteDirectoryEntry: (directoryTypeId: string, entryId: string) => 
     api.delete(`/api/directory-records/${entryId}`),
 
+  // Bulk delete directory entries by group
+  bulkDeleteByGroup: (directory_id: string, company_id: string, groupValue: string) =>
+    api.delete('/api/directory-records/bulk-delete-by-group', {
+      params: { directory_id, company_id, groupValue }
+    }),
+
   // Get full directory data, companyDirectory, and directoryRecords
   getFullDirectoryData: (directory_id: string, company_id: string, params?: URLSearchParams) =>
     api.get<{

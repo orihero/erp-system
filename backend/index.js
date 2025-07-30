@@ -35,7 +35,17 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+
+// Add explicit UTF-8 encoding middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Set default charset for all responses
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
+
 app.use(limiter);
 app.use(morgan("dev")); // Console logging
 app.use(morgan("combined", { stream: accessLogStream })); // File logging

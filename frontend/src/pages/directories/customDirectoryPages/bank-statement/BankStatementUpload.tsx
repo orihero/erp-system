@@ -30,6 +30,7 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { useDirectoryRecords } from '@/hooks/useDirectoryRecords';
+import { fileParserService } from '@/api/services/fileParser.service';
 
 interface UploadedFile {
   id: string;
@@ -84,26 +85,8 @@ const BankStatementUpload: React.FC<BankStatementUploadProps> = ({ onUploadCompl
       setUploadedFiles(prev => [newFile, ...prev]);
 
       try {
-        // Parse Excel file and extract data
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('directoryId', directoryId);
-        formData.append('companyId', companyId);
-
-        // Upload and parse the file
-        const response = await fetch('/api/file-parser/parse-bank-statement', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
-        }
-
-        const result = await response.json();
+        // Upload and parse the file using the fileParser service
+        const result = await fileParserService.parseBankStatement(file, directoryId, companyId);
 
         // Update file status
         setUploadedFiles(prev => prev.map(f => 

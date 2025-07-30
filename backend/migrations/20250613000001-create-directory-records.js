@@ -28,6 +28,9 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.NOW
       }
+    }, {
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci'
     });
 
     // Add directory_record_id column to directory_values table

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useDirectoryRecords } from '@/hooks/useDirectoryRecords';
+import { directoriesApi } from '@/api/services/directories';
 import { RootState } from '@/store';
 import {
   Box,
@@ -24,12 +25,19 @@ import {
   CircularProgress,
   Button,
   Tabs,
-  Tab
+  Tab,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   AccountBalance as AccountBalanceIcon,
-  CloudUpload as CloudUploadIcon
+  CloudUpload as CloudUploadIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import type { DirectoryEntry, DirectoryField } from '@/api/services/directories';
@@ -44,33 +52,57 @@ interface GroupedRecords {
   [groupValue: string]: BankStatementRecord[];
 }
 
+// Updated interface to match the actual API response
+interface FullDataResponse {
+  directory: any;
+  companyDirectory: any;
+  directoryRecords: any[] | Record<string, any[]>;
+  fields: DirectoryField[];
+}
+
 const BankStatement: React.FC = () => {
   const { directoryId } = useParams<{ directoryId: string }>();
   const companyId = useSelector((state: RootState) => state.auth.user?.company_id);
   const { t } = useTranslation();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState(0);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState<BankStatementRecord | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
+  const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const {
     data: fullData,
     isLoading,
     error,
     refetch
-  } = useDirectoryRecords(directoryId || '', companyId || '');
+  } = useDirectoryRecords(directoryId || '', companyId || '') as unknown as { data: FullDataResponse; isLoading: boolean; error: unknown; refetch: () => void };
 
   // Get grouping configuration from directory metadata
   const groupByField = useMemo(() => {
     if (!fullData?.directory?.metadata) return null;
     const metadata = fullData.directory.metadata as Record<string, unknown>;
-    return (metadata.groupBy as string) || null;
+    const groupBy = metadata.groupBy as string || null;
+    console.log('BankStatement GroupBy Field:', groupBy);
+    return groupBy;
   }, [fullData?.directory?.metadata]);
 
   // Parse directory records into bank statement format
   const groupedRecords = useMemo(() => {
-    if (!fullData?.directoryRecords || !fullData?.directory?.fields) return {};
+    if (!fullData?.directoryRecords || !fullData?.fields) return {};
 
-    const records = fullData.directoryRecords as DirectoryEntry[];
-    const fields = fullData.directory.fields as DirectoryField[];
+    const records = fullData.directoryRecords as any[];
+    const fields = fullData.fields as DirectoryField[];
+    
+    console.log('BankStatement Debug:', {
+      recordsCount: records.length,
+      fieldsCount: fields.length,
+      sampleRecord: records[0],
+      sampleField: fields[0],
+      fullData
+    });
     
     // Sort fields by order
     const sortedFields = fields.sort((a, b) => {
@@ -81,15 +113,36 @@ const BankStatement: React.FC = () => {
 
     const grouped: GroupedRecords = {};
 
-    records.forEach(record => {
+    // Handle both array and object formats for directoryRecords
+    let recordsToProcess: any[] = [];
+    if (Array.isArray(records)) {
+      recordsToProcess = records;
+    } else if (typeof records === 'object' && records !== null) {
+      // If records is an object (grouped by backend), flatten it
+      Object.values(records).forEach((groupRecords: any) => {
+        if (Array.isArray(groupRecords)) {
+          recordsToProcess.push(...groupRecords);
+        }
+      });
+    }
+
+    recordsToProcess.forEach(record => {
       const recordData: Partial<BankStatementRecord> = { id: record.id };
       
-      // Map record values to fields
-      record.values?.forEach(value => {
-        const field = sortedFields.find(f => f.id === value.attribute_id);
+      // Map record values to fields - handle both 'values' and 'recordValues' for compatibility
+      const values = record.values || record.recordValues || [];
+      console.log('Processing record:', record.id, 'with values:', values);
+      
+      values.forEach((value: any) => {
+        // Handle both 'attribute_id' and 'field_id' for compatibility
+        const fieldId = value.attribute_id || value.field_id;
+        const field = sortedFields.find(f => f.id === fieldId);
         if (field) {
           const fieldName = field.name;
           (recordData as Record<string, unknown>)[fieldName] = value.value;
+          console.log(`Mapped field ${fieldName} = ${value.value}`);
+        } else {
+          console.log(`Field not found for fieldId: ${fieldId}`);
         }
       });
 
@@ -99,8 +152,14 @@ const BankStatement: React.FC = () => {
         // Find the field by name
         const groupField = sortedFields.find(f => f.name === groupByField);
         if (groupField) {
-          const groupValueObj = record.values?.find(v => v.attribute_id === groupField.id);
+          const groupValueObj = values.find((v: any) => {
+            const fieldId = v.attribute_id || v.field_id;
+            return fieldId === groupField.id;
+          });
           groupValue = groupValueObj ? String(groupValueObj.value) : 'Unknown';
+          console.log(`Group value for ${groupByField}: ${groupValue}`);
+        } else {
+          console.log(`Group field '${groupByField}' not found in sorted fields`);
         }
       } else {
         // No grouping, put all records in a single group
@@ -113,6 +172,7 @@ const BankStatement: React.FC = () => {
       grouped[groupValue].push(recordData as BankStatementRecord);
     });
 
+    console.log('BankStatement Grouped Records:', grouped);
     return grouped;
   }, [fullData, groupByField]);
 
@@ -172,6 +232,58 @@ const BankStatement: React.FC = () => {
     setActiveTab(newValue);
   };
 
+  const handleDeleteClick = (record: BankStatementRecord) => {
+    setRecordToDelete(record);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!recordToDelete || !directoryId) return;
+
+    setIsDeleting(true);
+    try {
+      await directoriesApi.deleteDirectoryEntry(directoryId, recordToDelete.id);
+      setDeleteDialogOpen(false);
+      setRecordToDelete(null);
+      refetch(); // Refresh the data
+    } catch (error) {
+      console.error('Error deleting record:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setRecordToDelete(null);
+  };
+
+  const handleBulkDeleteClick = (groupValue: string) => {
+    setGroupToDelete(groupValue);
+    setBulkDeleteDialogOpen(true);
+  };
+
+  const handleBulkDeleteConfirm = async () => {
+    if (!groupToDelete || !directoryId || !companyId) return;
+
+    setIsBulkDeleting(true);
+    try {
+      await directoriesApi.bulkDeleteByGroup(directoryId, companyId, groupToDelete);
+      setBulkDeleteDialogOpen(false);
+      setGroupToDelete(null);
+      refetch(); // Refresh the data
+    } catch (error) {
+      console.error('Error bulk deleting records:', error);
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const handleBulkDeleteCancel = () => {
+    setBulkDeleteDialogOpen(false);
+    setGroupToDelete(null);
+  };
+
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
@@ -189,7 +301,7 @@ const BankStatement: React.FC = () => {
   }
 
   const fileNames = Object.keys(groupedRecords);
-  const fields = fullData?.directory?.fields as DirectoryField[] || [];
+  const fields = fullData?.fields as DirectoryField[] || [];
   const sortedFields = fields.sort((a, b) => {
     const orderA = (a.metadata?.fieldOrder as number) || 0;
     const orderB = (b.metadata?.fieldOrder as number) || 0;
@@ -198,7 +310,7 @@ const BankStatement: React.FC = () => {
   const visibleFields = getVisibleFields(sortedFields);
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3, maxWidth: '100%', overflow: 'hidden' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <AccountBalanceIcon sx={{ mr: 2, fontSize: 32 }} />
         <Typography variant="h4" fontWeight={700}>
@@ -271,11 +383,31 @@ const BankStatement: React.FC = () => {
                   >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                        <Box sx={{ flexGrow: 1 }}>
-                          <Typography variant="h6" fontWeight={600}>
-                            {groupValue}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Tooltip title={groupValue}>
+                            <Typography 
+                              variant="h6" 
+                              fontWeight={600}
+                              sx={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: '100%'
+                              }}
+                            >
+                              {groupValue}
+                            </Typography>
+                          </Tooltip>
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary"
+                            sx={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              maxWidth: '100%'
+                            }}
+                          >
                             {records.length} {t('bankStatement.records', 'records')}
                             {Object.entries(totals).map(([fieldName, total]) => (
                               <span key={fieldName}>
@@ -284,27 +416,64 @@ const BankStatement: React.FC = () => {
                             ))}
                           </Typography>
                         </Box>
-                        <Chip 
-                          label={records.length} 
-                          size="small" 
-                          color="primary" 
-                          sx={{ ml: 2 }}
-                        />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                          <Chip 
+                            label={records.length} 
+                            size="small" 
+                            color="primary" 
+                          />
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleBulkDeleteClick(groupValue);
+                            }}
+                            title={t('bankStatement.deleteGroup', 'Delete all records in this group')}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Box>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <TableContainer component={Paper} variant="outlined">
-                        <Table size="small">
+                      <TableContainer 
+                        component={Paper} 
+                        variant="outlined"
+                        sx={{
+                          maxWidth: '100%',
+                          overflowX: 'auto',
+                          '& .MuiTable-root': {
+                            minWidth: 650,
+                          }
+                        }}
+                      >
+                        <Table size="small" sx={{ tableLayout: 'fixed' }}>
                           <TableHead>
                             <TableRow>
                               {visibleFields.map(field => (
                                 <TableCell 
                                   key={field.id}
                                   align={['decimal', 'number', 'integer'].includes(field.type) ? 'right' : 'left'}
+                                  sx={{
+                                    width: field.name === 'fileName' ? '25%' : 
+                                           field.name === 'documentDate' ? '12%' :
+                                           field.name === 'account' ? '20%' :
+                                           field.name === 'organizationName' ? '15%' :
+                                           field.name === 'documentNumber' ? '10%' :
+                                           field.name === 'documentType' ? '10%' :
+                                           field.name === 'branch' ? '8%' :
+                                           'auto',
+                                    minWidth: field.name === 'fileName' ? 200 : 80,
+                                    maxWidth: field.name === 'fileName' ? 300 : undefined,
+                                  }}
                                 >
                                   {field.metadata?.label || field.name}
                                 </TableCell>
                               ))}
+                              <TableCell align="center" sx={{ width: 80, minWidth: 80 }}>
+                                {t('bankStatement.actions', 'Actions')}
+                              </TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -314,18 +483,60 @@ const BankStatement: React.FC = () => {
                                   <TableCell 
                                     key={field.id}
                                     align={['decimal', 'number', 'integer'].includes(field.type) ? 'right' : 'left'}
+                                    sx={{
+                                      width: field.name === 'fileName' ? '25%' : 
+                                             field.name === 'documentDate' ? '12%' :
+                                             field.name === 'account' ? '20%' :
+                                             field.name === 'organizationName' ? '15%' :
+                                             field.name === 'documentNumber' ? '10%' :
+                                             field.name === 'documentType' ? '10%' :
+                                             field.name === 'branch' ? '8%' :
+                                             'auto',
+                                      minWidth: field.name === 'fileName' ? 200 : 80,
+                                      maxWidth: field.name === 'fileName' ? 300 : undefined,
+                                    }}
                                   >
-                                    {field.type === 'text' && typeof record[field.name] === 'string' && record[field.name] && (record[field.name] as string).length > 50 ? (
+                                    {field.type === 'text' && typeof record[field.name] === 'string' && record[field.name] && (record[field.name] as string).length > 30 ? (
                                       <Tooltip title={record[field.name] as string}>
-                                        <Typography variant="body2" noWrap>
+                                        <Typography 
+                                          variant="body2" 
+                                          sx={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                            maxWidth: '100%',
+                                            display: 'block'
+                                          }}
+                                        >
                                           {record[field.name] as string}
                                         </Typography>
                                       </Tooltip>
                                     ) : (
-                                      formatValue(record[field.name], field)
+                                      <Typography 
+                                        variant="body2"
+                                        sx={{
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          whiteSpace: 'nowrap',
+                                          maxWidth: '100%',
+                                          display: 'block'
+                                        }}
+                                      >
+                                        {formatValue(record[field.name], field)}
+                                      </Typography>
                                     )}
                                   </TableCell>
                                 ))}
+                                <TableCell align="center" sx={{ width: 80, minWidth: 80 }}>
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => handleDeleteClick(record)}
+                                    title={t('bankStatement.deleteRecord', 'Delete record')}
+                                  >
+                                    <DeleteIcon fontSize="small" />
+                                  </IconButton>
+                                </TableCell>
                               </TableRow>
                             ))}
                             {Object.keys(totals).length > 0 && (
@@ -347,6 +558,7 @@ const BankStatement: React.FC = () => {
                                   }
                                   return null;
                                 })}
+                                <TableCell />
                               </TableRow>
                             )}
                           </TableBody>
@@ -364,6 +576,77 @@ const BankStatement: React.FC = () => {
       {activeTab === 1 && (
         <BankStatementUpload onUploadComplete={handleUploadComplete} />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          {t('bankStatement.confirmDelete', 'Confirm Delete')}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            {t('bankStatement.deleteWarning', 'Are you sure you want to delete this bank statement record? This action cannot be undone.')}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} disabled={isDeleting}>
+            {t('bankStatement.cancel', 'Cancel')}
+          </Button>
+          <Button 
+            onClick={handleDeleteConfirm} 
+            color="error" 
+            variant="contained"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              t('bankStatement.delete', 'Delete')
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <Dialog
+        open={bulkDeleteDialogOpen}
+        onClose={handleBulkDeleteCancel}
+        aria-labelledby="bulk-delete-dialog-title"
+        aria-describedby="bulk-delete-dialog-description"
+      >
+        <DialogTitle id="bulk-delete-dialog-title">
+          {t('bankStatement.confirmBulkDelete', 'Confirm Bulk Delete')}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="bulk-delete-dialog-description">
+            {t('bankStatement.bulkDeleteWarning', 'Are you sure you want to delete all records in the group "{{groupName}}"? This will delete {{recordCount}} records and this action cannot be undone.', {
+              groupName: groupToDelete,
+              recordCount: groupToDelete ? groupedRecords[groupToDelete]?.length || 0 : 0
+            })}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleBulkDeleteCancel} disabled={isBulkDeleting}>
+            {t('bankStatement.cancel', 'Cancel')}
+          </Button>
+          <Button 
+            onClick={handleBulkDeleteConfirm} 
+            color="error" 
+            variant="contained"
+            disabled={isBulkDeleting}
+          >
+            {isBulkDeleting ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              t('bankStatement.bulkDelete', 'Delete All')
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
