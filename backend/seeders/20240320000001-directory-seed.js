@@ -84,7 +84,13 @@ module.exports = {
         directory_type: 'Module',
         created_at: now,
         updated_at: now,
-        metadata: null
+        metadata: JSON.stringify({
+          componentName: 'BankStatement',
+          groupBy: 'fileName',
+          sheetName: 'Sheet1',
+          horizontalOffset: 0,
+          verticalOffset: 0
+        })
       },
       {
         id: measurementsDirId,

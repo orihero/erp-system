@@ -97,7 +97,7 @@ export const directoriesApi = {
     api.delete(`/api/directory-records/${entryId}`),
 
   // Get full directory data, companyDirectory, and directoryRecords
-  getFullDirectoryData: (directory_id: string, company_id: string) =>
+  getFullDirectoryData: (directory_id: string, company_id: string, params?: URLSearchParams) =>
     api.get<{
       directory: Directory;
       companyDirectory: {
@@ -108,5 +108,11 @@ export const directoriesApi = {
         directory: Directory;
       };
       directoryRecords: DirectoryEntry[];
-    }>(`/api/directory-records/full-data`, { params: { directory_id, company_id } }),
+    }>(`/api/directory-records/full-data`, { 
+      params: { 
+        directory_id, 
+        company_id,
+        ...(params ? Object.fromEntries(params) : {})
+      } 
+    }),
 };

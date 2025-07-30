@@ -364,7 +364,35 @@
     "credit": "Credit",
     "paymentPurpose": "Payment Purpose",
     "cashSymbol": "Cash Symbol",
-    "taxId": "Tax ID"
+    "taxId": "Tax ID",
+    "error": "Error loading bank statements",
+    "noRecords": "No bank statement records found",
+    "totals": "Totals",
+    "tabs": {
+      "records": "Records",
+      "upload": "Upload"
+    },
+    "uploadToGetStarted": "Upload files to get started",
+    "uploadNow": "Upload Files",
+    "upload": {
+      "title": "Upload Bank Statement Files",
+      "processing": "Processing files...",
+      "pleaseWait": "Please wait while we process your files",
+      "dropHere": "Drop the files here",
+      "dragDrop": "Drag and drop files here, or click to select",
+      "supportedFormats": "Supported formats: .xlsx, .xls (Max 10MB each)",
+      "chooseFiles": "Choose Files",
+      "uploadedFiles": "Uploaded Files",
+      "delete": "Delete file",
+      "confirmDelete": "Confirm Delete",
+      "deleteWarning": "Are you sure you want to delete this file? This action cannot be undone.",
+      "status": {
+        "uploading": "Uploading",
+        "processing": "Processing",
+        "completed": "Completed",
+        "error": "Error"
+      }
+    }
   },
   "permissions": {
     "management": "Permissions Management",

@@ -5,13 +5,6 @@ import {
   Button,
   Card,
   CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   Chip,
   IconButton,
   Dialog,
@@ -20,101 +13,125 @@ import {
   DialogActions,
   Alert,
   CircularProgress,
-  Tooltip
+  Tooltip,
+  List,
+  ListItem,
+  ListItemSecondaryAction
 } from '@mui/material';
 import {
   CloudUpload as CloudUploadIcon,
-  Visibility as VisibilityIcon,
   Delete as DeleteIcon,
-  FileDownload as FileDownloadIcon
+  CheckCircle as CheckCircleIcon,
+  Error as ErrorIcon
 } from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
-import { fileParserService } from '@/api/services/fileParser.service';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
+import { useDirectoryRecords } from '@/hooks/useDirectoryRecords';
 
-interface BankStatementGroup {
+interface UploadedFile {
+  id: string;
   fileName: string;
-  recordCount: number;
-  totalDebit: number;
-  totalCredit: number;
+  fileSize: number;
   uploadDate: string;
-  status: 'uploaded' | 'processing' | 'completed' | 'error';
+  status: 'uploading' | 'processing' | 'completed' | 'error';
+  recordsCount?: number;
+  error?: string;
 }
 
 interface BankStatementUploadProps {
-  onViewRecords: (fileName: string, records: any[]) => void; // Added records parameter
+  onUploadComplete?: () => void;
 }
 
-const BankStatementUpload: React.FC<BankStatementUploadProps> = ({ onViewRecords }) => {
+const BankStatementUpload: React.FC<BankStatementUploadProps> = ({ onUploadComplete }) => {
+  const { directoryId } = useParams<{ directoryId: string }>();
+  const companyId = useSelector((state: RootState) => state.auth.user?.company_id);
   const { t } = useTranslation();
-  const [uploadedFiles, setUploadedFiles] = useState<BankStatementGroup[]>([]);
+  
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<string | null>(null);
 
-  // Bank statement parsing prompt
-  const BANK_STATEMENT_PROMPT = `
-Parse this bank statement Excel file and convert it to a standardized JSON format.
-
-The data should be mapped to these exact field names:
-- documentDate: Date in YYYY-MM-DD format
-- account: Bank account number as string
-- organizationName: Organization/company name as string
-- documentNumber: Document number as integer
-- documentType: Document type code as integer
-- branch: Branch code as integer
-- debitTurnover: Debit amount as decimal number (0 if empty)
-- creditTurnover: Credit amount as decimal number (0 if empty)
-- paymentPurpose: Payment description/purpose as string
-- cashSymbol: Cash symbol code as integer (null if empty)
-- taxId: Tax identification number as string
-
-Rules:
-1. Convert all dates to YYYY-MM-DD format
-2. Convert numeric fields to appropriate types (integer/decimal)
-3. Handle empty/null values appropriately
-4. Preserve all text content in original language
-5. If a field is missing or empty, use appropriate default values (0 for numbers, null for optional fields, empty string for required strings)
-`;
+  const {
+    refetch
+  } = useDirectoryRecords(directoryId || '', companyId || '');
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
+    if (!directoryId || !companyId) {
+      setUploadError('Directory or company not found');
+      return;
+    }
 
     setIsUploading(true);
     setUploadError(null);
 
-    try {
-      const response = await fileParserService.parseExcelFile(file, BANK_STATEMENT_PROMPT);
+    for (const file of acceptedFiles) {
+      const fileId = `${Date.now()}-${Math.random()}`;
       
-      // Calculate totals
-      const totalDebit = response.records.reduce((sum, record) => 
-        sum + (parseFloat(record.debitTurnover) || 0), 0);
-      const totalCredit = response.records.reduce((sum, record) => 
-        sum + (parseFloat(record.creditTurnover) || 0), 0);
-
-      const newGroup: BankStatementGroup = {
-        fileName: response.fileName,
-        recordCount: response.recordsCount,
-        totalDebit,
-        totalCredit,
+      // Add file to upload list
+      const newFile: UploadedFile = {
+        id: fileId,
+        fileName: file.name,
+        fileSize: file.size,
         uploadDate: new Date().toISOString(),
-        status: 'completed'
+        status: 'uploading'
       };
 
-      setUploadedFiles(prev => [newGroup, ...prev]);
-      
-      // Automatically open the edit view for the uploaded file
-      onViewRecords(response.fileName, response.records);
-      
-    } catch (error) {
-      console.error('Upload error:', error);
-      setUploadError(error instanceof Error ? error.message : 'Failed to upload file');
-    } finally {
-      setIsUploading(false);
+      setUploadedFiles(prev => [newFile, ...prev]);
+
+      try {
+        // Parse Excel file and extract data
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('directoryId', directoryId);
+        formData.append('companyId', companyId);
+
+        // Upload and parse the file
+        const response = await fetch('/api/file-parser/parse-bank-statement', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        // Update file status
+        setUploadedFiles(prev => prev.map(f => 
+          f.id === fileId 
+            ? { ...f, status: 'completed', recordsCount: result.recordsCount }
+            : f
+        ));
+
+        // Refresh the directory records
+        await refetch();
+        onUploadComplete?.();
+
+      } catch (error) {
+        console.error('Upload error:', error);
+        
+        // Update file status to error
+        setUploadedFiles(prev => prev.map(f => 
+          f.id === fileId 
+            ? { ...f, status: 'error', error: error instanceof Error ? error.message : 'Upload failed' }
+            : f
+        ));
+        
+        setUploadError(error instanceof Error ? error.message : 'Failed to upload file');
+      }
     }
-  }, [onViewRecords]);
+
+    setIsUploading(false);
+  }, [directoryId, companyId, refetch, onUploadComplete]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -122,29 +139,29 @@ Rules:
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
       'application/vnd.ms-excel': ['.xls']
     },
-    multiple: false,
+    multiple: true,
     disabled: isUploading
   });
 
-  const handleDeleteFile = (fileName: string) => {
-    setFileToDelete(fileName);
+  const handleDeleteFile = (fileId: string) => {
+    setFileToDelete(fileId);
     setDeleteConfirmOpen(true);
   };
 
   const confirmDelete = () => {
     if (fileToDelete) {
-      setUploadedFiles(prev => prev.filter(file => file.fileName !== fileToDelete));
+      setUploadedFiles(prev => prev.filter(f => f.id !== fileToDelete));
       setFileToDelete(null);
     }
     setDeleteConfirmOpen(false);
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('uz-UZ', {
-      style: 'currency',
-      currency: 'UZS',
-      minimumFractionDigits: 0
-    }).format(amount);
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   const formatDate = (dateString: string) => {
@@ -157,10 +174,39 @@ Rules:
     });
   };
 
+  const getStatusIcon = (status: UploadedFile['status']) => {
+    switch (status) {
+      case 'uploading':
+        return <CircularProgress size={20} />;
+      case 'processing':
+        return <CircularProgress size={20} />;
+      case 'completed':
+        return <CheckCircleIcon color="success" />;
+      case 'error':
+        return <ErrorIcon color="error" />;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusColor = (status: UploadedFile['status']) => {
+    switch (status) {
+      case 'uploading':
+      case 'processing':
+        return 'warning';
+      case 'completed':
+        return 'success';
+      case 'error':
+        return 'error';
+      default:
+        return 'default';
+    }
+  };
+
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" fontWeight={700} mb={3}>
-        {t('bankStatement.management', 'Bank Statement Management')}
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h5" fontWeight={600} mb={3}>
+        {t('bankStatement.upload.title', 'Upload Bank Statement Files')}
       </Typography>
 
       {/* Upload Area */}
@@ -188,147 +234,106 @@ Rules:
             {isUploading ? (
               <Box>
                 <CircularProgress size={48} sx={{ mb: 2 }} />
-                <Typography variant="h6" color="text.secondary">
-                  {t('bankStatement.processing', 'Processing bank statement...')}
+                <Typography variant="h6" color="primary">
+                  {t('bankStatement.upload.processing', 'Processing files...')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {t('bankStatement.parsing', 'AI is parsing your Excel file')}
+                  {t('bankStatement.upload.pleaseWait', 'Please wait while we process your files')}
                 </Typography>
               </Box>
             ) : (
               <Box>
                 <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
                 <Typography variant="h6" gutterBottom>
-                  {isDragActive ? t('bankStatement.dropHere', 'Drop the file here') : t('bankStatement.upload', 'Upload Bank Statement')}
+                  {isDragActive 
+                    ? t('bankStatement.upload.dropHere', 'Drop the files here') 
+                    : t('bankStatement.upload.dragDrop', 'Drag and drop files here, or click to select')
+                  }
                 </Typography>
                 <Typography variant="body2" color="text.secondary" mb={2}>
-                  {t('bankStatement.dragDrop', 'Drag and drop an Excel file here, or click to select')}
+                  {t('bankStatement.upload.supportedFormats', 'Supported formats: .xlsx, .xls (Max 10MB each)')}
                 </Typography>
-                <Button variant="contained" component="span" disabled={isUploading}>
-                  {t('bankStatement.chooseFile', 'Choose File')}
+                <Button variant="outlined" color="primary">
+                  {t('bankStatement.upload.chooseFiles', 'Choose Files')}
                 </Button>
-                <Typography variant="caption" display="block" mt={1} color="text.secondary">
-                  {t('bankStatement.supportedFormats', 'Supported formats: .xlsx, .xls (Max 10MB)')}
-                </Typography>
               </Box>
             )}
           </Box>
-
-          {uploadError && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {uploadError}
-            </Alert>
-          )}
         </CardContent>
       </Card>
 
-      {/* Uploaded Files Table */}
+      {/* Error Alert */}
+      {uploadError && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setUploadError(null)}>
+          {uploadError}
+        </Alert>
+      )}
+
+      {/* Uploaded Files List */}
       {uploadedFiles.length > 0 && (
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              {t('bankStatement.uploaded', 'Uploaded Bank Statements')}
+              {t('bankStatement.upload.uploadedFiles', 'Uploaded Files')}
             </Typography>
-            
-            <TableContainer component={Paper} variant="outlined">
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>File Name</TableCell>
-                    <TableCell align="center">Records</TableCell>
-                    <TableCell align="right">Total Debit</TableCell>
-                    <TableCell align="right">Total Credit</TableCell>
-                    <TableCell align="center">Upload Date</TableCell>
-                    <TableCell align="center">Status</TableCell>
-                    <TableCell align="center">Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {uploadedFiles.map((file) => (
-                    <TableRow key={file.fileName} hover>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight={500}>
-                          {file.fileName}
+            <List>
+              {uploadedFiles.map((file) => (
+                <ListItem key={file.id} divider>
+                  <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+                    {getStatusIcon(file.status)}
+                    <Box sx={{ ml: 2, flexGrow: 1 }}>
+                      <Typography variant="subtitle1" fontWeight={500}>
+                        {file.fileName}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {formatFileSize(file.fileSize)} • {formatDate(file.uploadDate)}
+                        {file.recordsCount && ` • ${file.recordsCount} records`}
+                      </Typography>
+                      {file.error && (
+                        <Typography variant="body2" color="error">
+                          {file.error}
                         </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip 
-                          label={file.recordCount} 
-                          size="small" 
-                          color="primary" 
-                          variant="outlined"
-                        />
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2" color="error.main">
-                          {formatCurrency(file.totalDebit)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2" color="success.main">
-                          {formatCurrency(file.totalCredit)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography variant="body2" color="text.secondary">
-                          {formatDate(file.uploadDate)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip 
-                          label={file.status} 
-                          size="small"
-                          color={
-                            file.status === 'completed' ? 'success' :
-                            file.status === 'processing' ? 'warning' :
-                            file.status === 'error' ? 'error' : 'default'
-                          }
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <Tooltip title="View/Edit Records">
-                          <IconButton 
-                            size="small" 
-                            onClick={() => onViewRecords(file.fileName, [])} // Pass empty array for now
-                            color="primary"
-                          >
-                            <VisibilityIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Download">
-                          <IconButton size="small" color="secondary">
-                            <FileDownloadIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete">
-                          <IconButton 
-                            size="small" 
-                            onClick={() => handleDeleteFile(file.fileName)}
-                            color="error"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                      )}
+                    </Box>
+                                         <Chip 
+                       label={t(`bankStatement.upload.status.${file.status}`, file.status)} 
+                       color={getStatusColor(file.status) as 'warning' | 'success' | 'error' | 'default'}
+                       size="small"
+                       sx={{ mr: 2 }}
+                     />
+                  </Box>
+                  <ListItemSecondaryAction>
+                    <Tooltip title={t('bankStatement.upload.delete', 'Delete file')}>
+                      <IconButton 
+                        edge="end" 
+                        onClick={() => handleDeleteFile(file.id)}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
           </CardContent>
         </Card>
       )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
-        <DialogTitle>{t('bankStatement.confirmDelete', 'Confirm Delete')}</DialogTitle>
+        <DialogTitle>
+          {t('bankStatement.upload.confirmDelete', 'Confirm Delete')}
+        </DialogTitle>
         <DialogContent>
           <Typography>
-            {t('bankStatement.deleteWarningFile', { file: fileToDelete })}
+            {t('bankStatement.upload.deleteWarning', 'Are you sure you want to delete this file? This action cannot be undone.')}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteConfirmOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
+          <Button onClick={() => setDeleteConfirmOpen(false)}>
+            {t('common.cancel', 'Cancel')}
+          </Button>
           <Button onClick={confirmDelete} color="error" variant="contained">
             {t('common.delete', 'Delete')}
           </Button>

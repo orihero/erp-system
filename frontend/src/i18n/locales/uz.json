@@ -371,7 +371,35 @@
     "credit": "Kredit",
     "paymentPurpose": "To'lov maqsadi",
     "cashSymbol": "Naqd belgi",
-    "taxId": "STIR"
+    "taxId": "STIR",
+    "error": "Bank ko'chirmalarini yuklashda xatolik",
+    "noRecords": "Bank ko'chirmalari topilmadi",
+    "totals": "Jami",
+    "tabs": {
+      "records": "Yozuvlar",
+      "upload": "Yuklash"
+    },
+    "uploadToGetStarted": "Boshlash uchun fayllarni yuklang",
+    "uploadNow": "Fayllarni yuklash",
+    "upload": {
+      "title": "Bank ko'chirmalarini yuklash",
+      "processing": "Fayllar qayta ishlanmoqda...",
+      "pleaseWait": "Iltimos, fayllaringizni qayta ishlashimizni kuting",
+      "dropHere": "Fayllarni shu yerga tashlang",
+      "dragDrop": "Fayllarni shu yerga tashlang yoki tanlash uchun bosing",
+      "supportedFormats": "Qo'llab-quvvatlanadigan formatlar: .xlsx, .xls (Har biri maksimal 10MB)",
+      "chooseFiles": "Fayllarni tanlash",
+      "uploadedFiles": "Yuklangan fayllar",
+      "delete": "Faylni o'chirish",
+      "confirmDelete": "O'chirishni tasdiqlang",
+      "deleteWarning": "Ushbu faylni o'chirishga ishonchingiz komilmi? Bu amal qaytarilmaydi.",
+      "status": {
+        "uploading": "Yuklanmoqda",
+        "processing": "Qayta ishlanmoqda",
+        "completed": "Tugallandi",
+        "error": "Xatolik"
+      }
+    }
   },
   "permissions": {
     "management": "Ruxsatlarni boshqarish",

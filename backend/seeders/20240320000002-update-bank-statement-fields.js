@@ -37,7 +37,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: true,
-          fieldOrder: 1,
+          fieldOrder: 0,
           isEditable: false,
           isFilterable: true,
           description: 'Auto-generated from filename and timestamp'
@@ -53,7 +53,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: true,
-          fieldOrder: 2,
+          fieldOrder: 1,
           isEditable: true,
           isFilterable: true,
           description: 'Document date from bank statement'
@@ -69,7 +69,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: true,
-          fieldOrder: 3,
+          fieldOrder: 2,
           isEditable: true,
           isFilterable: true,
           description: 'Bank account number'
@@ -85,7 +85,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: true,
-          fieldOrder: 4,
+          fieldOrder: 3,
           isEditable: true,
           isFilterable: true,
           description: 'Organization name'
@@ -101,7 +101,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: true,
-          fieldOrder: 5,
+          fieldOrder: 4,
           isEditable: true,
           isFilterable: true,
           description: 'Document number'
@@ -117,7 +117,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: true,
-          fieldOrder: 6,
+          fieldOrder: 5,
           isEditable: true,
           isFilterable: true,
           description: 'Document type code'
@@ -133,7 +133,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: true,
-          fieldOrder: 7,
+          fieldOrder: 6,
           isEditable: true,
           isFilterable: true,
           description: 'Branch code'
@@ -149,7 +149,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: true,
-          fieldOrder: 8,
+          fieldOrder: 7,
           isEditable: true,
           isFilterable: true,
           description: 'Debit turnover amount'
@@ -165,7 +165,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: true,
-          fieldOrder: 9,
+          fieldOrder: 8,
           isEditable: true,
           isFilterable: true,
           description: 'Credit turnover amount'
@@ -181,7 +181,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: false,
-          fieldOrder: 10,
+          fieldOrder: 9,
           isEditable: true,
           isFilterable: true,
           description: 'Payment purpose description'
@@ -197,7 +197,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: false,
-          fieldOrder: 11,
+          fieldOrder: 10,
           isEditable: true,
           isFilterable: true,
           description: 'Cash symbol code (optional)'
@@ -213,7 +213,7 @@ module.exports = {
         updated_at: now,
         metadata: {
           isVisibleOnTable: true,
-          fieldOrder: 12,
+          fieldOrder: 11,
           isEditable: true,
           isFilterable: true,
           description: 'Tax identification number'

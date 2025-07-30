@@ -10,14 +10,10 @@ interface KeyValueEditorProps {
   value: KeyValueObject;
   onChange: (value: KeyValueObject) => void;
   label?: string;
-  translateKey?: (key: string) => string;
-  translateValue?: (value: KeyValueType, key?: string) => string;
 }
 
-const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label, translateKey, translateValue }) => {
+const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label }) => {
   const { tWithFallback } = useTranslationWithFallback();
-  const tKey = translateKey || ((key: string) => tWithFallback(`metadata.${key}`, key));
-  const tValue = translateValue || ((val: KeyValueType, key?: string) => typeof val === 'string' ? tWithFallback(`metadata.${key}.${val}`, val) : String(val));
   const [entries, setEntries] = React.useState<{
     key: string;
     value: KeyValueType;
@@ -90,16 +86,18 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label,
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {label && <Typography fontWeight={600}>{label}</Typography>}
       {entries.map((entry, idx) => (
-        <Box key={entry.key + idx} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+        <Box key={entry.key + idx} sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: '1fr 120px 1fr 40px',
+          gap: 2, 
+          alignItems: 'center' 
+        }}>
           <TextField
             label={tWithFallback('keyValueEditor.key', 'Key')}
             value={entry.key}
             onChange={e => handleEntryChange(idx, 'key', e.target.value)}
-            InputProps={{
-              startAdornment: <>{tKey(entry.key)}</>
-            }}
             size="small"
-            sx={{ minWidth: 120 }}
+            fullWidth
           />
           <TextField
             select
@@ -107,7 +105,7 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label,
             value={entry.type}
             onChange={e => handleEntryChange(idx, 'type', e.target.value)}
             size="small"
-            sx={{ minWidth: 100 }}
+            fullWidth
           >
             {typeOptions.map(opt => (
               <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
@@ -119,11 +117,8 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label,
               label={tWithFallback('keyValueEditor.value', 'Value')}
               value={String(entry.value)}
               onChange={e => handleEntryChange(idx, 'value', e.target.value)}
-              InputProps={{
-                startAdornment: <>{tValue(entry.value, entry.key)}</>
-              }}
               size="small"
-              sx={{ minWidth: 100 }}
+              fullWidth
             >
               <MenuItem value="true">{tWithFallback('keyValueEditor.boolean.true', 'true')}</MenuItem>
               <MenuItem value="false">{tWithFallback('keyValueEditor.boolean.false', 'false')}</MenuItem>
@@ -133,11 +128,8 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label,
               label={tWithFallback('keyValueEditor.value', 'Value')}
               value={entry.value}
               onChange={e => handleEntryChange(idx, 'value', e.target.value)}
-              InputProps={{
-                startAdornment: <>{tValue(entry.value, entry.key)}</>
-              }}
               size="small"
-              sx={{ minWidth: 120 }}
+              fullWidth
               type={entry.type === 'number' ? 'number' : 'text'}
             />
           )}
@@ -146,13 +138,19 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label,
           </IconButton>
         </Box>
       ))}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
+      <Box sx={{ 
+        display: 'grid', 
+        gridTemplateColumns: '1fr 120px 1fr 40px',
+        gap: 2, 
+        alignItems: 'center',
+        mt: 1 
+      }}>
         <TextField
           label={tWithFallback('keyValueEditor.key', 'Key')}
           value={newKey}
           onChange={e => setNewKey(e.target.value)}
           size="small"
-          sx={{ minWidth: 120 }}
+          fullWidth
         />
         <TextField
           select
@@ -160,7 +158,7 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label,
           value={newType}
           onChange={e => setNewType(e.target.value as 'string' | 'number' | 'boolean')}
           size="small"
-          sx={{ minWidth: 100 }}
+          fullWidth
         >
           {typeOptions.map(opt => (
             <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
@@ -173,7 +171,7 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label,
             value={String(newValue)}
             onChange={e => setNewValue(e.target.value)}
             size="small"
-            sx={{ minWidth: 100 }}
+            fullWidth
           >
             <MenuItem value="true">{tWithFallback('keyValueEditor.boolean.true', 'true')}</MenuItem>
             <MenuItem value="false">{tWithFallback('keyValueEditor.boolean.false', 'false')}</MenuItem>
@@ -184,11 +182,16 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label,
             value={newValue}
             onChange={e => setNewValue(e.target.value)}
             size="small"
-            sx={{ minWidth: 120 }}
+            fullWidth
             type={newType === 'number' ? 'number' : 'text'}
           />
         )}
-        <Button onClick={handleAdd} variant="contained" sx={{ minWidth: 40, borderRadius: 999, bgcolor: '#3b82f6' }}>
+        <Button onClick={handleAdd} variant="contained" sx={{ 
+          minWidth: 40, 
+          borderRadius: 999, 
+          bgcolor: '#3b82f6',
+          height: 40
+        }}>
           <Icon icon="ph:plus" />
         </Button>
       </Box>

@@ -147,8 +147,18 @@ const directoryRecordController = {
       if (groupBy) {
         grouped = {};
         for (const record of directoryRecords) {
-          // Find the value for the groupBy field
-          const valueObj = (record.recordValues || []).find(v => v.field_id === groupBy);
+          // Find the value for the groupBy field by field name or ID
+          let valueObj = null;
+          if (groupBy.includes('-')) {
+            // If groupBy contains a dash, it's likely a field ID
+            valueObj = (record.recordValues || []).find(v => v.field_id === groupBy);
+          } else {
+            // If groupBy is a field name, find the field first, then the value
+            const field = fields.find(f => f.name === groupBy);
+            if (field) {
+              valueObj = (record.recordValues || []).find(v => v.field_id === field.id);
+            }
+          }
           const groupValue = valueObj ? valueObj.value : 'undefined';
           if (!grouped[groupValue]) grouped[groupValue] = [];
           grouped[groupValue].push(record);
