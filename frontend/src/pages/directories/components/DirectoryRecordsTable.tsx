@@ -2,26 +2,11 @@ import { Icon } from '@iconify/react';
 import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import type { DirectoryField as APIDirectoryField } from '@/api/services/directories';
 
-interface DirectoryField {
-  id: string;
-  name: string;
-  type: string;
-  directory_id: string;
+// DirectoryField type compatible with both backend and frontend
+interface DirectoryField extends Omit<APIDirectoryField, 'relation_id'> {
   relation_id: string | null;
-  metadata?: {
-    isVisibleOnTable?: boolean;
-    fieldOrder?: number;
-    [key: string]: unknown;
-  };
-}
-
-interface DirectoryRecordValue {
-  id: string;
-  field_id: string;
-  value: string | number | boolean;
-  field: DirectoryField;
-  [key: string]: unknown;
 }
 
 interface DirectoryRecordApi {
@@ -29,8 +14,13 @@ interface DirectoryRecordApi {
   company_directory_id?: string;
   createdAt?: string;
   updatedAt?: string;
-  recordValues: DirectoryRecordValue[];
-  [key: string]: unknown;
+  recordValues: Array<{
+    id: string;
+    field_id: string;
+    value: string | number | boolean;
+    field: DirectoryField;
+    metadata?: Record<string, unknown>;
+  }>;
 }
 
 interface DirectoryRecordsTableProps {
@@ -38,14 +28,28 @@ interface DirectoryRecordsTableProps {
   loading: boolean;
   error: unknown;
   fields: DirectoryField[];
+  onCascadingConfig?: (record: DirectoryRecordApi) => void;
 }
 
-const DirectoryRecordsTable: React.FC<DirectoryRecordsTableProps> = ({ records, loading, error, fields }) => {
+const DirectoryRecordsTable: React.FC<DirectoryRecordsTableProps> = ({ records, loading, error, fields, onCascadingConfig }) => {
   const { t } = useTranslation();
 
   const displayFields = (fields || [])
-    .filter(field => field.metadata?.isVisibleOnTable)
+    .filter(field => field.metadata?.isVisibleOnTable !== false) // Show all fields by default unless explicitly hidden
     .sort((a, b) => Number(a.metadata?.fieldOrder ?? 0) - Number(b.metadata?.fieldOrder ?? 0));
+
+  // Debug logs
+  console.log('DirectoryRecordsTable Debug:', {
+    fields: fields,
+    displayFields: displayFields,
+    records: records,
+    firstRecord: records[0]
+  });
+
+  const handleEditRecord = (record: DirectoryRecordApi) => {
+    // TODO: Implement record editing functionality
+    console.log('Edit record:', record);
+  };
 
   return (
     <Box sx={{ width: '100%', mb: 4 }}>
@@ -81,6 +85,7 @@ const DirectoryRecordsTable: React.FC<DirectoryRecordsTableProps> = ({ records, 
                   <TableCell>{String(record.id)}</TableCell>
                   {displayFields.map((field) => {
                     const valueObj = record.recordValues.find((v) => v.field_id === field.id);
+                    console.log(`Field ${field.name} (${field.id}):`, { valueObj, field });
                     return (
                       <TableCell key={field.id}>
                         {valueObj ? String(valueObj.value) : '-'}
@@ -88,9 +93,25 @@ const DirectoryRecordsTable: React.FC<DirectoryRecordsTableProps> = ({ records, 
                     );
                   })}
                   <TableCell sx={{ textAlign: 'right' }}>
-                    <IconButton size="small" sx={{ mr: 1 }}>
+                    <IconButton 
+                      size="small" 
+                      sx={{ mr: 1 }}
+                      onClick={() => handleEditRecord(record)}
+                      title={t('directories.records.editRecord', 'Edit Record')}
+                    >
                       <Icon icon="ph:pencil-simple" />
                     </IconButton>
+                    {onCascadingConfig && (
+                      <IconButton 
+                        size="small" 
+                        sx={{ mr: 1 }}
+                        onClick={() => onCascadingConfig(record)}
+                        title={t('directories.records.cascadingConfig', 'Cascading Configuration')}
+                        color="primary"
+                      >
+                        <Icon icon="mdi:cog" />
+                      </IconButton>
+                    )}
                     <IconButton size="small" color="error">
                       <Icon icon="ph:trash" />
                     </IconButton>
@@ -107,6 +128,7 @@ const DirectoryRecordsTable: React.FC<DirectoryRecordsTableProps> = ({ records, 
           </TableBody>
         </Table>
       </TableContainer>
+
     </Box>
   );
 };

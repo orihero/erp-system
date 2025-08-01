@@ -44,8 +44,28 @@ module.exports = {
       }
     });
 
-    await queryInterface.addIndex('report_template_versions', ['reportStructureId', 'version']);
-    await queryInterface.addIndex('report_template_versions', ['createdBy']);
+    try {
+      await queryInterface.addIndex('report_template_versions', ['reportStructureId', 'version'], {
+        unique: true,
+        name: 'report_template_versions_report_structure_id_version'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
+    
+    try {
+      await queryInterface.addIndex('report_template_versions', ['createdBy'], {
+        name: 'report_template_versions_created_by'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
   },
 
   down: async (queryInterface, Sequelize) => {

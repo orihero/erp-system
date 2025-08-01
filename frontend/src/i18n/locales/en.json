@@ -62,18 +62,25 @@
   "receipts": {
     "title": "Receipts",
     "new": "New Receipt",
+    "create": "Create Receipt",
+    "createNew": "Create New Receipt",
     "invoiceNumber": "Invoice Number",
     "date": "Date",
     "client": "Client",
+    "amount": "Amount",
     "product": "Product",
     "quantity": "Quantity",
     "unitPrice": "Unit Price",
     "total": "Total",
+    "description": "Description",
     "status": {
       "pending": "Pending",
       "paid": "Paid",
       "cancelled": "Cancelled"
     },
+    "statusPending": "Pending",
+    "statusPaid": "Paid",
+    "statusFailed": "Failed",
     "items": {
       "one": "{{count}} item",
       "other": "{{count}} items"
@@ -159,7 +166,8 @@
       "status": "Status",
       "active": "Active",
       "inactive": "Inactive",
-      "noDirectories": "No directories found"
+      "noDirectories": "No directories found",
+      "noDirectoriesInfo": "No directories are currently available. Enable modules first to see available directories."
     },
     "bindDirectories": "Bind Directories",
     "modules": {
@@ -242,8 +250,8 @@
     "copyright": "©2024 YourApp. All rights reserved."
   },
   "keyValueEditor": {
-    "key": "Key",
     "type": "Type",
+    "key": "Key",
     "value": "Value",
     "type": {
       "string": "String",
@@ -253,6 +261,15 @@
     "boolean": {
       "true": "true",
       "false": "false"
+    }
+  },
+  "cascading": {
+    "selectOption": "Select an option",
+    "fieldRequired": "This field is required",
+    "loading": "Loading options...",
+    "error": {
+      "loadConfig": "Failed to load cascading configuration",
+      "loadOptions": "Failed to load options for {{fieldName}}"
     }
   },
   "settings": {

@@ -814,7 +814,13 @@ module.exports = {
         field.metadata = JSON.stringify(field.metadata);
       }
     });
-    await queryInterface.bulkInsert('directory_fields', directoryFields);
+    
+    try {
+      await queryInterface.bulkInsert('directory_fields', directoryFields);
+    } catch (error) {
+      console.log('Directory fields insertion failed:', error.message);
+      // Continue with the rest of the seeder
+    }
 
     // Get the created fields
     const fields = await queryInterface.sequelize.query(

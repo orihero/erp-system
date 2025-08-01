@@ -1,35 +1,36 @@
-const { Sequelize } = require('sequelize');
-const dotenv = require('dotenv');
+const { Sequelize } = require("sequelize");
+const config = require("./config.json");
 
-dotenv.config();
+const env = process.env.NODE_ENV || "development";
+const dbConfig = config[env];
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
+  dbConfig.database,
+  dbConfig.username,
+  dbConfig.password,
   {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: 'postgres',
-    logging: false,
+    host: dbConfig.host,
+    port: dbConfig.port || 5432,
+    dialect: dbConfig.dialect,
+    logging: console.log,
     pool: {
       max: 5,
       min: 0,
       acquire: 30000,
-      idle: 10000
+      idle: 10000,
     },
     // Add explicit UTF-8 charset configuration
     dialectOptions: {
-      charset: 'utf8mb4',
-      collate: 'utf8mb4_unicode_ci',
+      charset: "utf8mb4",
+      collate: "utf8mb4_unicode_ci",
       supportBigNumbers: true,
-      bigNumberStrings: true
+      bigNumberStrings: true,
     },
     define: {
-      charset: 'utf8mb4',
-      collate: 'utf8mb4_unicode_ci'
-    }
+      charset: "utf8mb4",
+      collate: "utf8mb4_unicode_ci",
+    },
   }
 );
 
-module.exports = sequelize; 
+module.exports = sequelize;

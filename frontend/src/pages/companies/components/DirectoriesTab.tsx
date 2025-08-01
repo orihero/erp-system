@@ -12,17 +12,17 @@ import {
   CircularProgress,
   Alert,
   Chip,
-  Switch,
-  FormControlLabel
+  IconButton
 } from '@mui/material';
+import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import type { Company } from '@/api/services/companies';
 import type { Directory } from '@/api/services/directories';
 import { RootState } from '@/store';
 import {
-  fetchCompanyDirectories,
-  toggleCompanyDirectory
+  fetchCompanyDirectories
 } from '@/store/slices/companyDirectoriesSlice';
 
 interface DirectoriesTabProps {
@@ -32,24 +32,29 @@ interface DirectoriesTabProps {
 const DirectoriesTab: React.FC<DirectoriesTabProps> = ({ company }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const {
     allDirectories,
     loading,
-    error,
-    updating
+    error
   } = useSelector((state: RootState) => state.companyDirectories);
 
   useEffect(() => {
     dispatch(fetchCompanyDirectories({ companyId: company.id }));
   }, [company.id, dispatch]);
 
-  const handleToggleDirectory = (directory: Directory) => {
-    const isEnabled = !directory.is_enabled;
-    dispatch(toggleCompanyDirectory({
-      companyId: company.id,
-      directory,
-      isEnabled
-    }));
+  // Filter to show only enabled directories
+  const enabledDirectories = allDirectories.filter(directory => directory.is_enabled);
+
+  const handleDirectoryClick = (directory: Directory) => {
+    // Navigate to directory records page
+    navigate(`/directories/${directory.id}`, {
+      state: { 
+        companyId: company.id,
+        companyName: company.name,
+        directoryName: directory.name
+      }
+    });
   };
 
   if (loading) {
@@ -74,18 +79,30 @@ const DirectoriesTab: React.FC<DirectoriesTabProps> = ({ company }) => {
         </Alert>
       )}
 
+      {enabledDirectories.length === 0 && !loading && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          {t('companies.directories.noEnabledDirectoriesInfo', 'No enabled directories are currently available. Enable modules and directories in the Modules tab to see available directories.')}
+        </Alert>
+      )}
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>{t('companies.directories.name', 'Name')}</TableCell>
               <TableCell>{t('companies.directories.icon', 'Icon')}</TableCell>
-              <TableCell>{t('companies.directories.status', 'Status')}</TableCell>
+              <TableCell>{t('companies.directories.type', 'Type')}</TableCell>
+              <TableCell>{t('companies.directories.actions', 'Actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {allDirectories.map((directory) => (
-              <TableRow key={directory.id}>
+            {enabledDirectories.map((directory) => (
+              <TableRow 
+                key={directory.id}
+                hover
+                sx={{ cursor: 'pointer' }}
+                onClick={() => handleDirectoryClick(directory)}
+              >
                 <TableCell>{directory.name}</TableCell>
                 <TableCell>
                   <Chip
@@ -95,34 +112,29 @@ const DirectoriesTab: React.FC<DirectoriesTabProps> = ({ company }) => {
                   />
                 </TableCell>
                 <TableCell>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={directory.is_enabled}
-                        onChange={() => handleToggleDirectory(directory)}
-                        disabled={updating[directory.id]}
-                      />
-                    }
-                    label={
-                      <Box display="flex" alignItems="center">
-                        <Chip
-                          label={directory.is_enabled ? t('companies.directories.active', 'Active') : t('companies.directories.inactive', 'Inactive')}
-                          color={directory.is_enabled ? 'success' : 'default'}
-                          size="small"
-                        />
-                        {updating[directory.id] && (
-                          <CircularProgress size={16} sx={{ ml: 1 }} />
-                        )}
-                      </Box>
-                    }
+                  <Chip
+                    label={directory.directory_type || 'Module'}
+                    color="primary"
+                    size="small"
                   />
+                </TableCell>
+                <TableCell>
+                  <IconButton 
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDirectoryClick(directory);
+                    }}
+                  >
+                    <Icon icon="mdi:eye" />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
-            {allDirectories.length === 0 && (
+            {enabledDirectories.length === 0 && (
               <TableRow>
-                <TableCell colSpan={3} align="center">
-                  {t('companies.directories.noDirectories', 'No directories found')}
+                <TableCell colSpan={4} align="center">
+                  {t('companies.directories.noEnabledDirectories', 'No enabled directories found')}
                 </TableCell>
               </TableRow>
             )}

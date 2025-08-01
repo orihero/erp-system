@@ -1,7 +1,7 @@
 {
     "development": {
         "username": "postgres",
-        "password": "18092004",
+        "password": "asdf12345",
         "database": "erp_db",
         "host": "127.0.0.1",
         "dialect": "postgres"

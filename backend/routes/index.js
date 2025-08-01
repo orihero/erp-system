@@ -13,6 +13,7 @@ const permissionsRouter = require("./permissions");
 const reportTemplateRoutes = require("./reportTemplates");
 const directoryRecordRoutes = require("./directoryRecord.routes");
 const fileParserRoutes = require("./fileParser.routes");
+const cascadingRoutes = require("./cascading");
 
 // Mount routes 
 router.use("/directories", directoryRoutes);
@@ -28,5 +29,6 @@ router.use("/permissions", permissionsRouter);
 router.use("/report-templates", reportTemplateRoutes);
 router.use("/directory-records", directoryRecordRoutes);
 router.use("/file-parser", fileParserRoutes);
+router.use("/cascading", cascadingRoutes);
 
 module.exports = router;

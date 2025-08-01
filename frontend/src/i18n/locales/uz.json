@@ -58,18 +58,25 @@
   "receipts": {
     "title": "Cheklar",
     "new": "Yangi chek",
+    "create": "Chek yaratish",
+    "createNew": "Yangi chek yaratish",
     "invoiceNumber": "Chek raqami",
     "date": "Sana",
     "client": "Mijoz",
+    "amount": "Summa",
     "product": "Mahsulot",
     "quantity": "Miqdor",
     "unitPrice": "Birlik narxi",
     "total": "Jami",
+    "description": "Tavsif",
     "status": {
       "pending": "Kutilmoqda",
       "paid": "To'langan",
       "cancelled": "Bekor qilingan"
     },
+    "statusPending": "Kutilmoqda",
+    "statusPaid": "To'langan",
+    "statusFailed": "Xatolik",
     "items": {
       "one": "{{count}} dona",
       "other": "{{count}} dona"
@@ -203,7 +210,8 @@
       "status": "Holat",
       "active": "Faol",
       "inactive": "Nofaol",
-      "noDirectories": "Ma'lumotnomalar topilmadi"
+      "noDirectories": "Ma'lumotnomalar topilmadi",
+      "noDirectoriesInfo": "Hozirda ma'lumotnomalar mavjud emas. Avval modullarni yoqing, mavjud ma'lumotnomalarni ko'rish uchun."
     },
     "employees": "Xodimlar",
     "employeesFetchError": "Xodimlarni olishda xatolik yuz berdi.",

@@ -58,18 +58,25 @@
   "receipts": {
     "title": "Чеки",
     "new": "Новый чек",
+    "create": "Создать чек",
+    "createNew": "Создать новый чек",
     "invoiceNumber": "Номер счета",
     "date": "Дата",
     "client": "Клиент",
+    "amount": "Сумма",
     "product": "Товар",
     "quantity": "Количество",
     "unitPrice": "Цена за единицу",
     "total": "Итого",
+    "description": "Описание",
     "status": {
       "pending": "В ожидании",
       "paid": "Оплачено",
       "cancelled": "Отменено"
     },
+    "statusPending": "В ожидании",
+    "statusPaid": "Оплачено",
+    "statusFailed": "Ошибка",
     "items": {
       "one": "{{count}} товар",
       "few": "{{count}} товара",
@@ -201,7 +208,8 @@
       "status": "Статус",
       "active": "Активен",
       "inactive": "Неактивен",
-      "noDirectories": "Справочники не найдены"
+      "noDirectories": "Справочники не найдены",
+      "noDirectoriesInfo": "В настоящее время справочники недоступны. Сначала включите модули, чтобы увидеть доступные справочники."
     },
     "employees": "Сотрудники",
     "employeesFetchError": "Не удалось получить сотрудников.",

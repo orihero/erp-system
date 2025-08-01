@@ -70,10 +70,49 @@ module.exports = {
       }
     });
 
-    await queryInterface.addIndex('report_execution_history', ['reportStructureId']);
-    await queryInterface.addIndex('report_execution_history', ['executedBy']);
-    await queryInterface.addIndex('report_execution_history', ['status']);
-    await queryInterface.addIndex('report_execution_history', ['createdAt']);
+    try {
+      await queryInterface.addIndex('report_execution_history', ['reportStructureId'], {
+        name: 'report_execution_history_report_structure_id'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
+    
+    try {
+      await queryInterface.addIndex('report_execution_history', ['executedBy'], {
+        name: 'report_execution_history_executed_by'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
+    
+    try {
+      await queryInterface.addIndex('report_execution_history', ['status'], {
+        name: 'report_execution_history_status'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
+    
+    try {
+      await queryInterface.addIndex('report_execution_history', ['createdAt'], {
+        name: 'report_execution_history_created_at'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
   },
 
   down: async (queryInterface, Sequelize) => {

@@ -37,10 +37,17 @@ module.exports = {
     });
 
     // Add unique constraint to prevent duplicate assignments
-    await queryInterface.addIndex('company_modules', ['company_id', 'module_id'], {
-      unique: true,
-      name: 'company_modules_unique'
-    });
+    try {
+      await queryInterface.addIndex('company_modules', ['company_id', 'module_id'], {
+        unique: true,
+        name: 'company_modules_unique'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
   },
 
   down: async (queryInterface, Sequelize) => {

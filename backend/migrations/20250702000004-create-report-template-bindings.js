@@ -78,18 +78,74 @@ module.exports = {
       }
     });
 
-    await queryInterface.addIndex('report_template_bindings', ['reportStructureId']);
-    await queryInterface.addIndex('report_template_bindings', ['companyId']);
-    await queryInterface.addIndex('report_template_bindings', ['moduleId']);
-    await queryInterface.addIndex('report_template_bindings', ['bindingType']);
-    await queryInterface.addIndex('report_template_bindings', ['isActive']);
+    try {
+      await queryInterface.addIndex('report_template_bindings', ['reportStructureId'], {
+        name: 'report_template_bindings_report_structure_id'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
+    
+    try {
+      await queryInterface.addIndex('report_template_bindings', ['companyId'], {
+        name: 'report_template_bindings_company_id'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
+    
+    try {
+      await queryInterface.addIndex('report_template_bindings', ['moduleId'], {
+        name: 'report_template_bindings_module_id'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
+    
+    try {
+      await queryInterface.addIndex('report_template_bindings', ['bindingType'], {
+        name: 'report_template_bindings_binding_type'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
+    
+    try {
+      await queryInterface.addIndex('report_template_bindings', ['isActive'], {
+        name: 'report_template_bindings_is_active'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
     
     // Unique constraint to prevent duplicate bindings
-    await queryInterface.addIndex('report_template_bindings', {
-      fields: ['reportStructureId', 'companyId', 'moduleId'],
-      unique: true,
-      name: 'unique_template_binding'
-    });
+    try {
+      await queryInterface.addIndex('report_template_bindings', {
+        fields: ['reportStructureId', 'companyId', 'moduleId'],
+        unique: true,
+        name: 'unique_template_binding'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
   },
 
   down: async (queryInterface, Sequelize) => {

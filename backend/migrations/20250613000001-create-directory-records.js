@@ -34,17 +34,31 @@ module.exports = {
     });
 
     // Add directory_record_id column to directory_values table
-    await queryInterface.addColumn('directory_values', 'directory_record_id', {
-      type: Sequelize.UUID,
-      allowNull: false,
-      references: {
-        model: 'directory_records',
-        key: 'id'
+    try {
+      await queryInterface.addColumn('directory_values', 'directory_record_id', {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'directory_records',
+          key: 'id'
+        }
+      });
+    } catch (error) {
+      // If column already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
       }
-    });
+    }
 
     // Remove company_directory_id column from directory_values table
-    await queryInterface.removeColumn('directory_values', 'company_directory_id');
+    try {
+      await queryInterface.removeColumn('directory_values', 'company_directory_id');
+    } catch (error) {
+      // If column doesn't exist, ignore the error
+      if (!error.message.includes('не существует') && !error.message.includes('does not exist')) {
+        throw error;
+      }
+    }
   },
 
   async down(queryInterface, Sequelize) {

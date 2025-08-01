@@ -31,7 +31,7 @@ const limiter = rateLimit({
 // Middleware
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
     credentials: true,
   })
 );
@@ -67,13 +67,21 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 // Initialize database and start server
-initializeDatabase()
-  .then(() => {
+const startServer = async () => {
+  try {
+    console.log("Initializing database...");
+    await initializeDatabase();
+    console.log("Database initialized successfully");
+    
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
+      console.log(`API available at http://localhost:${PORT}/api`);
     });
-  })
-  .catch((error) => {
-    console.error("Failed to start server:", error);
+  } catch (error) {
+    console.error("Failed to start server:", error.message);
+    console.error("Please check your database connection and try again.");
     process.exit(1);
-  });
+  }
+};
+
+startServer();

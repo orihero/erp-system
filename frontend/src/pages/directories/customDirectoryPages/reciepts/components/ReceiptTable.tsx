@@ -10,12 +10,9 @@ import {
     TableRow,
     TableFooter,
     TablePagination,
-    IconButton,
     Typography,
-    InputBase,
     CircularProgress,
 } from "@mui/material";
-import { Icon } from "@iconify/react";
 
 interface Receipt {
     id: string;
@@ -23,6 +20,11 @@ interface Receipt {
     amount: number;
     status: "paid" | "pending" | "failed";
     createdAt: string;
+}
+
+interface ReceiptsTableProps {
+    searchInput: string;
+    refreshTrigger?: number;
 }
 
 const mockReceipts: Receipt[] = [
@@ -49,8 +51,7 @@ const mockReceipts: Receipt[] = [
     },
 ];
 
-export default function ReceiptsTable() {
-    const [searchInput, setSearchInput] = useState("");
+export default function ReceiptsTable({ searchInput, refreshTrigger }: ReceiptsTableProps) {
     const [receipts, setReceipts] = useState<Receipt[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
@@ -66,10 +67,10 @@ export default function ReceiptsTable() {
             setReceipts(filtered);
             setLoading(false);
         }, 500);
-    }, [searchInput]);
+    }, [searchInput, refreshTrigger]);
 
     const handlePageChange = useCallback(
-        (_: any, newPage: number) => setPage(newPage),
+        (_: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => setPage(newPage),
         []
     );
     const handleRowsPerPageChange = useCallback(
@@ -82,41 +83,6 @@ export default function ReceiptsTable() {
 
     return (
         <Box>
-            <Box
-                sx={{
-                    display: "flex",
-                    justifyContent: "flex-start",
-                    mb: 2,
-                    mt: 4,
-                }}
-            >
-                <Paper
-                    component="form"
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        borderRadius: 999,
-                        boxShadow: "none",
-                        bgcolor: "#fff",
-                        py: 0.5,
-                        minWidth: 200,
-                        pl: 2,
-                        pr: 0.5,
-                    }}
-                >
-                    <InputBase
-                        sx={{ ml: 1, flex: 1, fontSize: 16 }}
-                        placeholder="Search receipts..."
-                        value={searchInput}
-                        onChange={(e) => setSearchInput(e.target.value)}
-                        endAdornment={
-                            <IconButton>
-                                <Icon icon="ep:search" width={24} />
-                            </IconButton>
-                        }
-                    />
-                </Paper>
-            </Box>
             <TableContainer
                 component={Paper}
                 sx={{
