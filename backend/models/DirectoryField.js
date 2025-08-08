@@ -72,16 +72,6 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'created_at'
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'updated_at'
-    },
     metadata: {
       type: DataTypes.JSONB,
       allowNull: true,

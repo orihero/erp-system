@@ -1,8 +1,12 @@
+const { Sequelize } = require('sequelize');
+
 // Get cascading configuration for a specific field value
 const getCascadingConfig = async (req, res) => {
   try {
     const { DirectoryRecord } = require('../models');
     const { directoryId, fieldId, value } = req.query;
+
+    console.log('🔍 Cascading Config Debug - Request params:', { directoryId, fieldId, value });
 
     if (!directoryId || !fieldId || !value) {
       return res.status(400).json({
@@ -11,26 +15,39 @@ const getCascadingConfig = async (req, res) => {
       });
     }
 
-    // Find the directory record that matches the value in the cascading directory
-    const directoryRecord = await DirectoryRecord.findOne({
-      where: {
-        directory_id: directoryId,
-        metadata: {
-          value: value
-        }
-      }
-    });
+    // Find the directory record by its ID (the value parameter is actually the record ID)
+    const directoryRecord = await DirectoryRecord.findByPk(value);
+    
+    console.log('🔍 Cascading Config Debug - Found record:', directoryRecord ? {
+      id: directoryRecord.id,
+      metadata: directoryRecord.metadata
+    } : 'Not found');
 
     if (!directoryRecord) {
+      // Let's also check if there are any records at all
+      const allRecords = await DirectoryRecord.findAll({ limit: 5 });
+      console.log('🔍 Cascading Config Debug - Available records:', allRecords.map(r => ({
+        id: r.id,
+        metadata: r.metadata
+      })));
+      
       return res.status(404).json({
         success: false,
-        message: 'Directory record not found'
+        message: 'Directory record not found',
+        debug: {
+          requestedId: value,
+          availableRecords: allRecords.length
+        }
       });
     }
 
     const cascadingConfig = directoryRecord.getCascadingConfig();
     
+    console.log('🔍 Cascading Config Debug - Cascading config:', cascadingConfig);
+    console.log('🔍 Cascading Config Debug - Record metadata:', directoryRecord.metadata);
+    
     if (!cascadingConfig || !cascadingConfig.enabled) {
+      console.log('🔍 Cascading Config Debug - Cascading disabled or no config');
       return res.json({
         success: true,
         data: {
@@ -39,6 +56,8 @@ const getCascadingConfig = async (req, res) => {
         }
       });
     }
+
+    console.log('🔍 Cascading Config Debug - Returning cascading config:', cascadingConfig);
 
     res.json({
       success: true,
@@ -401,6 +420,151 @@ const getCascadingValues = async (req, res) => {
   }
 };
 
+// Store cascading values for a directory record
+const storeCascadingValues = async (req, res) => {
+  try {
+    const { DirectoryRecord, DirectoryValue, DirectoryField, CompanyDirectory } = require('../models');
+    const { companyDirectoryId, parentFieldId, parentValue, cascadingSelections, metadata } = req.body;
+
+    if (!companyDirectoryId || !parentFieldId || !parentValue) {
+      return res.status(400).json({
+        success: false,
+        message: 'Company directory ID, parent field ID, and parent value are required'
+      });
+    }
+
+    // Get the company directory to access directory_id
+    const companyDirectory = await CompanyDirectory.findByPk(companyDirectoryId);
+    if (!companyDirectory) {
+      return res.status(404).json({
+        success: false,
+        message: 'Company directory not found'
+      });
+    }
+
+    // Create the main directory record
+    const record = await DirectoryRecord.create({
+      company_directory_id: companyDirectoryId,
+      metadata: {
+        parentFieldId,
+        parentValue,
+        cascadingSelections,
+        ...metadata
+      }
+    });
+
+    // Create directory values for the main record and cascading selections
+    const valuesToCreate = [
+      {
+        directory_record_id: record.id,
+        field_id: parentFieldId,
+        value: parentValue,
+        metadata: {
+          isParentField: true
+        }
+      }
+    ];
+
+    // Add cascading field values
+    if (cascadingSelections && Array.isArray(cascadingSelections)) {
+      for (const selection of cascadingSelections) {
+        // Find or create the cascading field
+        let cascadingField = await DirectoryField.findOne({
+          where: {
+            directory_id: companyDirectory.directory_id,
+            name: selection.fieldName
+          }
+        });
+        
+        if (!cascadingField) {
+          // Create the cascading field
+          cascadingField = await DirectoryField.create({
+            directory_id: companyDirectory.directory_id,
+            name: selection.fieldName,
+            type: 'string',
+            required: false,
+            metadata: {
+              isCascadingField: true,
+              parentFieldId: parentFieldId
+            }
+          });
+        }
+        
+        valuesToCreate.push({
+          directory_record_id: record.id,
+          field_id: cascadingField.id,
+          value: selection.value,
+          metadata: {
+            isCascadingField: true,
+            parentField: parentFieldId,
+            displayName: selection.displayName,
+            fieldName: selection.fieldName
+          }
+        });
+      }
+    }
+
+    await DirectoryValue.bulkCreate(valuesToCreate);
+
+    res.json({
+      success: true,
+      data: {
+        recordId: record.id,
+        message: 'Cascading values stored successfully'
+      }
+    });
+  } catch (error) {
+    console.error('Error storing cascading values:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+// Get cascading values for a specific record
+const getCascadingValuesForRecord = async (req, res) => {
+  try {
+    const { DirectoryRecord, DirectoryValue } = require('../models');
+    const { recordId } = req.params;
+
+    const record = await DirectoryRecord.findByPk(recordId, {
+      include: [{
+        model: DirectoryValue,
+        as: 'recordValues'
+      }]
+    });
+
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: 'Record not found'
+      });
+    }
+
+    const metadata = record.metadata || {};
+    const cascadingSelections = metadata.cascadingSelections || [];
+
+    res.json({
+      success: true,
+      data: {
+        parentFieldId: metadata.parentFieldId,
+        parentValue: metadata.parentFieldValue,
+        cascadingSelections,
+        metadata
+      }
+    });
+  } catch (error) {
+    console.error('Error getting cascading values:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getCascadingConfig,
   getFilteredRecords,
@@ -408,5 +572,7 @@ module.exports = {
   updateCascadingConfig,
   validateCascadingSelection,
   saveCascadingValues,
-  getCascadingValues
+  getCascadingValues,
+  storeCascadingValues,
+  getCascadingValuesForRecord
 }; 

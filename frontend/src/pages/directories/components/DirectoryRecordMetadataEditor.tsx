@@ -43,9 +43,9 @@ interface DirectoryField {
 
 interface DirectoryRecordValue {
   id: string;
-  field_id: string;
+  field_id: string | null;
   value: string | number | boolean;
-  field: DirectoryField;
+  field: DirectoryField | null;
   metadata?: Record<string, unknown>;
   [key: string]: unknown;
 }
@@ -55,6 +55,7 @@ interface DirectoryRecordApi {
   company_directory_id?: string;
   createdAt?: string;
   updatedAt?: string;
+  metadata?: Record<string, unknown>;
   recordValues: DirectoryRecordValue[];
 }
 
@@ -86,6 +87,14 @@ const DirectoryRecordMetadataEditor: React.FC<DirectoryRecordMetadataEditorProps
   const [directories, setDirectories] = useState<Directory[]>([]);
   const [loadingDirectories, setLoadingDirectories] = useState(false);
   
+  // Debug: Log the record when component opens
+  useEffect(() => {
+    if (open && record) {
+      console.log('🔍 DirectoryRecordMetadataEditor Debug - Record passed to component:', record);
+      console.log('🔍 DirectoryRecordMetadataEditor Debug - Record metadata:', record.metadata);
+    }
+  }, [open, record]);
+  
   // Cascading configuration state
   const [cascadingConfig, setCascadingConfig] = useState<CascadingConfig>({
     enabled: false,
@@ -96,8 +105,9 @@ const DirectoryRecordMetadataEditor: React.FC<DirectoryRecordMetadataEditorProps
   useEffect(() => {
     if (open) {
       loadDirectories();
+      loadExistingCascadingConfig();
     }
-  }, [open]);
+  }, [open, record]);
 
   const loadDirectories = async () => {
     try {
@@ -109,6 +119,29 @@ const DirectoryRecordMetadataEditor: React.FC<DirectoryRecordMetadataEditorProps
       setError('Failed to load directories');
     } finally {
       setLoadingDirectories(false);
+    }
+  };
+
+  const loadExistingCascadingConfig = () => {
+    // Load existing cascading configuration from record metadata
+    // The cascading config is stored as cascadingConfig inside the metadata
+    const existingConfig = record.metadata?.cascadingConfig as CascadingConfig | undefined;
+    
+    console.log('🔍 DirectoryRecordMetadataEditor Debug - Record metadata:', record.metadata);
+    console.log('🔍 DirectoryRecordMetadataEditor Debug - Existing config:', existingConfig);
+    
+    if (existingConfig && existingConfig.enabled !== undefined) {
+      console.log('Loading existing cascading config:', existingConfig);
+      setCascadingConfig({
+        enabled: existingConfig.enabled || false,
+        dependentFields: existingConfig.dependentFields || []
+      });
+    } else {
+      console.log('No existing cascading config found, using defaults');
+      setCascadingConfig({
+        enabled: false,
+        dependentFields: []
+      });
     }
   };
 

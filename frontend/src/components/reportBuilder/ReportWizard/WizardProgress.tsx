@@ -1,8 +1,6 @@
 import React, { useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { WizardStep, WizardStepValidation } from '../../../types/wizard';
-
-// Placeholder translation function
-declare function t(key: string, params?: Record<string, unknown>): string;
 
 interface WizardProgressProps {
   steps: WizardStep[];
@@ -19,6 +17,7 @@ export const WizardProgress: React.FC<WizardProgressProps> = ({
   onStepClick,
   estimatedMinutes = 5,
 }) => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Keyboard navigation
@@ -79,23 +78,23 @@ export const WizardProgress: React.FC<WizardProgressProps> = ({
 
   return (
     <nav
-      className="wizard-progress"
-      aria-label={t('wizard.progressNavigation')}
+      className="w-full mb-5"
+      aria-label={t('wizard.progressNavigation', 'Progress Navigation')}
       ref={containerRef}
       tabIndex={0}
       role="navigation"
     >
-      <div className="progress-bar" aria-hidden="true">
+      <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden mb-5" aria-hidden="true">
         <div
-          className="progress-fill"
+          className="h-full bg-blue-600 transition-all duration-300 ease-in-out"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
-      <div className="progress-meta flex justify-between items-center mb-2">
-        <span>{t('wizard.stepOf', { current: currentStep + 1, total: steps.length })}</span>
-        <span>{t('wizard.estimatedTime', { minutes: estTime })}</span>
+      <div className="flex justify-between items-center mb-5 text-sm text-gray-500">
+        <span>{t('wizard.stepOf', 'Step {{current}} of {{total}}', { current: currentStep + 1, total: steps.length })}</span>
+        <span>{t('wizard.estimatedTime', 'Estimated time: {{minutes}} minutes', { minutes: estTime })}</span>
       </div>
-      <ol className="steps-container" aria-label={t('wizard.breadcrumb')}>
+      <ol className="flex gap-5 overflow-x-auto list-none p-0 m-0" aria-label={t('wizard.breadcrumb', 'Wizard Steps')}>
         {steps.map((step, index) => {
           const status = getStepStatus(index);
           const clickable = isStepClickable(index);
@@ -106,7 +105,14 @@ export const WizardProgress: React.FC<WizardProgressProps> = ({
           return (
             <li
               key={step.id}
-              className={`step-item ${status} ${clickable ? 'clickable' : ''}`}
+              className={`
+                flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all duration-200 min-w-[200px] flex-shrink-0
+                ${status === 'completed' ? 'bg-blue-50 border border-blue-200' : ''}
+                ${status === 'current' ? 'bg-blue-100 border-2 border-blue-600' : ''}
+                ${status === 'pending' ? 'bg-gray-50 border border-gray-200 opacity-60' : ''}
+                ${status === 'error' ? 'bg-red-50 border border-red-200' : ''}
+                ${clickable ? 'hover:-translate-y-0.5 hover:shadow-lg' : ''}
+              `}
               aria-current={status === 'current' ? 'step' : undefined}
               aria-disabled={!clickable}
               tabIndex={clickable ? 0 : -1}
@@ -117,34 +123,38 @@ export const WizardProgress: React.FC<WizardProgressProps> = ({
               role="listitem"
               aria-label={
                 status === 'completed'
-                  ? t('wizard.stepCompleted', { step: step.title })
+                  ? t('wizard.stepCompleted', 'Step completed: {{step}}', { step: step.title })
                   : status === 'error'
-                  ? t('wizard.stepError', { step: step.title })
+                  ? t('wizard.stepError', 'Step error: {{step}}', { step: step.title })
                   : status === 'current'
-                  ? t('wizard.currentStep', { step: step.title })
-                  : t('wizard.stepPending', { step: step.title })
+                  ? t('wizard.currentStep', 'Current step: {{step}}', { step: step.title })
+                  : t('wizard.stepPending', 'Step pending: {{step}}', { step: step.title })
               }
             >
-              <div className="step-indicator">
-                <div className="step-number">
-                  {status === 'completed' ? (
-                    <svg className="check-icon" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  ) : status === 'error' ? (
-                    <svg className="error-icon" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  ) : (
-                    index + 1
-                  )}
-                </div>
+              <div className={`
+                flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm
+                ${status === 'completed' ? 'bg-green-500 text-white' : ''}
+                ${status === 'current' ? 'bg-blue-600 text-white' : ''}
+                ${status === 'pending' ? 'bg-gray-400 text-white' : ''}
+                ${status === 'error' ? 'bg-red-500 text-white' : ''}
+              `}>
+                {status === 'completed' ? (
+                  <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : status === 'error' ? (
+                  <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  index + 1
+                )}
               </div>
-              <div className="step-content">
-                <div className="step-title">{step.title}</div>
-                {step.isOptional && <div className="step-optional">{t('wizard.optional')}</div>}
+              <div className="flex-1">
+                <div className="font-semibold text-sm text-gray-700 mb-1">{step.title}</div>
+                {step.isOptional && <div className="text-xs text-gray-500 italic">{t('wizard.optional', 'Optional')}</div>}
                 {errorMsg && status === 'error' && (
-                  <div className="step-error" role="alert">{errorMsg}</div>
+                  <div className="text-xs text-red-500 mt-1" role="alert">{errorMsg}</div>
                 )}
               </div>
             </li>

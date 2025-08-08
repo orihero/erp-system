@@ -75,6 +75,14 @@ export interface CascadingValuesResponse {
   cascadingConfig: CascadingConfig;
 }
 
+// Add new interface for storing cascading values
+export interface CascadingValueStorage {
+  parentFieldId: string;
+  parentValue: string;
+  cascadingSelections: CascadingSelection[];
+  metadata?: Record<string, unknown>;
+}
+
 export const cascadingApi = {
   // Get cascading configuration for a specific field value
   getCascadingConfig: (directoryId: string, fieldId: string, value: string) =>
@@ -110,5 +118,16 @@ export const cascadingApi = {
 
   // Get cascading field values for a record
   getCascadingValues: (recordId: string) =>
-    api.get<{ success: boolean; data: CascadingValuesResponse }>(`/api/cascading/values/${recordId}`)
+    api.get<{ success: boolean; data: CascadingValuesResponse }>(`/api/cascading/values/${recordId}`),
+
+  // Store cascading values for a directory record
+  storeCascadingValues: (companyDirectoryId: string, cascadingData: CascadingValueStorage) =>
+    api.post<{ success: boolean; data: Record<string, unknown>; message: string }>('/api/cascading/store-values', {
+      companyDirectoryId,
+      ...cascadingData
+    }),
+
+  // Get cascading values for a directory record
+  getCascadingValuesForRecord: (recordId: string) =>
+    api.get<{ success: boolean; data: CascadingValueStorage }>(`/api/cascading/record-values/${recordId}`)
 }; 

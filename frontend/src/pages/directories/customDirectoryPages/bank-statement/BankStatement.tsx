@@ -129,20 +129,22 @@ const BankStatement: React.FC = () => {
     recordsToProcess.forEach(record => {
       const recordData: Partial<BankStatementRecord> = { id: record.id };
       
-      // Map record values to fields - handle both 'values' and 'recordValues' for compatibility
-      const values = record.values || record.recordValues || [];
-      console.log('Processing record:', record.id, 'with values:', values);
+      // Map record values to fields - use recordValues with field_id
+      const values = record.recordValues || [];
+      console.log('Processing record:', record.id, 'with recordValues:', values);
       
-      values.forEach((value: any) => {
-        // Handle both 'attribute_id' and 'field_id' for compatibility
-        const fieldId = value.attribute_id || value.field_id;
-        const field = sortedFields.find(f => f.id === fieldId);
-        if (field) {
+      // Map each field to its value
+      sortedFields.forEach(field => {
+        const valueObj = values.find((value: any) => {
+          return value.field_id === field.id;
+        });
+        
+        if (valueObj) {
           const fieldName = field.name;
-          (recordData as Record<string, unknown>)[fieldName] = value.value;
-          console.log(`Mapped field ${fieldName} = ${value.value}`);
+          (recordData as Record<string, unknown>)[fieldName] = valueObj.value;
+          console.log(`Mapped field ${fieldName} = ${valueObj.value}`);
         } else {
-          console.log(`Field not found for fieldId: ${fieldId}`);
+          console.log(`No value found for field ${field.name} (${field.id})`);
         }
       });
 
@@ -153,8 +155,7 @@ const BankStatement: React.FC = () => {
         const groupField = sortedFields.find(f => f.name === groupByField);
         if (groupField) {
           const groupValueObj = values.find((v: any) => {
-            const fieldId = v.attribute_id || v.field_id;
-            return fieldId === groupField.id;
+            return v.field_id === groupField.id;
           });
           groupValue = groupValueObj ? String(groupValueObj.value) : 'Unknown';
           console.log(`Group value for ${groupByField}: ${groupValue}`);

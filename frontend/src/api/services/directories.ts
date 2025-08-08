@@ -8,6 +8,15 @@ export interface DirectoryEntry {
     attribute_id: string;
     value: string | number | boolean;
   }>;
+  recordValues?: Array<{
+    id: string;
+    directory_record_id: string;
+    field_id: string | null;
+    value: string | number | boolean;
+    createdAt: string;
+    updatedAt: string;
+    field: DirectoryField | null;
+  }>;
   created_at: string;
   updated_at: string;
 }
@@ -121,6 +130,7 @@ export const directoriesApi = {
         directory: Directory;
       };
       directoryRecords: DirectoryEntry[];
+      fields: DirectoryField[];
     }>(`/api/directory-records/full-data`, { 
       params: { 
         directory_id, 

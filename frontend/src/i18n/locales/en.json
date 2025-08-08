@@ -23,7 +23,59 @@
     "user": "User",
     "enabled": "Enabled",
     "disabled": "Disabled",
-    "add": "Add"
+    "add": "Add",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish"
+  },
+  "wizard": {
+    "selectDirectory": "Select Directory",
+    "configureContent": "Configure Content",
+    "preview": "Preview",
+    "selectDirectoryTitle": "Select a directory to use as data source",
+    "selectDirectoryDescription": "Choose a directory that contains the data you want to include in your {{insertType}}",
+    "configureContentTitle": "Configure your content",
+    "configureContentDescription": "Selected directory: {{directoryName}}",
+    "previewTitle": "Preview your {{insertType}}",
+    "previewDescription": "Review your configuration before inserting",
+    "previewComingSoon": "Preview functionality coming soon...",
+    "insertTitle": "Insert {{insertType}}",
+    "noDirectories": "No directories available",
+    "noDirectoriesDescription": "This company has no directories bound to it yet.",
+    "noDirectorySelected": "No directory selected",
+    "filters": "Filters",
+    "filtersDescription": "Apply filters to narrow down your data",
+    "sorting": "Sorting",
+    "sortingDescription": "Sort your data by specific fields",
+    "grouping": "Grouping",
+    "groupingDescription": "Group your data by categories",
+    "joins": "Joins",
+    "joinsDescription": "Join with other directories for additional data",
+    "searchRecords": "Search records...",
+    "recordsFound": "{{count}} records found",
+    "selectAll": "Select All",
+    "selectedConfiguration": "Selected Configuration:",
+    "selectFunction": "Select Function for {{field}}",
+    "functionParameters": "Function Parameters",
+    "filterValue": "Filter Value",
+    "filterValueHelp": "Enter the value to filter by",
+    "advancedFilter": "Advanced Filter",
+    "advancedFilterPlaceholder": "Type to filter (e.g., \"athlete contains michael\")",
+    "advancedFilterPlaceholderFocused": "Select an Excel function to start filtering...",
+    "builder": "Builder",
+    "apply": "Apply",
+    "filterHelp": "Type field names, operators (AND, OR, contains, equals, etc.), and values. Use the Builder for complex filters.",
+    "advancedFilterBuilder": "Advanced Filter Builder",
+    "filterGroup": "Filter Group {{index}}",
+    "joinOperator": "Join Operator",
+    "field": "Field",
+    "operator": "Operator",
+    "value": "Value",
+    "addCondition": "Add Condition",
+    "functionSuggestions": "Function Suggestions",
+    "availableFunctions": "Available Functions",
+    "functionDescription": "Function Description",
+    "functionSyntax": "Function Syntax"
   },
   "auth": {
     "email": "Email",
@@ -136,7 +188,26 @@
     "editFieldMetadata": "Edit Field Metadata",
     "fieldMetadataDescription": "Configure metadata for field:",
     "fieldMetadataHelp": "Common metadata keys include: fieldOrder, isVisibleOnTable, isRequired, validationRules, etc.",
-    "metadata": "Metadata"
+    "metadata": "Metadata",
+    "metadata": {
+      "title": "Directory Metadata Editor",
+      "description": "Edit directory and field metadata. Changes will affect how the directory is displayed and behaves.",
+      "directory": "Directory Metadata",
+      "fields": "Field Metadata",
+      "componentName": "Component Name",
+      "componentNameHelp": "Custom component to render for this directory",
+      "displayName": "Display Name",
+      "displayNameHelp": "Human-readable name for the directory",
+      "selectDisplayField": "Select Display Field",
+      "selectDisplayFieldHelp": "Field to display when this directory is used in relation selects",
+      "noDisplayField": "No specific display field",
+      "isVisible": "Visible in Navigation",
+      "fieldOrder": "Field Order",
+      "isVisibleOnTable": "Visible in Table",
+      "isRequired": "Required Field",
+      "defaultValue": "Default Value",
+      "saved": "Metadata saved successfully!"
+    }
   },
   "companies": {
     "title": "Companies",
@@ -144,6 +215,7 @@
     "aboutTab": "About",
     "modulesTab": "Modules",
     "directoriesTab": "Directories",
+    "reportsTab": "Reports",
     "name": "Name",
     "email": "Email",
     "employeeCount": "Employee Count",
@@ -219,7 +291,9 @@
     "modules": "Modules",
     "reports": "Reports",
     "settings": "Settings",
-    "systemDirectories": "System Directories"
+    "systemDirectories": "System Directories",
+    "expand": "Expand Sidebar",
+    "collapse": "Collapse Sidebar"
   },
   "permission": {
     "edit": "Edit Permission",
@@ -276,7 +350,9 @@
     "profileTab": "Profile",
     "directoriesTab": "Directories",
     "systemDirectories": "System Directories",
-    "noSystemDirectories": "No system directories found."
+    "noSystemDirectories": "No system directories found.",
+    "companyDirectories": "Company Directories",
+    "noCompanyDirectories": "No company directories found."
   },
   "unauthorized": {
     "403": "403",
@@ -471,6 +547,14 @@
     "createReportStructure": "Create Report Structure",
     "structure": "Report Structure",
     "createChart": "Create Chart",
+    "noReports": "No reports yet",
+    "noReportsDescription": "Create your first report to get started",
+    "createReport": "Create Report",
+    "startTyping": "Start typing to create your report...",
+    "insert": "Insert",
+    "insertText": "Text",
+    "insertTable": "Table",
+    "insertChart": "Chart",
     "financial": {
       "title": "Financial Reports",
       "description": "View and analyze financial data, including revenue, expenses, and profit margins."
@@ -490,6 +574,327 @@
       "barChart": "Bar Chart",
       "pieChart": "Pie Chart",
       "chartTitle": "Chart Title"
+    },
+    "wizard": {
+      "insertTitle": "Insert {{insertType}}",
+      "selectDirectory": "Select Directory",
+      "configureContent": "Configure Content",
+      "preview": "Preview",
+      "selectDirectoryTitle": "Select a directory to use as data source",
+      "selectDirectoryDescription": "Choose a directory that contains the data you want to include in your {{insertType}}",
+      "configureContentTitle": "Configure your {{insertType}}",
+      "configureContentDescription": "Selected directory: {{directoryName}}",
+      "previewTitle": "Preview your {{insertType}}",
+      "previewDescription": "Review your configuration before inserting",
+      "configurationComingSoon": "Configuration options coming soon...",
+      "previewComingSoon": "Preview functionality coming soon...",
+      "noDirectories": "No directories available",
+      "noDirectoriesDescription": "This company has no directories bound to it yet."
+    },
+    "common": {
+      "loading": "Loading...",
+      "error": "Error loading directories",
+      "cancel": "Cancel",
+      "back": "Back",
+      "next": "Next",
+      "finish": "Finish"
+    }
+  },
+  "excelFunctions": {
+    "title": "Excel Functions",
+    "categories": {
+      "text": "Text Functions",
+      "math": "Math Functions",
+      "date": "Date Functions",
+      "logical": "Logical Functions",
+      "lookup": "Lookup Functions",
+      "statistical": "Statistical Functions"
+    },
+    "functions": {
+      "CONCATENATE": {
+        "name": "CONCATENATE",
+        "description": "Combines values from multiple columns into one string",
+        "syntax": "CONCATENATE(column1, separator, column2, ...)",
+        "examples": ["CONCATENATE(\"first_name\", \" \", \"last_name\")", "CONCATENATE(\"name\", \" - \", \"category\")"]
+      },
+      "LEFT": {
+        "name": "LEFT",
+        "description": "Extracts a specified number of characters from the left side of values in a column",
+        "syntax": "LEFT(column_name, num_chars)",
+        "examples": ["LEFT(\"name\", 5)", "LEFT(\"description\", 10)"]
+      },
+      "RIGHT": {
+        "name": "RIGHT",
+        "description": "Extracts a specified number of characters from the right side of values in a column",
+        "syntax": "RIGHT(column_name, num_chars)",
+        "examples": ["RIGHT(\"name\", 5)", "RIGHT(\"description\", 10)"]
+      },
+      "MID": {
+        "name": "MID",
+        "description": "Extracts a substring from the middle of values in a column",
+        "syntax": "MID(column_name, start_num, num_chars)",
+        "examples": ["MID(\"name\", 7, 5)", "MID(\"description\", 1, 10)"]
+      },
+      "LEN": {
+        "name": "LEN",
+        "description": "Returns the length of values in a column",
+        "syntax": "LEN(column_name)",
+        "examples": ["LEN(\"name\")", "LEN(\"description\")"]
+      },
+      "UPPER": {
+        "name": "UPPER",
+        "description": "Converts values in a column to uppercase",
+        "syntax": "UPPER(column_name)",
+        "examples": ["UPPER(\"name\")", "UPPER(\"description\")"]
+      },
+      "LOWER": {
+        "name": "LOWER",
+        "description": "Converts values in a column to lowercase",
+        "syntax": "LOWER(column_name)",
+        "examples": ["LOWER(\"name\")", "LOWER(\"description\")"]
+      },
+      "PROPER": {
+        "name": "PROPER",
+        "description": "Capitalizes the first letter of each word in values in a column",
+        "syntax": "PROPER(column_name)",
+        "examples": ["PROPER(\"name\")", "PROPER(\"description\")"]
+      },
+      "TRIM": {
+        "name": "TRIM",
+        "description": "Removes extra spaces from values in a column",
+        "syntax": "TRIM(column_name)",
+        "examples": ["TRIM(\"name\")", "TRIM(\"description\")"]
+      },
+      "SUBSTITUTE": {
+        "name": "SUBSTITUTE",
+        "description": "Replaces text in values in a column",
+        "syntax": "SUBSTITUTE(column_name, old_text, new_text, instance_num)",
+        "examples": ["SUBSTITUTE(\"name\", \"World\", \"Excel\")", "SUBSTITUTE(\"description\", \"old\", \"new\")"]
+      },
+      "SUM": {
+        "name": "SUM",
+        "description": "Adds all numbers in a column",
+        "syntax": "SUM(column_name)",
+        "examples": ["SUM(\"amount\")", "SUM(\"price\")"]
+      },
+      "AVERAGE": {
+        "name": "AVERAGE",
+        "description": "Returns the average of numbers in a column",
+        "syntax": "AVERAGE(column_name)",
+        "examples": ["AVERAGE(\"amount\")", "AVERAGE(\"price\")"]
+      },
+      "COUNT": {
+        "name": "COUNT",
+        "description": "Counts the number of non-empty values in a column",
+        "syntax": "COUNT(column_name)",
+        "examples": ["COUNT(\"name\")", "COUNT(\"amount\")"]
+      },
+      "MAX": {
+        "name": "MAX",
+        "description": "Returns the largest value in a column",
+        "syntax": "MAX(column_name)",
+        "examples": ["MAX(\"amount\")", "MAX(\"price\")"]
+      },
+      "MIN": {
+        "name": "MIN",
+        "description": "Returns the smallest value in a column",
+        "syntax": "MIN(column_name)",
+        "examples": ["MIN(\"amount\")", "MIN(\"price\")"]
+      },
+      "ROUND": {
+        "name": "ROUND",
+        "description": "Rounds values in a column to a specified number of digits",
+        "syntax": "ROUND(column_name, num_digits)",
+        "examples": ["ROUND(\"amount\", 2)", "ROUND(\"price\", 0)"]
+      },
+      "ABS": {
+        "name": "ABS",
+        "description": "Returns the absolute value of numbers in a column",
+        "syntax": "ABS(column_name)",
+        "examples": ["ABS(\"amount\")", "ABS(\"price\")"]
+      },
+      "MOD": {
+        "name": "MOD",
+        "description": "Returns the remainder after division for values in a column",
+        "syntax": "MOD(column_name, divisor)",
+        "examples": ["MOD(\"amount\", 3)", "MOD(\"price\", 2)"]
+      },
+      "YEAR": {
+        "name": "YEAR",
+        "description": "Returns the year of dates in a column",
+        "syntax": "YEAR(column_name)",
+        "examples": ["YEAR(\"created_date\")", "YEAR(\"birth_date\")"]
+      },
+      "MONTH": {
+        "name": "MONTH",
+        "description": "Returns the month of dates in a column (1-12)",
+        "syntax": "MONTH(column_name)",
+        "examples": ["MONTH(\"created_date\")", "MONTH(\"birth_date\")"]
+      },
+      "DAY": {
+        "name": "DAY",
+        "description": "Returns the day of dates in a column (1-31)",
+        "syntax": "DAY(column_name)",
+        "examples": ["DAY(\"created_date\")", "DAY(\"birth_date\")"]
+      },
+      "HOUR": {
+        "name": "HOUR",
+        "description": "Returns the hour of times in a column (0-23)",
+        "syntax": "HOUR(column_name)",
+        "examples": ["HOUR(\"created_time\")", "HOUR(\"start_time\")"]
+      },
+      "MINUTE": {
+        "name": "MINUTE",
+        "description": "Returns the minute of times in a column (0-59)",
+        "syntax": "MINUTE(column_name)",
+        "examples": ["MINUTE(\"created_time\")", "MINUTE(\"start_time\")"]
+      },
+      "SECOND": {
+        "name": "SECOND",
+        "description": "Returns the second of times in a column (0-59)",
+        "syntax": "SECOND(column_name)",
+        "examples": ["SECOND(\"created_time\")", "SECOND(\"start_time\")"]
+      },
+      "TODAY": {
+        "name": "TODAY",
+        "description": "Returns the current date",
+        "syntax": "TODAY()",
+        "examples": ["TODAY()"]
+      },
+      "NOW": {
+        "name": "NOW",
+        "description": "Returns the current date and time",
+        "syntax": "NOW()",
+        "examples": ["NOW()"]
+      },
+      "DATE": {
+        "name": "DATE",
+        "description": "Creates a date from year, month, and day",
+        "syntax": "DATE(year, month, day)",
+        "examples": ["DATE(2023, 12, 25)", "DATE(A1, B1, C1)"]
+      },
+      "IF": {
+        "name": "IF",
+        "description": "Returns one value if a condition is true and another if it is false",
+        "syntax": "IF(column_name, operator, value, value_if_true, value_if_false)",
+        "examples": ["IF(\"amount\", \">\", \"100\", \"High\", \"Low\")", "IF(\"status\", \"=\", \"active\", \"Valid\", \"Invalid\")"]
+      },
+      "AND": {
+        "name": "AND",
+        "description": "Returns TRUE if all conditions are TRUE for values in columns",
+        "syntax": "AND(column1, operator1, value1, column2, operator2, value2, ...)",
+        "examples": ["AND(\"amount\", \">\", \"0\", \"amount\", \"<\", \"100\")", "AND(\"status\", \"=\", \"active\", \"type\", \"=\", \"premium\")"]
+      },
+      "OR": {
+        "name": "OR",
+        "description": "Returns TRUE if any condition is TRUE for values in columns",
+        "syntax": "OR(column1, operator1, value1, column2, operator2, value2, ...)",
+        "examples": ["OR(\"amount\", \">\", \"100\", \"amount\", \"<\", \"0\")", "OR(\"status\", \"=\", \"active\", \"type\", \"=\", \"premium\")"]
+      },
+      "NOT": {
+        "name": "NOT",
+        "description": "Reverses the logic of a condition for values in a column",
+        "syntax": "NOT(column_name, operator, value)",
+        "examples": ["NOT(\"amount\", \">\", \"10\")", "NOT(\"status\", \"=\", \"active\")"]
+      },
+      "ISBLANK": {
+        "name": "ISBLANK",
+        "description": "Returns TRUE if values in a column are blank",
+        "syntax": "ISBLANK(column_name)",
+        "examples": ["ISBLANK(\"name\")", "IF(ISBLANK(\"email\"), \"Empty\", \"Has Value\")"]
+      },
+      "ISNUMBER": {
+        "name": "ISNUMBER",
+        "description": "Returns TRUE if values in a column are numbers",
+        "syntax": "ISNUMBER(column_name)",
+        "examples": ["ISNUMBER(\"amount\")", "IF(ISNUMBER(\"price\"), \"Valid\", \"Not a number\")"]
+      },
+      "ISTEXT": {
+        "name": "ISTEXT",
+        "description": "Returns TRUE if values in a column are text",
+        "syntax": "ISTEXT(column_name)",
+        "examples": ["ISTEXT(\"name\")", "IF(ISTEXT(\"description\"), UPPER(\"description\"), \"description\")"]
+      },
+      "VLOOKUP": {
+        "name": "VLOOKUP",
+        "description": "Looks up a value in the first column of a range and returns a value in the same row",
+        "syntax": "VLOOKUP(lookup_value, table_array, col_index_num, range_lookup)",
+        "examples": ["VLOOKUP(\"Apple\", A1:B10, 2, FALSE)", "VLOOKUP(A1, B1:D10, 3, TRUE)"]
+      },
+      "HLOOKUP": {
+        "name": "HLOOKUP",
+        "description": "Looks up a value in the first row of a range and returns a value in the same column",
+        "syntax": "HLOOKUP(lookup_value, table_array, row_index_num, range_lookup)",
+        "examples": ["HLOOKUP(\"Q1\", A1:D3, 2, FALSE)", "HLOOKUP(A1, B1:D3, 3, TRUE)"]
+      },
+      "COUNTIF": {
+        "name": "COUNTIF",
+        "description": "Counts the number of values in a column that meet a criterion",
+        "syntax": "COUNTIF(column_name, operator, value)",
+        "examples": ["COUNTIF(\"amount\", \">\", \"5\")", "COUNTIF(\"status\", \"=\", \"Active\")"]
+      },
+      "SUMIF": {
+        "name": "SUMIF",
+        "description": "Adds values in a column that meet a given criteria",
+        "syntax": "SUMIF(column_name, operator, value)",
+        "examples": ["SUMIF(\"amount\", \">\", \"5\")", "SUMIF(\"amount\", \"=\", \"100\")"]
+      },
+      "AVERAGEIF": {
+        "name": "AVERAGEIF",
+        "description": "Returns the average of values in a column that meet a criterion",
+        "syntax": "AVERAGEIF(column_name, operator, value)",
+        "examples": ["AVERAGEIF(\"amount\", \">\", \"5\")", "AVERAGEIF(\"amount\", \"=\", \"100\")"]
+      }
+    },
+    "parameters": {
+      "column_name": "Name of the column",
+      "column1": "First column",
+      "column2": "Second column",
+      "separator": "Separator between values",
+      "num_chars": "Number of characters",
+      "start_num": "Starting position (1-based)",
+      "old_text": "Text to replace",
+      "new_text": "New text",
+      "instance_num": "Which occurrence to replace",
+      "num_digits": "Number of decimal places",
+      "divisor": "Number to divide by",
+      "operator": "Comparison operator",
+      "value": "Value to compare against",
+      "value_if_true": "Value if condition is true",
+      "value_if_false": "Value if condition is false",
+      "year": "Year (1900-9999)",
+      "month": "Month (1-12)",
+      "day": "Day (1-31)",
+      "lookup_value": "Value to search for",
+      "table_array": "Range to search in",
+      "col_index_num": "Column number to return",
+      "row_index_num": "Row number to return",
+      "range_lookup": "TRUE for approximate match, FALSE for exact"
+    },
+    "operators": {
+      "equals": "Equals",
+      "not_equals": "Not equals",
+      "greater_than": "Greater than",
+      "less_than": "Less than",
+      "greater_than_or_equal": "Greater than or equal",
+      "less_than_or_equal": "Less than or equal",
+      "contains": "Contains",
+      "not_contains": "Not contains",
+      "starts_with": "Starts with",
+      "ends_with": "Ends with"
+    },
+    "ui": {
+      "selectFunction": "Select Function",
+      "configureParameters": "Configure Parameters",
+      "applyFunction": "Apply Function",
+      "functionPreview": "Function Preview",
+      "noFunctionsAvailable": "No functions available for this field type",
+      "searchFunctions": "Search functions...",
+      "filterableFields": "Filterable Fields",
+      "activeFilters": "Active Filters",
+      "addFilter": "Add Filter",
+      "removeFilter": "Remove Filter",
+      "clearAllFilters": "Clear All Filters"
     }
   }
 }

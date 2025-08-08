@@ -24,4 +24,10 @@ router.post('/save-values', authenticateUser, cascadingController.saveCascadingV
 // Get cascading field values for a record
 router.get('/values/:recordId', authenticateUser, cascadingController.getCascadingValues);
 
+// Store cascading values for a directory record
+router.post('/store-values', authenticateUser, cascadingController.storeCascadingValues);
+
+// Get cascading values for a specific record
+router.get('/record-values/:recordId', authenticateUser, cascadingController.getCascadingValuesForRecord);
+
 module.exports = router; 

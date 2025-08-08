@@ -10,6 +10,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "npx sequelize-cli db:seed:all",
     "seed:undo": "npx sequelize-cli db:seed:undo:all",
+    "seed:production": "npx sequelize-cli db:seed --seed 20250101000000-production-seed.js",
+    "seed:development": "node scripts/seed-all.js",
+    "seed:undo:production": "npx sequelize-cli db:seed:undo --seed 20250101000000-production-seed.js",
+    "seed:undo:development": "npx sequelize-cli db:seed:undo --seed 20250102000004-development-directory-records.js && npx sequelize-cli db:seed:undo --seed 20250102000003-development-directories.js && npx sequelize-cli db:seed:undo --seed 20250102000002-development-company-modules.js && npx sequelize-cli db:seed:undo --seed 20250102000001-development-users.js && npx sequelize-cli db:seed:undo --seed 20250102000000-development-companies.js && npx sequelize-cli db:seed:undo --seed 20250101000000-production-seed.js",
     "migrate": "npx sequelize-cli db:migrate",
     "migrate:reset": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate"
   },

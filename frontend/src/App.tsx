@@ -10,7 +10,6 @@ import Signup from './pages/signup/Signup';
 import Dashboard from './pages/dashboard';
 import Clients from './pages/clients';
 import Directories from './pages/directories';
-import DirectoryRecords from './pages/directories/DirectoryRecords';
 import Companies from './pages/companies';
 import Modules from './pages/modules/Modules';
 import Reports from './pages/reports/Reports';
@@ -21,11 +20,14 @@ import Layout from './components/Layout/Layout';
 import CompanyDetail from './pages/companies/CompanyDetail';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import UserRoles from './pages/roles';
-import type { NavigationItem } from './api/services/types';
+import type { NavigationModule } from '@/api/services/types';
 import Settings from './pages/Settings';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Snackbar } from './components/Snackbar';
 import FullScreenSpreadsheet from './pages/reports/FullScreenSpreadsheet';
+import DirectoryRecords from './pages/directories/DirectoryRecords';
+import ReportWizardPage from './pages/reports/ReportWizardPage';
+import ReportEditorPage from './pages/reports/ReportEditorPage';
 
 type SubItemWithModule = { directory_type: string; name: string; path?: string };
 
@@ -37,18 +39,18 @@ const theme = createTheme({
 
 function AutoRedirector() {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
-  const navigation = useSelector((state: RootState) => state.navigation.navigation);
+  const navigation = useSelector((state: RootState) => state.navigation);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     if (
       isAuthenticated &&
-      Array.isArray(navigation) &&
-      navigation.length > 0 &&
+      Array.isArray(navigation.modules) &&
+      navigation.modules.length > 0 &&
       (location.pathname === '/' || location.pathname === '/dashboard')
     ) {
-      function findFirstModuleDirectory(navItems: NavigationItem[]): string | null {
+      function findFirstModuleDirectory(navItems: NavigationModule[]): string | null {
         for (const item of navItems) {
           const subItems = (item as unknown as { subItems?: unknown[] }).subItems;
           if (Array.isArray(subItems) && subItems.length > 0) {
@@ -65,7 +67,7 @@ function AutoRedirector() {
                 return (sub as SubItemWithModule).path || `/directories/${(sub as SubItemWithModule).name.toLowerCase().replace(/ /g, '-')}`;
               }
             }
-            const found = findFirstModuleDirectory(subItems as NavigationItem[]);
+            const found = findFirstModuleDirectory(subItems as NavigationModule[]);
             if (found) return found;
           }
         }
@@ -73,7 +75,7 @@ function AutoRedirector() {
       }
 
       console.log('navigation', navigation);
-      const firstModuleDirectoryPath = findFirstModuleDirectory(navigation);
+      const firstModuleDirectoryPath = findFirstModuleDirectory(navigation.modules);
       console.log('firstModuleDirectoryPath', firstModuleDirectoryPath);
       if (firstModuleDirectoryPath) {
         navigate(firstModuleDirectoryPath, { replace: true });
@@ -144,11 +146,9 @@ const AppRoutes: React.FC = () => {
 
           <Route path="/directories/:directoryId" element={
             <PrivateRoute requiredPermissionType="directories.view">
-              <Outlet />
+              <DirectoryRecords />
             </PrivateRoute>
-          }>
-            <Route index element={<DirectoryRecords />} />
-          </Route>
+          } />
 
           <Route path="/companies" element={
             <PrivateRoute requiredPermissionType="companies.view">
@@ -217,6 +217,23 @@ const AppRoutes: React.FC = () => {
             <Route index element={<Settings />} />
           </Route>
         </Route>
+
+        {/* Full-page routes (outside Layout) */}
+        <Route path="/reports/create" element={
+          <PrivateRoute requiredPermissionType="reports.view">
+            <ReportWizardPage />
+          </PrivateRoute>
+        } />
+        <Route path="/reports/edit/:templateId" element={
+          <PrivateRoute requiredPermissionType="reports.view">
+            <ReportWizardPage />
+          </PrivateRoute>
+        } />
+        <Route path="/reports/editor/:companyId" element={
+          <PrivateRoute requiredPermissionType="reports.view">
+            <ReportEditorPage />
+          </PrivateRoute>
+        } />
       </Routes>
     </div>
   );

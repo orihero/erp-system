@@ -108,7 +108,7 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({
       if (onComplete) {
         onComplete(template);
       } else {
-        navigate('/report-templates');
+        navigate('/reports');
       }
     } catch (error) {
       console.error('Failed to submit template:', error);
@@ -127,7 +127,7 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({
       if (onCancel) {
         onCancel();
       } else {
-        navigate('/report-templates');
+        navigate('/reports');
       }
     }
   }, [wizardData, onCancel, navigate]);
@@ -137,26 +137,48 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({
     if (onCancel) {
       onCancel();
     } else {
-      navigate('/report-templates');
+      navigate('/reports');
     }
   }, [onCancel, navigate]);
   
   if (isLoading) {
     return (
-      <div className="report-wizard__loading">
-        <div className="loading-spinner" />
-        <p>Loading template...</p>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5'
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '4px solid #f3f3f3',
+          borderTop: '4px solid #3498db',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }} />
+        <p style={{ marginTop: '20px', fontSize: '16px' }}>Loading template...</p>
       </div>
     );
   }
   
   if (error) {
     return (
-      <div className="report-wizard__error">
-        <h3>Error Loading Template</h3>
-        <p>{error}</p>
-        <Button onClick={() => navigate('/report-templates')}>
-          Back to Templates
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+        padding: '20px'
+      }}>
+        <h3 style={{ color: '#d32f2f', marginBottom: '20px' }}>Error Loading Template</h3>
+        <p style={{ color: '#666', marginBottom: '20px' }}>{error}</p>
+        <Button onClick={() => navigate('/reports')}>
+          Back to Reports
         </Button>
       </div>
     );
@@ -167,16 +189,44 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({
   const canProceed = validation[currentStep]?.isValid || currentStepData.isOptional;
   
   return (
-    <div className="report-wizard">
-      <div className="report-wizard__header">
-        <div className="header-content">
-          <h1>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#f5f5f5',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      {/* Header */}
+      <div style={{
+        backgroundColor: '#fff',
+        borderBottom: '1px solid #e0e0e0',
+        padding: '20px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px'
+        }}>
+          <h1 style={{
+            margin: 0,
+            fontSize: '24px',
+            fontWeight: '600',
+            color: '#333'
+          }}>
             {templateId ? 'Edit Report Template' : 'Create Report Template'}
           </h1>
           
-          <div className="header-actions">
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '15px'
+          }}>
             {autoSaveEnabled && lastSaved && (
-              <span className="auto-save-status">
+              <span style={{
+                fontSize: '14px',
+                color: '#666'
+              }}>
                 Last saved: {lastSaved.toLocaleTimeString()}
               </span>
             )}
@@ -199,25 +249,67 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({
         />
       </div>
       
-      <div className="report-wizard__content">
-        <div className="step-header">
-          <h2>{currentStepData.title}</h2>
-          <p>{currentStepData.description}</p>
-        </div>
-        
-        <div className="step-content">
-          <WizardStep
-            step={currentStepData}
-            data={wizardData[currentStepData.id]}
-            wizardData={wizardData}
-            validation={validation[currentStep]}
-            onDataChange={(data) => handleStepDataChange(currentStepData.id, data)}
-          />
+      {/* Content */}
+      <div style={{
+        flex: 1,
+        padding: '30px',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        width: '100%'
+      }}>
+        <div style={{
+          backgroundColor: '#fff',
+          borderRadius: '8px',
+          padding: '30px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          minHeight: '500px'
+        }}>
+          <div style={{
+            marginBottom: '30px'
+          }}>
+            <h2 style={{
+              margin: '0 0 10px 0',
+              fontSize: '20px',
+              fontWeight: '600',
+              color: '#333'
+            }}>
+              {currentStepData.title}
+            </h2>
+            <p style={{
+              margin: 0,
+              color: '#666',
+              fontSize: '16px'
+            }}>
+              {currentStepData.description}
+            </p>
+          </div>
+          
+          <div>
+            <WizardStep
+              step={currentStepData}
+              data={wizardData[currentStepData.id]}
+              wizardData={wizardData}
+              validation={validation[currentStep]}
+              onDataChange={(data) => handleStepDataChange(currentStepData.id, data)}
+            />
+          </div>
         </div>
       </div>
       
-      <div className="report-wizard__footer">
-        <div className="wizard-actions">
+      {/* Footer */}
+      <div style={{
+        backgroundColor: '#fff',
+        borderTop: '1px solid #e0e0e0',
+        padding: '20px',
+        boxShadow: '0 -2px 4px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
           <Button
             variant="secondary"
             onClick={handleCancel}
@@ -225,7 +317,10 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({
             Cancel
           </Button>
           
-          <div className="navigation-buttons">
+          <div style={{
+            display: 'flex',
+            gap: '15px'
+          }}>
             <Button
               variant="secondary"
               onClick={handlePrevious}

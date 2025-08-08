@@ -1,9 +1,10 @@
 import { Icon } from '@iconify/react';
-import { Avatar, Box, IconButton, Menu, MenuItem, Paper, Typography, Tabs, Tab } from '@mui/material';
+import { Avatar, Box, IconButton, Menu, MenuItem, Paper, Typography, Tabs, Tab, Tooltip } from '@mui/material';
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/store/slices/authSlice';
+import { toggleSidebar } from '@/store/slices/sidebarSlice';
 import type { RootState } from '@/store';
 import type { NavigationModule } from '@/api/services/types';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +16,7 @@ export default function DashboardHeader() {
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const modules: NavigationModule[] = useSelector((state: RootState) => state.navigation.modules) || [];
+  const isCollapsed = useSelector((state: RootState) => state.sidebar.isCollapsed);
   // Determine if user is super_admin with no company
   const isSuperAdmin = user && Array.isArray(user.roles) && user.roles.some((role) => role.name === 'super_admin') && (user.company_id === null || user.company_id === undefined);
   const [tabValue, setTabValue] = useState(() => {
@@ -97,12 +99,33 @@ export default function DashboardHeader() {
       }}>
         {/* Left: Logo & App Name */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box sx={{ bgcolor: '#3b82f6', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Box component="span" sx={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>+</Box>
-          </Box>
+        <Tooltip title={isCollapsed ? t('sidebar.expand', 'Expand Sidebar') : t('sidebar.collapse', 'Collapse Sidebar')}>
+            <IconButton
+              onClick={() => dispatch(toggleSidebar())}
+              sx={{
+                color: '#64748b',
+                bgcolor: '#f8fafc',
+                borderRadius: '50%',
+                width: 40,
+                height: 40,
+                '&:hover': {
+                  bgcolor: '#e2e8f0',
+                  color: '#475569',
+                },
+              }}
+            >
+              <Icon 
+                icon={!isCollapsed ? 'zondicons:dots-horizontal-triple' : 'ion:list'} 
+                width={20} 
+                height={20} 
+              />
+            </IconButton>
+          </Tooltip>
           <Typography variant="h6" sx={{ fontWeight: 700, fontSize: 22, letterSpacing: 1 }}>
             {t('app.name', 'OSON ERP')}
           </Typography>
+          {/* Sidebar Toggle Button */}
+          
         </Box>
         {/* Center: Module Tab Bar */}
         {!isSuperAdmin && modules.length > 1 && (

@@ -34,8 +34,8 @@ const LoginForm: React.FC = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'superadmin@demo.com',
-      password: 'password123',
+      email: 'admin@erp.com',
+      password: 'admin123',
       remember: false
     }
   });

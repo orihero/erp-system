@@ -23,7 +23,10 @@
     "disabled": "Faol emas",
     "add": "Qo'shish",
     "saveChanges": "O'zgarishlarni saqlash",
-    "actions": "Harakatlar"
+    "actions": "Harakatlar",
+    "back": "Orqaga",
+    "next": "Keyingi",
+    "finish": "Tugatish"
   },
   "auth": {
     "email": "Elektron pochta",
@@ -134,6 +137,25 @@
     "fieldMetadataDescription": "Maydon uchun metadatalarni sozlash:",
     "fieldMetadataHelp": "Umumiy metadata kalitlari: fieldOrder, isVisibleOnTable, isRequired, validationRules va boshqalar.",
     "metadata": "Metadatalar",
+    "metadata": {
+      "title": "Ma'lumotnoma metadatalari tahrirchisi",
+      "description": "Ma'lumotnoma va maydonlar metadatalarini tahrirlash. O'zgarishlar ma'lumotnomaning qanday ko'rsatilishi va ishlashiga ta'sir qiladi.",
+      "directory": "Ma'lumotnoma metadatalari",
+      "fields": "Maydon metadatalari",
+      "componentName": "Komponent nomi",
+      "componentNameHelp": "Ushbu ma'lumotnoma uchun maxsus komponent",
+      "displayName": "Ko'rsatiladigan nom",
+      "displayNameHelp": "Ma'lumotnoma uchun odam o'qiy oladigan nom",
+      "selectDisplayField": "Tanlashda ko'rsatiladigan maydon",
+      "selectDisplayFieldHelp": "Ushbu ma'lumotnoma bog'lanishlarda ishlatilganda ko'rsatiladigan maydon",
+      "noDisplayField": "Maxsus ko'rsatish maydoni yo'q",
+      "isVisible": "Navigatsiyada ko'rinadi",
+      "fieldOrder": "Maydon tartibi",
+      "isVisibleOnTable": "Jadvalda ko'rinadi",
+      "isRequired": "Majburiy maydon",
+      "defaultValue": "Standart qiymat",
+      "saved": "Metadatalar muvaffaqiyatli saqlandi!"
+    },
     "loadingFields": "Maydonlar yuklanmoqda...",
     "loadingDirectories": "Ma'lumotnomalar yuklanmoqda...",
     "errorLoadingDirectories": "Ma'lumotnomalarni yuklashda xatolik:",
@@ -147,6 +169,7 @@
     "aboutTab": "Kompaniya haqida",
     "modulesTab": "Modullar",
     "directoriesTab": "Ma'lumotnomalar",
+    "reportsTab": "Hisobotlar",
     "new": "Yangi kompaniya",
     "name": "Nomi",
     "address": "Manzil",
@@ -226,7 +249,9 @@
     "modules": "Modullar",
     "reports": "Hisobotlar",
     "settings": "Sozlamalar",
-    "systemDirectories": "Tizim ma'lumotnomalari"
+    "systemDirectories": "Tizim ma'lumotnomalari",
+    "expand": "Yon panelni kengaytirish",
+    "collapse": "Yon panelni yig'ish"
   },
   "permission": {
     "edit": "Ruxsatni tahrirlash",
@@ -274,7 +299,9 @@
     "profileTab": "Profil",
     "directoriesTab": "Ma'lumotnomalar",
     "systemDirectories": "Tizim ma'lumotnomalari",
-    "noSystemDirectories": "Tizim ma'lumotnomalari topilmadi."
+    "noSystemDirectories": "Tizim ma'lumotnomalari topilmadi.",
+    "companyDirectories": "Kompaniya ma'lumotnomalari",
+    "noCompanyDirectories": "Kompaniya ma'lumotnomalari topilmadi."
   },
   "unauthorized": {
     "403": "403",
@@ -469,6 +496,14 @@
     "createReportStructure": "Hisobot tuzilmasini yaratish",
     "structure": "Hisobot tuzilmasi",
     "createChart": "Diagramma yaratish",
+    "noReports": "Hali hisobotlar yo'q",
+    "noReportsDescription": "Ishni boshlash uchun birinchi hisobotni yarating",
+    "createReport": "Hisobot yaratish",
+    "startTyping": "Hisobot yaratish uchun yozishni boshlang...",
+    "insert": "Kiritish",
+    "insertText": "Matn",
+    "insertTable": "Jadval",
+    "insertChart": "Diagramma",
     "financial": {
       "title": "Moliyaviy hisobotlar",
       "description": "Daromad, xarajatlar va foyda marjasini ko'rish va tahlil qilish."
@@ -488,6 +523,360 @@
       "barChart": "Ustunli diagramma",
       "pieChart": "Doira diagramma",
       "chartTitle": "Diagramma nomi"
+    },
+    "wizard": {
+      "insertTitle": "{{insertType}} kiritish",
+      "selectDirectory": "Ma'lumotnoma tanlash",
+      "configureContent": "Tarkibni sozlash",
+      "preview": "Ko'rish",
+      "selectDirectoryTitle": "Ma'lumot manbai sifatida foydalanish uchun ma'lumotnomani tanlang",
+      "selectDirectoryDescription": "{{insertType}} ga kiritmoqchi bo'lgan ma'lumotlarni o'z ichiga olgan ma'lumotnomani tanlang",
+      "configureContentTitle": "{{insertType}} ni sozlang",
+      "configureContentDescription": "Tanlangan ma'lumotnoma: {{directoryName}}",
+      "previewTitle": "{{insertType}} ni ko'rish",
+      "previewDescription": "Kiritishdan oldin sozlamalarni ko'rib chiqing",
+      "configurationComingSoon": "Sozlash imkoniyatlari tez orada...",
+      "previewComingSoon": "Ko'rish funksiyasi tez orada...",
+      "noDirectories": "Mavjud ma'lumotnomalar yo'q",
+      "noDirectoriesDescription": "Bu kompaniyada hali bog'langan ma'lumotnomalar yo'q.",
+      "filters": "Filtrlarni",
+      "filtersDescription": "Ma'lumotlarni cheklash uchun filtrlarni qo'llang",
+      "sorting": "Saralash",
+      "sortingDescription": "Ma'lumotlarni ma'lum maydonlar bo'yicha saralang",
+      "grouping": "Guruhlash",
+      "groupingDescription": "Ma'lumotlarni kategoriyalar bo'yicha guruhlang",
+      "joins": "Birlashtirish",
+      "joinsDescription": "Qo'shimcha ma'lumotlar uchun boshqa ma'lumotnomalar bilan birlashtiring",
+      "searchRecords": "Yozuvlarni qidirish...",
+      "recordsFound": "{{count}} ta yozuv topildi",
+      "selectAll": "Hammasini tanlash",
+      "selectedConfiguration": "Tanlangan sozlash:",
+      "selectFunction": "{{field}} uchun funksiyani tanlang",
+      "functionParameters": "Funksiya parametrlari",
+      "filterValue": "Filtr qiymati",
+      "filterValueHelp": "Filtrlash uchun qiymat kiriting",
+      "advancedFilter": "Kengaytirilgan filtr",
+      "advancedFilterPlaceholder": "Filtrlash uchun yozing (masalan, \"sportchi michael ni o'z ichiga oladi\")",
+    "advancedFilterPlaceholderFocused": "Filtrlashni boshlash uchun Excel funksiyasini tanlang...",
+      "builder": "Quruvchi",
+      "apply": "Qo'llash",
+      "filterHelp": "Maydon nomlarini, operatorlarni (VA, YOKI, o'z ichiga oladi, teng va h.k.) va qiymatlarni kiriting. Murakkab filtrlash uchun Quruvchidan foydalaning.",
+      "advancedFilterBuilder": "Kengaytirilgan filtr quruvchisi",
+      "filterGroup": "Filtr guruhi {{index}}",
+      "joinOperator": "Birlashtirish operatori",
+      "field": "Maydon",
+      "operator": "Operator",
+      "value": "Qiymat",
+      "addCondition": "Shart qo'shish",
+    "functionSuggestions": "Funksiya takliflari",
+    "availableFunctions": "Mavjud funksiyalar",
+    "functionDescription": "Funksiya tavsifi",
+    "functionSyntax": "Funksiya sintaksisi"
+    },
+    "common": {
+      "loading": "Yuklanmoqda...",
+      "error": "Ma'lumotnomalarni yuklashda xatolik",
+      "cancel": "Bekor qilish",
+      "back": "Orqaga",
+      "next": "Keyingi",
+      "finish": "Tugatish"
+    }
+  },
+  "excelFunctions": {
+    "title": "Excel funksiyalari",
+    "categories": {
+      "text": "Matn funksiyalari",
+      "math": "Matematik funksiyalar",
+      "date": "Sana funksiyalari",
+      "logical": "Mantiqiy funksiyalar",
+      "lookup": "Qidiruv funksiyalari",
+      "statistical": "Statistik funksiyalar"
+    },
+    "functions": {
+      "CONCATENATE": {
+        "name": "BIRLASHTIRISH",
+        "description": "Bir nechta ustundagi qiymatlarni bitta matnga birlashtiradi",
+        "syntax": "BIRLASHTIRISH(ustun1, ajratuvchi, ustun2, ...)",
+        "examples": ["BIRLASHTIRISH(\"ism\", \" \", \"familiya\")", "BIRLASHTIRISH(\"nomi\", \" - \", \"kategoriya\")"]
+      },
+      "LEFT": {
+        "name": "CHAP",
+        "description": "Ustundagi qiymatlarning chap tomonidan belgilangan miqdordagi belgilarni ajratib oladi",
+        "syntax": "CHAP(ustun_nomi, belgilar_soni)",
+        "examples": ["CHAP(\"ism\", 5)", "CHAP(\"tavsif\", 10)"]
+      },
+      "RIGHT": {
+        "name": "O'NG",
+        "description": "Ustundagi qiymatlarning o'ng tomonidan belgilangan miqdordagi belgilarni ajratib oladi",
+        "syntax": "O'NG(ustun_nomi, belgilar_soni)",
+        "examples": ["O'NG(\"ism\", 5)", "O'NG(\"tavsif\", 10)"]
+      },
+      "MID": {
+        "name": "ORTA",
+        "description": "Ustundagi qiymatlarning o'rtasidan qismni ajratib oladi",
+        "syntax": "ORTA(ustun_nomi, boshlanish_joyi, belgilar_soni)",
+        "examples": ["ORTA(\"ism\", 7, 5)", "ORTA(\"tavsif\", 1, 10)"]
+      },
+      "LEN": {
+        "name": "UZUNLIK",
+        "description": "Ustundagi qiymatlarning uzunligini qaytaradi",
+        "syntax": "UZUNLIK(ustun_nomi)",
+        "examples": ["UZUNLIK(\"ism\")", "UZUNLIK(\"tavsif\")"]
+      },
+      "UPPER": {
+        "name": "KATTA",
+        "description": "Ustundagi qiymatlarni katta harflarga o'zgartiradi",
+        "syntax": "KATTA(ustun_nomi)",
+        "examples": ["KATTA(\"ism\")", "KATTA(\"tavsif\")"]
+      },
+      "LOWER": {
+        "name": "KICHIK",
+        "description": "Ustundagi qiymatlarni kichik harflarga o'zgartiradi",
+        "syntax": "KICHIK(ustun_nomi)",
+        "examples": ["KICHIK(\"ism\")", "KICHIK(\"tavsif\")"]
+      },
+      "PROPER": {
+        "name": "TO'G'RI",
+        "description": "Ustundagi qiymatlardagi har bir so'zning birinchi harfini katta qiladi",
+        "syntax": "TO'G'RI(ustun_nomi)",
+        "examples": ["TO'G'RI(\"ism\")", "TO'G'RI(\"tavsif\")"]
+      },
+      "TRIM": {
+        "name": "TOZALASH",
+        "description": "Ustundagi qiymatlardan ortiqcha bo'shliqlarni olib tashlaydi",
+        "syntax": "TOZALASH(ustun_nomi)",
+        "examples": ["TOZALASH(\"ism\")", "TOZALASH(\"tavsif\")"]
+      },
+      "SUBSTITUTE": {
+        "name": "ALMASHTIRISH",
+        "description": "Ustundagi qiymatlardagi matnni almashtiradi",
+        "syntax": "ALMASHTIRISH(ustun_nomi, eski_matn, yangi_matn, joylashish_raqami)",
+        "examples": ["ALMASHTIRISH(\"ism\", \"Dunyo\", \"Excel\")", "ALMASHTIRISH(\"tavsif\", \"eski\", \"yangi\")"]
+      },
+      "SUM": {
+        "name": "YIG'INDI",
+        "description": "Ustundagi barcha sonlarni qo'shadi",
+        "syntax": "YIG'INDI(ustun_nomi)",
+        "examples": ["YIG'INDI(\"summa\")", "YIG'INDI(\"narx\")"]
+      },
+      "AVERAGE": {
+        "name": "O'RTACHA",
+        "description": "Ustundagi sonlarning o'rtacha qiymatini qaytaradi",
+        "syntax": "O'RTACHA(ustun_nomi)",
+        "examples": ["O'RTACHA(\"summa\")", "O'RTACHA(\"narx\")"]
+      },
+      "COUNT": {
+        "name": "SANASH",
+        "description": "Ustundagi bo'sh bo'lmagan qiymatlar sonini sanaydi",
+        "syntax": "SANASH(ustun_nomi)",
+        "examples": ["SANASH(\"ism\")", "SANASH(\"summa\")"]
+      },
+      "MAX": {
+        "name": "MAKSIMAL",
+        "description": "Ustundagi eng katta qiymatni qaytaradi",
+        "syntax": "MAKSIMAL(ustun_nomi)",
+        "examples": ["MAKSIMAL(\"summa\")", "MAKSIMAL(\"narx\")"]
+      },
+      "MIN": {
+        "name": "MINIMAL",
+        "description": "Ustundagi eng kichik qiymatni qaytaradi",
+        "syntax": "MINIMAL(ustun_nomi)",
+        "examples": ["MINIMAL(\"summa\")", "MINIMAL(\"narx\")"]
+      },
+      "ROUND": {
+        "name": "YAXLITLASH",
+        "description": "Ustundagi qiymatlarni belgilangan raqamgacha yaxlitlaydi",
+        "syntax": "YAXLITLASH(ustun_nomi, raqamlar_soni)",
+        "examples": ["YAXLITLASH(\"summa\", 2)", "YAXLITLASH(\"narx\", 0)"]
+      },
+      "ABS": {
+        "name": "ABS",
+        "description": "Ustundagi sonlarning mutlaq qiymatini qaytaradi",
+        "syntax": "ABS(ustun_nomi)",
+        "examples": ["ABS(\"summa\")", "ABS(\"narx\")"]
+      },
+      "MOD": {
+        "name": "QOLDIQ",
+        "description": "Ustundagi qiymatlar uchun bo'lishdan keyingi qoldiqni qaytaradi",
+        "syntax": "QOLDIQ(ustun_nomi, bo'luvchi)",
+        "examples": ["QOLDIQ(\"summa\", 3)", "QOLDIQ(\"narx\", 2)"]
+      },
+      "YEAR": {
+        "name": "YIL",
+        "description": "Ustundagi sanalardan yilni qaytaradi",
+        "syntax": "YIL(ustun_nomi)",
+        "examples": ["YIL(\"yaratilgan_sana\")", "YIL(\"tug'ilgan_sana\")"]
+      },
+      "MONTH": {
+        "name": "OY",
+        "description": "Ustundagi sanalardan oyni qaytaradi (1-12)",
+        "syntax": "OY(ustun_nomi)",
+        "examples": ["OY(\"yaratilgan_sana\")", "OY(\"tug'ilgan_sana\")"]
+      },
+      "DAY": {
+        "name": "KUN",
+        "description": "Ustundagi sanalardan kunning qaytaradi (1-31)",
+        "syntax": "KUN(ustun_nomi)",
+        "examples": ["KUN(\"yaratilgan_sana\")", "KUN(\"tug'ilgan_sana\")"]
+      },
+      "HOUR": {
+        "name": "SOAT",
+        "description": "Ustundagi vaqtdan soatni qaytaradi (0-23)",
+        "syntax": "SOAT(ustun_nomi)",
+        "examples": ["SOAT(\"yaratilgan_vaqt\")", "SOAT(\"boshlanish_vaqti\")"]
+      },
+      "MINUTE": {
+        "name": "DAQIQA",
+        "description": "Ustundagi vaqtdan daqiqani qaytaradi (0-59)",
+        "syntax": "DAQIQA(ustun_nomi)",
+        "examples": ["DAQIQA(\"yaratilgan_vaqt\")", "DAQIQA(\"boshlanish_vaqti\")"]
+      },
+      "SECOND": {
+        "name": "SONIYA",
+        "description": "Ustundagi vaqtdan soniyani qaytaradi (0-59)",
+        "syntax": "SONIYA(ustun_nomi)",
+        "examples": ["SONIYA(\"yaratilgan_vaqt\")", "SONIYA(\"boshlanish_vaqti\")"]
+      },
+      "TODAY": {
+        "name": "BUGUN",
+        "description": "Joriy sanani qaytaradi",
+        "syntax": "BUGUN()",
+        "examples": ["BUGUN()"]
+      },
+      "NOW": {
+        "name": "HOZIR",
+        "description": "Joriy sana va vaqtni qaytaradi",
+        "syntax": "HOZIR()",
+        "examples": ["HOZIR()"]
+      },
+      "DATE": {
+        "name": "SANA",
+        "description": "Yil, oy va kundan sana yaratadi",
+        "syntax": "SANA(yil, oy, kun)",
+        "examples": ["SANA(2023, 12, 25)", "SANA(A1, B1, C1)"]
+      },
+      "IF": {
+        "name": "AGAR",
+        "description": "Agar shart to'g'ri bo'lsa bitta qiymat, aks holda boshqa qiymatni qaytaradi",
+        "syntax": "AGAR(ustun_nomi, operator, qiymat, to'g'ri_qiymat, noto'g'ri_qiymat)",
+        "examples": ["AGAR(\"summa\", \">\", \"100\", \"Yuqori\", \"Past\")", "AGAR(\"holat\", \"=\", \"faol\", \"To'g'ri\", \"Noto'g'ri\")"]
+      },
+      "AND": {
+        "name": "VA",
+        "description": "Agar barcha shartlar ustunlardagi qiymatlar uchun TO'G'RI bo'lsa TO'G'RI qaytaradi",
+        "syntax": "VA(ustun1, operator1, qiymat1, ustun2, operator2, qiymat2, ...)",
+        "examples": ["VA(\"summa\", \">\", \"0\", \"summa\", \"<\", \"100\")", "VA(\"holat\", \"=\", \"faol\", \"turi\", \"=\", \"premium\")"]
+      },
+      "OR": {
+        "name": "YOKI",
+        "description": "Agar har qanday shart ustunlardagi qiymatlar uchun TO'G'RI bo'lsa TO'G'RI qaytaradi",
+        "syntax": "YOKI(ustun1, operator1, qiymat1, ustun2, operator2, qiymat2, ...)",
+        "examples": ["YOKI(\"summa\", \">\", \"100\", \"summa\", \"<\", \"0\")", "YOKI(\"holat\", \"=\", \"faol\", \"turi\", \"=\", \"premium\")"]
+      },
+      "NOT": {
+        "name": "YO'Q",
+        "description": "Ustundagi qiymatlar uchun shartning mantiqini teskarisiga o'zgartiradi",
+        "syntax": "YO'Q(ustun_nomi, operator, qiymat)",
+        "examples": ["YO'Q(\"summa\", \">\", \"10\")", "YO'Q(\"holat\", \"=\", \"faol\")"]
+      },
+      "ISBLANK": {
+        "name": "BOSH",
+        "description": "Agar ustundagi qiymatlar bo'sh bo'lsa TO'G'RI qaytaradi",
+        "syntax": "BOSH(ustun_nomi)",
+        "examples": ["BOSH(\"ism\")", "AGAR(BOSH(\"email\"), \"Bo'sh\", \"Qiymat bor\")"]
+      },
+      "ISNUMBER": {
+        "name": "SON",
+        "description": "Agar ustundagi qiymatlar son bo'lsa TO'G'RI qaytaradi",
+        "syntax": "SON(ustun_nomi)",
+        "examples": ["SON(\"summa\")", "AGAR(SON(\"narx\"), \"To'g'ri\", \"Son emas\")"]
+      },
+      "ISTEXT": {
+        "name": "MATN",
+        "description": "Agar ustundagi qiymatlar matn bo'lsa TO'G'RI qaytaradi",
+        "syntax": "MATN(ustun_nomi)",
+        "examples": ["MATN(\"ism\")", "AGAR(MATN(\"tavsif\"), KATTA(\"tavsif\"), \"tavsif\")"]
+      },
+      "VLOOKUP": {
+        "name": "VQIDIRUV",
+        "description": "Diapazonning birinchi ustunida qiymat qidiradi va bir xil qatordagi qiymatni qaytaradi",
+        "syntax": "VQIDIRUV(qidirilayotgan_qiymat, jadval, ustun_raqami, diapazon_qidiruv)",
+        "examples": ["VQIDIRUV(\"Olma\", A1:B10, 2, YO'LON)", "VQIDIRUV(A1, B1:D10, 3, TO'G'RI)"]
+      },
+      "HLOOKUP": {
+        "name": "HQIDIRUV",
+        "description": "Diapazonning birinchi qatorida qiymat qidiradi va bir xil ustundagi qiymatni qaytaradi",
+        "syntax": "HQIDIRUV(qidirilayotgan_qiymat, jadval, qator_raqami, diapazon_qidiruv)",
+        "examples": ["HQIDIRUV(\"Q1\", A1:D3, 2, YO'LON)", "HQIDIRUV(A1, B1:D3, 3, TO'G'RI)"]
+      },
+      "COUNTIF": {
+        "name": "SANASHAGAR",
+        "description": "Ustundagi mezonlarga mos keladigan qiymatlar sonini sanaydi",
+        "syntax": "SANASHAGAR(ustun_nomi, operator, qiymat)",
+        "examples": ["SANASHAGAR(\"summa\", \">\", \"5\")", "SANASHAGAR(\"holat\", \"=\", \"Faol\")"]
+      },
+      "SUMIF": {
+        "name": "YIG'INDIGAR",
+        "description": "Ustundagi berilgan mezonlarga mos keladigan qiymatlarni qo'shadi",
+        "syntax": "YIG'INDIGAR(ustun_nomi, operator, qiymat)",
+        "examples": ["YIG'INDIGAR(\"summa\", \">\", \"5\")", "YIG'INDIGAR(\"summa\", \"=\", \"100\")"]
+      },
+      "AVERAGEIF": {
+        "name": "O'RTACHAGAR",
+        "description": "Ustundagi mezonlarga mos keladigan qiymatlarning o'rtacha qiymatini qaytaradi",
+        "syntax": "O'RTACHAGAR(ustun_nomi, operator, qiymat)",
+        "examples": ["O'RTACHAGAR(\"summa\", \">\", \"5\")", "O'RTACHAGAR(\"summa\", \"=\", \"100\")"]
+      }
+    },
+    "parameters": {
+      "column_name": "Ustun nomi",
+      "column1": "Birinchi ustun",
+      "column2": "Ikkinchi ustun",
+      "separator": "Qiymatlar orasidagi ajratuvchi",
+      "num_chars": "Belgilar soni",
+      "start_num": "Boshlanish joyi (1 dan boshlanadi)",
+      "old_text": "Almashtiriladigan matn",
+      "new_text": "Yangi matn",
+      "instance_num": "Qaysi joylashishni almashtirish",
+      "num_digits": "O'nlik raqamlar soni",
+      "divisor": "Bo'linadigan son",
+      "operator": "Taqqoslash operatori",
+      "value": "Taqqoslanadigan qiymat",
+      "value_if_true": "Agar shart to'g'ri bo'lsa qiymat",
+      "value_if_false": "Agar shart noto'g'ri bo'lsa qiymat",
+      "year": "Yil (1900-9999)",
+      "month": "Oy (1-12)",
+      "day": "Kun (1-31)",
+      "lookup_value": "Qidiriladigan qiymat",
+      "table_array": "Qidirish uchun diapazon",
+      "col_index_num": "Qaytariladigan ustun raqami",
+      "row_index_num": "Qaytariladigan qator raqami",
+      "range_lookup": "Taxminiy moslik uchun TO'G'RI, aniq uchun YO'LON"
+    },
+    "operators": {
+      "equals": "Teng",
+      "not_equals": "Teng emas",
+      "greater_than": "Katta",
+      "less_than": "Kichik",
+      "greater_than_or_equal": "Katta yoki teng",
+      "less_than_or_equal": "Kichik yoki teng",
+      "contains": "O'z ichiga oladi",
+      "not_contains": "O'z ichiga olmaydi",
+      "starts_with": "Bilan boshlanadi",
+      "ends_with": "Bilan tugaydi"
+    },
+    "ui": {
+      "selectFunction": "Funksiyani tanlash",
+      "configureParameters": "Parametrlarni sozlash",
+      "applyFunction": "Funksiyani qo'llash",
+      "functionPreview": "Funksiya ko'rinishi",
+      "noFunctionsAvailable": "Bu maydon turi uchun mavjud funksiyalar yo'q",
+      "searchFunctions": "Funksiyalarni qidirish...",
+      "filterableFields": "Filtrlash uchun maydonlar",
+      "activeFilters": "Faol filtrlar",
+      "addFilter": "Filterni qo'shish",
+      "removeFilter": "Filterni olib tashlash",
+      "clearAllFilters": "Barcha filtrlarni tozalash"
     }
   }
 } 

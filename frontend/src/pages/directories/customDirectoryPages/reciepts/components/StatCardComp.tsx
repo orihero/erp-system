@@ -4,6 +4,15 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import { motion } from "framer-motion";
 
+interface ReceiptRecord {
+    id: string;
+    [key: string]: string | number | boolean | null | undefined;
+}
+
+interface GroupedRecords {
+    [groupValue: string]: ReceiptRecord[];
+}
+
 interface StatCardProps {
     title: string;
     amount: number | string;
@@ -77,35 +86,119 @@ interface StatItem {
     positive?: boolean;
 }
 
-export default function StatCardComp() {
-    const stats: StatItem[] = [
-        {
-            title: "Kirim (Income)",
-            amount: 24500,
-            change: 4.2,
-            icon: TrendingUpIcon,
-            positive: true,
-        },
-        {
-            title: "Chiqim (Expense)",
-            amount: 9700,
-            change: 1.8,
-            icon: TrendingDownIcon,
-            positive: false,
-        },
-        {
-            title: "Kutilayotgan (Pending)",
-            amount: 5300,
-            icon: AccessTimeIcon,
-            positive: true,
-        },
-        {
-            title: "Kutilayotgan (Pending)",
-            amount: 5300,
-            icon: AccessTimeIcon,
-            positive: true,
-        },
-    ];
+interface StatCardCompProps {
+    groupedRecords?: GroupedRecords;
+    fields?: any[];
+}
+
+export default function StatCardComp({ groupedRecords, fields }: StatCardCompProps) {
+    // Calculate statistics from grouped records
+    const calculateStats = (): StatItem[] => {
+        if (!groupedRecords || !fields) {
+            return [
+                {
+                    title: "Kirim (Income)",
+                    amount: 0,
+                    change: 0,
+                    icon: TrendingUpIcon,
+                    positive: true,
+                },
+                {
+                    title: "Chiqim (Expense)",
+                    amount: 0,
+                    change: 0,
+                    icon: TrendingDownIcon,
+                    positive: false,
+                },
+                {
+                    title: "Kutilayotgan (Pending)",
+                    amount: 0,
+                    icon: AccessTimeIcon,
+                    positive: true,
+                },
+                {
+                    title: "Jami (Total)",
+                    amount: 0,
+                    icon: TrendingUpIcon,
+                    positive: true,
+                },
+            ];
+        }
+
+        let totalIncome = 0;
+        let totalExpense = 0;
+        let totalPending = 0;
+        let totalRecords = 0;
+
+        // Find amount/income fields
+        const amountFields = fields.filter(field => 
+            field.name.toLowerCase().includes('amount') || 
+            field.name.toLowerCase().includes('income') ||
+            field.name.toLowerCase().includes('sum') ||
+            field.name.toLowerCase().includes('total')
+        );
+
+        // Find status fields
+        const statusFields = fields.filter(field => 
+            field.name.toLowerCase().includes('status') ||
+            field.name.toLowerCase().includes('type')
+        );
+
+        Object.values(groupedRecords).forEach(records => {
+            records.forEach(record => {
+                totalRecords++;
+
+                // Calculate amounts
+                amountFields.forEach(field => {
+                    const value = record[field.name];
+                    if (typeof value === 'number' && value > 0) {
+                        totalIncome += value;
+                    }
+                });
+
+                // Calculate status-based counts
+                statusFields.forEach(field => {
+                    const status = String(record[field.name]).toLowerCase();
+                    if (status.includes('pending') || status.includes('waiting')) {
+                        totalPending++;
+                    } else if (status.includes('expense') || status.includes('outgoing')) {
+                        totalExpense += Number(record[amountFields[0]?.name] || 0);
+                    }
+                });
+            });
+        });
+
+        return [
+            {
+                title: "Kirim (Income)",
+                amount: totalIncome,
+                change: totalIncome > 0 ? 4.2 : 0,
+                icon: TrendingUpIcon,
+                positive: true,
+            },
+            {
+                title: "Chiqim (Expense)",
+                amount: totalExpense,
+                change: totalExpense > 0 ? 1.8 : 0,
+                icon: TrendingDownIcon,
+                positive: false,
+            },
+            {
+                title: "Kutilayotgan (Pending)",
+                amount: totalPending,
+                icon: AccessTimeIcon,
+                positive: true,
+            },
+            {
+                title: "Jami (Total)",
+                amount: totalRecords,
+                icon: TrendingUpIcon,
+                positive: true,
+            },
+        ];
+    };
+
+    const stats = calculateStats();
 
     return (
         <section className="grid gap-6 sm:grid-cols-2 md:grid-cols-4 xl:gap-8 w-full">
@@ -115,11 +208,3 @@ export default function StatCardComp() {
         </section>
     );
 }
-
-/*
- HOW TO USE:
- 1. Fayl kengaytmasi `.tsx` boʻlishi kerak (masalan, `StatsDashboard.tsx`).
- 2. MUI Icons ishlatilmoqda: `@mui/icons-material` o'rnatilgan bo'lishi shart.
- 3. Tailwind, framer-motion avvaldan oʻrnatilgan boʻlishi kerak:
-    npm i @mui/icons-material framer-motion
-*/

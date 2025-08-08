@@ -9,7 +9,11 @@ import {
   FormControlLabel,
   Alert,
   CircularProgress,
-  Divider
+  Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
@@ -152,6 +156,26 @@ const DirectoryMetadataEditor: React.FC<DirectoryMetadataEditorProps> = ({
             onChange={(e) => handleMetadataChange('displayName', e.target.value)}
             helperText={t('directories.metadata.displayNameHelp', 'Human-readable name for the directory')}
           />
+          <FormControl fullWidth>
+            <InputLabel>{t('directories.metadata.selectDisplayField', 'Select Display Field')}</InputLabel>
+            <Select
+              value={localMetadata.selectDisplayField as string || ''}
+              onChange={(e) => handleMetadataChange('selectDisplayField', e.target.value)}
+              label={t('directories.metadata.selectDisplayField', 'Select Display Field')}
+            >
+              <MenuItem value="">
+                <em>{t('directories.metadata.noDisplayField', 'No specific display field')}</em>
+              </MenuItem>
+              {fields.map((field) => (
+                <MenuItem key={field.id} value={field.name}>
+                  {field.name} ({field.type})
+                </MenuItem>
+              ))}
+            </Select>
+            <Typography variant="caption" color="text.secondary">
+              {t('directories.metadata.selectDisplayFieldHelp', 'Field to display when this directory is used in relation selects')}
+            </Typography>
+          </FormControl>
           <FormControlLabel
             control={
               <Switch

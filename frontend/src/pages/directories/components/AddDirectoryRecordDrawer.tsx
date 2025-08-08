@@ -11,14 +11,20 @@ import { DatePicker, TimePicker, DateTimePicker, LocalizationProvider } from '@m
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import KeyValueEditor from '@/components/KeyValueEditor';
 import RelationField from '@/components/RelationField';
-// Removed unused useDirectoryRecords import
+
+// Add interface for cascading selections
+interface CascadingSelection {
+  fieldName: string;
+  value: string;
+  displayName: string;
+}
 
 const AddDirectoryRecordDrawer: React.FC<{
-  open: boolean;
-  onClose: () => void;
-  companyDirectoryId: string | undefined;
-  directoryId?: string;
-  onSuccess?: () => void;
+    open: boolean;
+    onClose: () => void;
+    companyDirectoryId: string | undefined;
+    directoryId?: string;
+    onSuccess?: () => void;
 }> = ({ open, onClose, companyDirectoryId, directoryId, onSuccess }) => {
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -26,6 +32,8 @@ const AddDirectoryRecordDrawer: React.FC<{
     const fieldId = directoryId || companyDirectoryId;
     const loading = fieldId ? fieldsLoading[fieldId] || false : false;
     const directoryFields = fieldId ? fields[fieldId] || [] : [];
+    const user = useSelector((state: RootState) => state.auth.user);
+    const companyId = user?.company_id;
 
     useEffect(() => {
         if (open && fieldId) {
@@ -34,7 +42,7 @@ const AddDirectoryRecordDrawer: React.FC<{
     }, [open, fieldId, dispatch]);
 
     // Replace all 'any' usages for formData with a proper type
-    const [formData, setFormData] = useState<Record<string, string | number | boolean | Date | null | undefined | object>>({});
+    const [formData, setFormData] = useState<Record<string, string | number | boolean | Date | null | undefined | object | CascadingSelection[]>>({});
     useEffect(() => {
         if (directoryFields.length > 0) {
             const initialFormData = directoryFields.reduce((acc: Record<string, string | number | boolean | Date | null | undefined | object>, field: DirectoryField) => {
@@ -88,8 +96,21 @@ const AddDirectoryRecordDrawer: React.FC<{
     };
 
     const handleSubmit = () => {
-        if (companyDirectoryId) {
-            const values = Object.entries(formData).map(([field_id, value]) => {
+        if (!companyDirectoryId) {
+            // Show an alert or message that records cannot be created for this directory
+            alert('Records cannot be created for this directory. Please ensure the directory is enabled for your company.');
+            onClose();
+            return;
+        }
+
+        const values: Array<{ field_id: string; value: string | number | boolean }> = [];
+
+        // Process regular fields
+        Object.entries(formData).forEach(([fieldId, value]) => {
+            // Skip cascading fields (they end with _cascading)
+            if (fieldId.endsWith('_cascading')) return;
+            
+            if (value !== undefined && value !== null && value !== '') {
                 let v: string | number | boolean = '';
                 if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
                     v = value;
@@ -98,11 +119,31 @@ const AddDirectoryRecordDrawer: React.FC<{
                 } else if (typeof value === 'object' && value !== null) {
                     v = JSON.stringify(value);
                 }
-                return { field_id, value: v };
-            });
-            dispatch(addDirectoryRecord({ companyDirectoryId, values }));
-            if (onSuccess) onSuccess();
-        }
+                
+                // Check if this field has cascading selections
+                const cascadingSelections = formData[`${fieldId}_cascading`] as CascadingSelection[] | undefined;
+                
+                // Add the main field value
+                values.push({
+                    field_id: fieldId,
+                    value: v
+                });
+                
+                // Add cascading field values if they exist
+                if (cascadingSelections && Array.isArray(cascadingSelections)) {
+                    cascadingSelections.forEach(selection => {
+                        values.push({
+                            field_id: `${fieldId}_${selection.fieldName}`,
+                            value: selection.value
+                        });
+                    });
+                }
+            }
+        });
+
+        console.log('Submitting record with values:', values);
+        dispatch(addDirectoryRecord({ companyDirectoryId, values }));
+        if (onSuccess) onSuccess();
         onClose();
     };
 
@@ -196,12 +237,19 @@ const AddDirectoryRecordDrawer: React.FC<{
                 <RelationField
                     key={field.id}
                     relationDirectoryId={field.relation_id}
-                    companyId={companyDirectoryId}
+                    companyId={companyId || ""}
                     value={formData[field.id] !== undefined && formData[field.id] !== null ? String(formData[field.id]) : ''}
-                    onChange={val => setFormData((prev: Record<string, string | number | boolean | Date | null | undefined | object>) => ({ ...prev, [field.id]: val }))}
+                    onChange={(val, cascadingSelections) => {
+                        setFormData((prev: Record<string, string | number | boolean | Date | null | undefined | object | CascadingSelection[]>) => ({ 
+                            ...prev, 
+                            [field.id]: val,
+                            [`${field.id}_cascading`]: cascadingSelections || []
+                        }));
+                    }}
                     required={field.required}
                     currentDirectoryId={directoryId}
                     label={field.name}
+                    showCascading={true}
                 />
             );
         }
@@ -251,19 +299,39 @@ const AddDirectoryRecordDrawer: React.FC<{
                 </Box>
                 <Divider sx={{ mb: 3 }} />
                 <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-                    {loading ? (
+                    {!companyDirectoryId ? (
+                        <Box sx={{ textAlign: 'center', py: 4 }}>
+                            <Typography variant="h6" color="text.secondary" gutterBottom>
+                                Directory Not Enabled
+                            </Typography>
+                            <Typography color="text.secondary" sx={{ mb: 2 }}>
+                                This directory is not enabled for your company. To create records, please:
+                            </Typography>
+                            <Typography color="text.secondary" sx={{ mb: 2, fontSize: '0.9rem' }}>
+                                1. Go to the Companies page<br />
+                                2. Select your company<br />
+                                3. Go to the Directories tab<br />
+                                4. Click on this directory
+                            </Typography>
+                            <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 999 }}>
+                                Close
+                            </Button>
+                        </Box>
+                    ) : loading ? (
                         <Typography>{t('directories.records.loadingFields', 'Loading fields...')}</Typography>
                     ) : (
-                        directoryFields.map(renderField)
+                        <>
+                            {directoryFields.map(renderField)}
+                            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                                <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 999 }}>
+                                    {t('common.cancel')}
+                                </Button>
+                                <Button type="submit" variant="contained" sx={{ borderRadius: 999 }}>
+                                    {t('common.save')}
+                                </Button>
+                            </Box>
+                        </>
                     )}
-                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                        <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 999 }}>
-                            {t('common.cancel')}
-                        </Button>
-                        <Button type="submit" variant="contained" sx={{ borderRadius: 999 }}>
-                            {t('common.save')}
-                        </Button>
-                    </Box>
                 </form>
             </Box>
         </Drawer>

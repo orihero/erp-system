@@ -9,6 +9,7 @@ import CompanyEmployeesDrawer from './components/CompanyEmployeesDrawer';
 import ModulesTab from './components/ModulesTab';
 import DirectoriesTab from './components/DirectoriesTab';
 import AboutTab from './components/AboutTab';
+import ReportsTab from './components/ReportsTab';
 
 const ACTIVE_COLOR = '#3b82f6';
 const INACTIVE_COLOR = '#888';
@@ -27,7 +28,7 @@ const CompanyDetail: React.FC = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [employeesOpen, setEmployeesOpen] = useState(false);
 
-  // Tabs: About, Modules, Directories
+  // Tabs: About, Modules, Directories, Reports
   const tabs = [
     {
       label: t('companies.aboutTab', 'About'),
@@ -40,6 +41,10 @@ const CompanyDetail: React.FC = () => {
     {
       label: t('companies.directoriesTab', 'Directories'),
       content: <DirectoriesTab company={company as Company} />,
+    },
+    {
+      label: t('companies.reportsTab', 'Reports'),
+      content: <ReportsTab company={company as Company | undefined} />,
     },
   ];
 
