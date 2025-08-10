@@ -1,13 +1,18 @@
 import axios from 'axios';
+import { store } from '@/store';
+import { showNotification } from '@/store/slices/notificationSlice';
 
 // Create axios instance with default config
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-cache',
     'Pragma': 'no-cache',
   },
+  // Add response type configuration for proper UTF-8 handling
+  responseType: 'json',
+  responseEncoding: 'utf8',
 });
 
 // Add request interceptor to add auth token
@@ -33,8 +38,27 @@ api.interceptors.request.use(
 
 // Add response interceptor to handle common errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Show success notification for mutating requests
+    const method = response.config.method?.toLowerCase();
+    if (["post", "put", "patch", "delete"].includes(method || "")) {
+      store.dispatch(showNotification({
+        message: 'Request executed successfully!',
+        type: 'success',
+      }));
+    }
+    return response;
+  },
   (error) => {
+    // Show error notification for mutating requests
+    const method = error.config?.method?.toLowerCase();
+    if (["post", "put", "patch", "delete"].includes(method || "")) {
+      const message = error.response?.data?.message || error.response?.data?.error || error.message || 'Request failed';
+      store.dispatch(showNotification({
+        message,
+        type: 'error',
+      }));
+    }
     if (error.response?.status === 401) {
       // Clear auth data on unauthorized
       localStorage.removeItem('token');

@@ -149,14 +149,14 @@ const ModulesTab: React.FC<ModulesTabProps> = ({ company }) => {
                     }}
                   />
                 }
-                label={module.is_enabled ? t('Enabled') : t('Disabled')}
+                label={module.is_enabled ? t('common.enabled', 'Enabled') : t('common.disabled', 'Disabled')}
                 onClick={(e) => e.stopPropagation()}
               />
             </Box>
             <Collapse in={expandedModules[module.id]}>
               <Box ml={4} mt={2}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography variant="subtitle1">{t('Directories')}</Typography>
+                  <Typography variant="subtitle1">{t('companies.directories.title', 'Directories')}</Typography>
                   {module.is_enabled && (
                     <Button
                       variant="outlined"
@@ -164,7 +164,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({ company }) => {
                       startIcon={<Icon icon="mdi:plus" />}
                       onClick={() => handleBindDirectories(module.id)}
                     >
-                      {t('Bind Directories')}
+                      {t('companies.bindDirectories', 'Bind Directories')}
                     </Button>
                   )}
                 </Box>

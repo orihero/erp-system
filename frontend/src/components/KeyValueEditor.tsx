@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, TextField, IconButton, MenuItem, Button, Typography } from '@mui/material';
 import { Icon } from '@iconify/react';
+import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback';
 
 export type KeyValueType = string | number | boolean;
 export type KeyValueObject = Record<string, KeyValueType>;
@@ -11,13 +12,8 @@ interface KeyValueEditorProps {
   label?: string;
 }
 
-const typeOptions = [
-  { value: 'string', label: 'String' },
-  { value: 'number', label: 'Number' },
-  { value: 'boolean', label: 'Boolean' },
-];
-
 const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label }) => {
+  const { tWithFallback } = useTranslationWithFallback();
   const [entries, setEntries] = React.useState<{
     key: string;
     value: KeyValueType;
@@ -80,25 +76,36 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label 
     setNewType('string');
   };
 
+  const typeOptions = [
+    { value: 'string', label: tWithFallback('keyValueEditor.type.string', 'String') },
+    { value: 'number', label: tWithFallback('keyValueEditor.type.number', 'Number') },
+    { value: 'boolean', label: tWithFallback('keyValueEditor.type.boolean', 'Boolean') },
+  ];
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {label && <Typography fontWeight={600}>{label}</Typography>}
       {entries.map((entry, idx) => (
-        <Box key={entry.key + idx} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+        <Box key={entry.key + idx} sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: '1fr 120px 1fr 40px',
+          gap: 2, 
+          alignItems: 'center' 
+        }}>
           <TextField
-            label="Key"
+            label={tWithFallback('keyValueEditor.key', 'Key')}
             value={entry.key}
             onChange={e => handleEntryChange(idx, 'key', e.target.value)}
             size="small"
-            sx={{ minWidth: 120 }}
+            fullWidth
           />
           <TextField
             select
-            label="Type"
+            label={tWithFallback('keyValueEditor.type', 'Type')}
             value={entry.type}
             onChange={e => handleEntryChange(idx, 'type', e.target.value)}
             size="small"
-            sx={{ minWidth: 100 }}
+            fullWidth
           >
             {typeOptions.map(opt => (
               <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
@@ -107,22 +114,22 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label 
           {entry.type === 'boolean' ? (
             <TextField
               select
-              label="Value"
+              label={tWithFallback('keyValueEditor.value', 'Value')}
               value={String(entry.value)}
               onChange={e => handleEntryChange(idx, 'value', e.target.value)}
               size="small"
-              sx={{ minWidth: 100 }}
+              fullWidth
             >
-              <MenuItem value="true">true</MenuItem>
-              <MenuItem value="false">false</MenuItem>
+              <MenuItem value="true">{tWithFallback('keyValueEditor.boolean.true', 'true')}</MenuItem>
+              <MenuItem value="false">{tWithFallback('keyValueEditor.boolean.false', 'false')}</MenuItem>
             </TextField>
           ) : (
             <TextField
-              label="Value"
+              label={tWithFallback('keyValueEditor.value', 'Value')}
               value={entry.value}
               onChange={e => handleEntryChange(idx, 'value', e.target.value)}
               size="small"
-              sx={{ minWidth: 120 }}
+              fullWidth
               type={entry.type === 'number' ? 'number' : 'text'}
             />
           )}
@@ -131,21 +138,27 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label 
           </IconButton>
         </Box>
       ))}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
+      <Box sx={{ 
+        display: 'grid', 
+        gridTemplateColumns: '1fr 120px 1fr 40px',
+        gap: 2, 
+        alignItems: 'center',
+        mt: 1 
+      }}>
         <TextField
-          label="Key"
+          label={tWithFallback('keyValueEditor.key', 'Key')}
           value={newKey}
           onChange={e => setNewKey(e.target.value)}
           size="small"
-          sx={{ minWidth: 120 }}
+          fullWidth
         />
         <TextField
           select
-          label="Type"
+          label={tWithFallback('keyValueEditor.type', 'Type')}
           value={newType}
           onChange={e => setNewType(e.target.value as 'string' | 'number' | 'boolean')}
           size="small"
-          sx={{ minWidth: 100 }}
+          fullWidth
         >
           {typeOptions.map(opt => (
             <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
@@ -154,26 +167,31 @@ const KeyValueEditor: React.FC<KeyValueEditorProps> = ({ value, onChange, label 
         {newType === 'boolean' ? (
           <TextField
             select
-            label="Value"
+            label={tWithFallback('keyValueEditor.value', 'Value')}
             value={String(newValue)}
             onChange={e => setNewValue(e.target.value)}
             size="small"
-            sx={{ minWidth: 100 }}
+            fullWidth
           >
-            <MenuItem value="true">true</MenuItem>
-            <MenuItem value="false">false</MenuItem>
+            <MenuItem value="true">{tWithFallback('keyValueEditor.boolean.true', 'true')}</MenuItem>
+            <MenuItem value="false">{tWithFallback('keyValueEditor.boolean.false', 'false')}</MenuItem>
           </TextField>
         ) : (
           <TextField
-            label="Value"
+            label={tWithFallback('keyValueEditor.value', 'Value')}
             value={newValue}
             onChange={e => setNewValue(e.target.value)}
             size="small"
-            sx={{ minWidth: 120 }}
+            fullWidth
             type={newType === 'number' ? 'number' : 'text'}
           />
         )}
-        <Button onClick={handleAdd} variant="contained" sx={{ minWidth: 40, borderRadius: 999, bgcolor: '#3b82f6' }}>
+        <Button onClick={handleAdd} variant="contained" sx={{ 
+          minWidth: 40, 
+          borderRadius: 999, 
+          bgcolor: '#3b82f6',
+          height: 40
+        }}>
           <Icon icon="ph:plus" />
         </Button>
       </Box>

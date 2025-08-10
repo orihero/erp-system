@@ -74,7 +74,7 @@ const EditCompanyDrawer: React.FC<EditCompanyDrawerProps> = ({ open, onClose, co
     if (company && open) {
       setForm({
         name: company.name || '',
-        email: company.email || '',
+        email: company.email || company.admin_email || '',
         employee_count: String(company.employee_count || ''),
         status: company.status || 'active',
         logo: company.logo || '',
@@ -118,15 +118,41 @@ const EditCompanyDrawer: React.FC<EditCompanyDrawerProps> = ({ open, onClose, co
     setForm({ ...form, contacts: newContacts });
   };
 
+  // Helper function to validate URLs
+  function isValidUrl(url: string) {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Validate website if present
+    if (form.website && !isValidUrl(form.website)) {
+      alert(t('companies.websiteInvalid'));
+      return;
+    }
     if (company) {
       dispatch(editCompanyStart({
         id: company.id,
         data: {
-          ...form,
+          name: form.name,
+          admin_email: form.email,
           employee_count: form.employee_count,
+          status: form.status,
+          logo: form.logo || undefined,
+          address: form.address || undefined,
+          description: form.description || undefined,
+          website: form.website || undefined,
+          phone: form.phone || undefined,
+          tax_id: form.tax_id || undefined,
+          registration_number: form.registration_number || undefined,
+          industry: form.industry || undefined,
           founded_year: form.founded_year ? Number(form.founded_year) : undefined,
+          contacts: Object.keys(form.contacts).length > 0 ? form.contacts : undefined,
         },
       }));
     }

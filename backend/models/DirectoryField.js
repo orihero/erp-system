@@ -7,7 +7,8 @@ module.exports = (sequelize, DataTypes) => {
       // Define associations here
       DirectoryField.belongsTo(models.Directory, {
         foreignKey: 'directory_id',
-        as: 'directory'
+        as: 'directory',
+        onDelete: 'CASCADE'
       });
       DirectoryField.belongsTo(models.Directory, {
         foreignKey: 'relation_id',
@@ -43,16 +44,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     type: {
       type: DataTypes.ENUM(
-        'string',
-        'number',
+        'text',
         'file',
         'bool',
         'date',
         'time',
-        'json',
         'datetime',
+        'json',
         'relation',
-        'text',
         'decimal',
         'integer'
       ),
@@ -72,16 +71,6 @@ module.exports = (sequelize, DataTypes) => {
           }
         }
       }
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'created_at'
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      field: 'updated_at'
     },
     metadata: {
       type: DataTypes.JSONB,

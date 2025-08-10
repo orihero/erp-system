@@ -5,11 +5,12 @@ const directoryController = {
   // Create a new directory
   create: async (req, res) => {
     try {
-      const { name, icon_name, fields } = req.body;
+      const { name, icon_name, directory_type, fields } = req.body;
       
       const directory = await Directory.create({
         name,
-        icon_name
+        icon_name,
+        directory_type
       });
 
       if (fields && fields.length > 0) {
@@ -168,6 +169,47 @@ const directoryController = {
 
       res.json(directory.fields);
     } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // Update directory metadata
+  updateMetadata: async (req, res) => {
+    try {
+      const { directoryMetadata, fieldMetadata } = req.body;
+      const directory = await Directory.findByPk(req.params.id);
+
+      if (!directory) {
+        return res.status(404).json({ message: 'Directory not found' });
+      }
+
+      // Update directory metadata
+      if (directoryMetadata) {
+        await directory.update({
+          metadata: directoryMetadata
+        });
+      }
+
+      // Update field metadata
+      if (fieldMetadata && Object.keys(fieldMetadata).length > 0) {
+        for (const [fieldId, metadata] of Object.entries(fieldMetadata)) {
+          await DirectoryField.update(
+            { metadata },
+            { where: { id: fieldId, directory_id: directory.id } }
+          );
+        }
+      }
+
+      const updatedDirectory = await Directory.findByPk(directory.id, {
+        include: [{
+          model: DirectoryField,
+          as: 'fields'
+        }]
+      });
+
+      res.json(updatedDirectory);
+    } catch (error) {
+      console.error('Error updating directory metadata:', error);
       res.status(500).json({ message: error.message });
     }
   }

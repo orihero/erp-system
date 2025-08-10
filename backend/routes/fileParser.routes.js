@@ -1,17 +1,12 @@
 const express = require('express');
-const { FileParserController, uploadMiddleware } = require('../controllers/fileParser.controller');
-const { authenticateToken } = require('../middleware/auth');
-
 const router = express.Router();
+const { fileParserController, upload } = require('../controllers/fileParser.controller');
+const { authenticateUser } = require('../middleware/auth');
 
-// Apply authentication middleware to all routes
-router.use(authenticateToken);
+// Parse Excel file with AI prompt (legacy)
+router.post('/parse-excel', authenticateUser, upload.single('excelFile'), fileParserController.parseExcelFile);
 
-/**
- * @route POST /api/file-parser/excel
- * @desc Upload and parse Excel file with custom AI prompt
- * @access Private
- */
-router.post('/excel', uploadMiddleware, FileParserController.parseExcelFile);
+// Parse bank statement file and create directory records
+router.post('/parse-bank-statement', authenticateUser, upload.single('file'), fileParserController.parseBankStatement);
 
 module.exports = router; 

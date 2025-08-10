@@ -34,13 +34,53 @@ class DirectoryRecordFactory {
           directory_field_id: v.field_id,
           value: v.value,
         })));
+        
         try {
-          await DirectoryValue.bulkCreate(
-            values.map((v) => ({
+          // Process values and handle cascading fields
+          const processedValues = [];
+          
+          for (const value of values) {
+            let fieldId = value.field_id;
+            
+            // Check if this is a cascading field (contains underscore)
+            if (fieldId.includes('_')) {
+              const [parentFieldId, cascadingFieldName] = fieldId.split('_', 2);
+              
+              // Find or create the cascading field
+              let cascadingField = await DirectoryField.findOne({
+                where: {
+                  directory_id: companyDirectory.directory_id,
+                  name: cascadingFieldName
+                },
+                transaction: t
+              });
+              
+              if (!cascadingField) {
+                // Create the cascading field
+                cascadingField = await DirectoryField.create({
+                  directory_id: companyDirectory.directory_id,
+                  name: cascadingFieldName,
+                  type: 'string',
+                  required: false,
+                  metadata: {
+                    isCascadingField: true,
+                    parentFieldId: parentFieldId
+                  }
+                }, { transaction: t });
+              }
+              
+              fieldId = cascadingField.id;
+            }
+            
+            processedValues.push({
               directory_record_id: record.id,
-              field_id: v.field_id, // Handle both attribute_id and fieldId for compatibility
-              value: v.value,
-            })),
+              field_id: fieldId,
+              value: value.value,
+            });
+          }
+          
+          await DirectoryValue.bulkCreate(
+            processedValues,
             { 
               transaction: t,
               returning: ['id', 'directory_record_id', 'field_id', 'value', 'created_at', 'updated_at']
@@ -141,6 +181,12 @@ class DirectoryRecordFactory {
       throw new Error("Directory Record not found");
     }
 
+    // Get the company directory to access directory_id
+    const companyDirectory = await CompanyDirectory.findByPk(record.company_directory_id);
+    if (!companyDirectory) {
+      throw new Error("Company Directory not found");
+    }
+
     return await DirectoryRecord.sequelize.transaction(async (t) => {
       if (values && values.length > 0) {
         // Delete existing values
@@ -149,15 +195,51 @@ class DirectoryRecordFactory {
           transaction: t,
         });
 
-        // Create new values
-        await DirectoryValue.bulkCreate(
-          values.map((v) => ({
+        // Process values and handle cascading fields
+        const processedValues = [];
+        
+        for (const value of values) {
+          let fieldId = value.attribute_id || value.fieldId || value.field_id;
+          
+          // Check if this is a cascading field (contains underscore)
+          if (fieldId.includes('_')) {
+            const [parentFieldId, cascadingFieldName] = fieldId.split('_', 2);
+            
+            // Find or create the cascading field
+            let cascadingField = await DirectoryField.findOne({
+              where: {
+                directory_id: companyDirectory.directory_id,
+                name: cascadingFieldName
+              },
+              transaction: t
+            });
+            
+            if (!cascadingField) {
+              // Create the cascading field
+              cascadingField = await DirectoryField.create({
+                directory_id: companyDirectory.directory_id,
+                name: cascadingFieldName,
+                type: 'string',
+                required: false,
+                metadata: {
+                  isCascadingField: true,
+                  parentFieldId: parentFieldId
+                }
+              }, { transaction: t });
+            }
+            
+            fieldId = cascadingField.id;
+          }
+          
+          processedValues.push({
             directory_record_id: record.id,
-            directory_field_id: v.attribute_id || v.fieldId, // Handle both attribute_id and fieldId for compatibility
-            value: v.value,
-          })),
-          { transaction: t }
-        );
+            field_id: fieldId,
+            value: value.value,
+          });
+        }
+
+        // Create new values
+        await DirectoryValue.bulkCreate(processedValues, { transaction: t });
       }
 
       return record;
@@ -170,7 +252,16 @@ class DirectoryRecordFactory {
       throw new Error("Directory Record not found");
     }
 
-    return await record.destroy();
+    return await DirectoryRecord.sequelize.transaction(async (t) => {
+      // First, delete all related directory values
+      await DirectoryValue.destroy({
+        where: { directory_record_id: record.id },
+        transaction: t,
+      });
+
+      // Then delete the directory record
+      await record.destroy({ transaction: t });
+    });
   }
 }
 

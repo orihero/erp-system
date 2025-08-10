@@ -31,11 +31,21 @@ const limiter = rateLimit({
 // Middleware
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
     credentials: true,
   })
 );
-app.use(express.json());
+
+// Add explicit UTF-8 encoding middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Set default charset for all responses
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
+
 app.use(limiter);
 app.use(morgan("dev")); // Console logging
 app.use(morgan("combined", { stream: accessLogStream })); // File logging
@@ -57,13 +67,21 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 // Initialize database and start server
-initializeDatabase()
-  .then(() => {
+const startServer = async () => {
+  try {
+    console.log("Initializing database...");
+    await initializeDatabase();
+    console.log("Database initialized successfully");
+    
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
+      console.log(`API available at http://localhost:${PORT}/api`);
     });
-  })
-  .catch((error) => {
-    console.error("Failed to start server:", error);
+  } catch (error) {
+    console.error("Failed to start server:", error.message);
+    console.error("Please check your database connection and try again.");
     process.exit(1);
-  });
+  }
+};
+
+startServer();

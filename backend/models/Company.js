@@ -69,6 +69,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    parent_company_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'companies',
+        key: 'id'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
     contacts: {
       type: DataTypes.JSONB,
       allowNull: true,
@@ -110,6 +120,15 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'company_id',
       otherKey: 'module_id',
       as: 'modules'
+    });
+    // Self-referential associations for hierarchy
+    Company.hasMany(models.Company, {
+      foreignKey: 'parent_company_id',
+      as: 'children'
+    });
+    Company.belongsTo(models.Company, {
+      foreignKey: 'parent_company_id',
+      as: 'parent'
     });
   };
 

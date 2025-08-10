@@ -23,3 +23,13 @@ dist-ssr
 *.sln
 *.sw?
 package-lock.json
+
+backend/node_modules
+backend/dist
+backend/dist-ssr
+backend/*.local
+backend/.env
+backend/.env.local
+backend/.env.development
+backend/.env.production
+backend/.env.test

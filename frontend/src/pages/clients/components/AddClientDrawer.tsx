@@ -3,11 +3,7 @@ import { Drawer, Box, Typography, IconButton, TextField, Button, Select, MenuIte
 import type { SelectChangeEvent } from '@mui/material/Select';
 import { Icon } from '@iconify/react';
 import { rolesApi, UserRole } from '@/api/services/roles';
-
-const statusOptions = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-];
+import { useTranslation } from 'react-i18next';
 
 interface AddClientDrawerProps {
   open: boolean;
@@ -15,6 +11,11 @@ interface AddClientDrawerProps {
 }
 
 const AddClientDrawer: React.FC<AddClientDrawerProps> = ({ open, onClose }) => {
+  const { t } = useTranslation();
+  const statusOptions = [
+    { value: 'active', label: t('clients.statusActive', 'Active') },
+    { value: 'inactive', label: t('clients.statusInactive', 'Inactive') },
+  ];
   const [form, setForm] = useState({
     firstname: '',
     lastname: '',
@@ -71,21 +72,21 @@ const AddClientDrawer: React.FC<AddClientDrawerProps> = ({ open, onClose }) => {
     >
       <Box sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-          <Typography variant="h5" fontWeight={700}>Add Client</Typography>
+          <Typography variant="h5" fontWeight={700}>{t('clients.addClient', 'Add Client')}</Typography>
           <IconButton onClick={onClose}>
             <Icon icon="ph:x" width={28} />
           </IconButton>
         </Box>
         <form style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24 }} onSubmit={handleSubmit}>
-          <TextField label="First Name" name="firstname" value={form.firstname} onChange={handleChange} fullWidth required />
-          <TextField label="Last Name" name="lastname" value={form.lastname} onChange={handleChange} fullWidth required />
-          <TextField label="Email" name="email" value={form.email} onChange={handleChange} fullWidth required type="email" />
+          <TextField label={t('clients.firstName', 'First Name')} name="firstname" value={form.firstname} onChange={handleChange} fullWidth required />
+          <TextField label={t('clients.lastName', 'Last Name')} name="lastname" value={form.lastname} onChange={handleChange} fullWidth required />
+          <TextField label={t('clients.email', 'Email')} name="email" value={form.email} onChange={handleChange} fullWidth required type="email" />
           <Select
             multiple
             name="roles"
             value={form.roles}
             onChange={handleRolesChange}
-            input={<OutlinedInput label="Roles" />}
+            input={<OutlinedInput label={t('clients.roles', 'Roles')} />}
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {(selected as string[]).map((value) => (
@@ -106,18 +107,13 @@ const AddClientDrawer: React.FC<AddClientDrawerProps> = ({ open, onClose }) => {
               </MenuItem>
             ))}
           </Select>
-          <TextField
-            label="Company"
-            value={form.company}
-            fullWidth
-            disabled
-          />
-          <TextField select label="Status" name="status" value={form.status} onChange={handleChange} fullWidth required>
+          <TextField label={t('clients.company', 'Company')} value={form.company} fullWidth disabled />
+          <TextField select label={t('clients.status', 'Status')} name="status" value={form.status} onChange={handleChange} fullWidth required>
             {statusOptions.map(option => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
           </TextField>
           <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 999, textTransform: 'none' }}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ borderRadius: 999, textTransform: 'none', bgcolor: '#3b82f6' }}>Add Client</Button>
+            <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 999, textTransform: 'none' }}>{t('common.cancel', 'Cancel')}</Button>
+            <Button type="submit" variant="contained" sx={{ borderRadius: 999, textTransform: 'none', bgcolor: '#3b82f6' }}>{t('clients.addClient', 'Add Client')}</Button>
           </Box>
         </form>
       </Box>

@@ -8,6 +8,7 @@ import {
   setCompanyEmployeesPage,
   setCompanyEmployeesLimit
 } from '../../../store/slices/companiesSlice';
+import { useTranslation } from 'react-i18next';
 
 interface CompanyEmployeesTableProps {
   companyId: string;
@@ -15,6 +16,7 @@ interface CompanyEmployeesTableProps {
 
 const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId }) => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const employees = useAppSelector(state => state.companies.companyEmployees);
   const loading = useAppSelector(state => state.companies.companyEmployeesLoading);
   const error = useAppSelector(state => state.companies.companyEmployeesError);
@@ -46,7 +48,7 @@ const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <TextField
           size="small"
-          placeholder="Search employees..."
+          placeholder={t('companies.searchEmployees', 'Search employees...')}
           value={search}
           onChange={handleSearchChange}
           sx={{ width: 320 }}
@@ -57,12 +59,12 @@ const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId
           <TableHead>
             <TableRow>
               <TableCell></TableCell>
-              <TableCell>First Name</TableCell>
-              <TableCell>Last Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Role</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell>{t('companies.firstName', 'First Name')}</TableCell>
+              <TableCell>{t('companies.lastName', 'Last Name')}</TableCell>
+              <TableCell>{t('companies.email', 'Email')}</TableCell>
+              <TableCell>{t('companies.role', 'Role')}</TableCell>
+              <TableCell>{t('companies.status', 'Status')}</TableCell>
+              <TableCell align="right">{t('companies.actions', 'Actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -110,7 +112,7 @@ const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId
             )) : (
               <TableRow>
                 <TableCell colSpan={7} align="center" style={{ color: '#888', fontSize: 20, minHeight: 300 }}>
-                  No employees found.
+                  {t('companies.noEmployees', 'No employees found.')}
                 </TableCell>
               </TableRow>
             )}

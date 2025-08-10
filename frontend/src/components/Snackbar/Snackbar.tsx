@@ -2,22 +2,24 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { hideNotification } from '../../store/slices/notificationSlice';
 import type { RootState } from '../../store';
+import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback';
 
 const Snackbar: React.FC = () => {
   const dispatch = useDispatch();
-  const { message, type, isVisible } = useSelector((state: RootState) => state.notification);
+  const { message, type, open } = useSelector((state: RootState) => state.notification);
+  const { tWithFallback } = useTranslationWithFallback();
 
   useEffect(() => {
-    if (isVisible) {
+    if (open) {
       const timer = setTimeout(() => {
         dispatch(hideNotification());
       }, 3000);
 
       return () => clearTimeout(timer);
     }
-  }, [isVisible, dispatch]);
+  }, [open, dispatch]);
 
-  if (!isVisible) return null;
+  if (!open) return null;
 
   const bgColor = {
     success: 'bg-green-500',
@@ -35,8 +37,9 @@ const Snackbar: React.FC = () => {
         <button
           onClick={() => dispatch(hideNotification())}
           className="ml-4 text-white hover:text-gray-200"
+          aria-label={tWithFallback('common.close', 'Close')}
         >
-          ✕
+          &#10005;
         </button>
       </div>
     </div>

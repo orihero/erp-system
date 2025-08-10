@@ -47,10 +47,17 @@ module.exports = {
     });
 
     // Add index for the name field
-    await queryInterface.addIndex('report_structures', ['name'], {
-      unique: true,
-      name: 'report_structures_name_unique'
-    });
+    try {
+      await queryInterface.addIndex('report_structures', ['name'], {
+        unique: true,
+        name: 'report_structures_name_unique'
+      });
+    } catch (error) {
+      // If index already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
   },
 
   async down(queryInterface, Sequelize) {

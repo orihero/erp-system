@@ -3,15 +3,17 @@ import { useTranslation } from 'react-i18next';
 import { Menu, Transition } from '@headlessui/react';
 import { GlobeAltIcon } from '@heroicons/react/24/outline';
 import { Fragment } from 'react';
-
-const languages = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
-  { code: 'uz', name: "O'zbekcha", flag: '🇺🇿' }
-];
+import { useTranslationWithFallback } from '@/hooks/useTranslationWithFallback';
 
 const LanguagePicker: React.FC = () => {
   const { i18n } = useTranslation();
+  const { tWithFallback } = useTranslationWithFallback();
+
+  const languages = [
+    { code: 'en', name: tWithFallback('language.english', 'English'), flag: '🇺🇸' },
+    { code: 'ru', name: tWithFallback('language.russian', 'Русский'), flag: '🇷🇺' },
+    { code: 'uz', name: tWithFallback('language.uzbek', "O'zbekcha"), flag: '🇺🇿' }
+  ];
 
   const changeLanguage = async (languageCode: string) => {
     try {
@@ -41,7 +43,7 @@ const LanguagePicker: React.FC = () => {
           <GlobeAltIcon className="w-5 h-5 mr-2" />
           {languages.find(lang => lang.code === i18n.language)?.flag || '🌐'}
           <span className="ml-2">
-            {languages.find(lang => lang.code === i18n.language)?.name || 'Language'}
+            {languages.find(lang => lang.code === i18n.language)?.name || tWithFallback('common.language', 'Language')}
           </span>
         </Menu.Button>
       </div>

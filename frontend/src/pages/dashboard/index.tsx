@@ -37,8 +37,8 @@ const Dashboard: React.FC = () => {
     fetchStats();
   }, []);
 
-  if (loading) return <div className="py-6">Loading statistics...</div>;
-  if (!stats) return <div className="py-6">No statistics available.</div>;
+  if (loading) return <div className="py-6">{t('dashboard.loadingStats', 'Loading statistics...')}</div>;
+  if (!stats) return <div className="py-6">{t('dashboard.noStats', 'No statistics available.')}</div>;
 
   return (
     <Box sx={{p: 4, width: '100%'}}>
@@ -61,7 +61,7 @@ const Dashboard: React.FC = () => {
                 }}
                 onClick={() => window.location.href = '/inventory'}
               >
-                View Inventory
+                {t('dashboard.viewInventory', 'View Inventory')}
               </Button>
             )}
             {canManageUsers && (
@@ -76,7 +76,7 @@ const Dashboard: React.FC = () => {
                 }}
                 onClick={() => window.location.href = '/users'}
               >
-                Manage Users
+                {t('dashboard.manageUsers', 'Manage Users')}
               </Button>
             )}
           </div>
@@ -84,8 +84,8 @@ const Dashboard: React.FC = () => {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
           <StatCard
-            title="Total patients"
-            extra={<a href="#">View more</a>}
+            title={t('dashboard.totalPatients', 'Total patients')}
+            extra={<a href="#">{t('dashboard.viewMore', 'View more')}</a>}
             value={stats.uniqueClients}
             icon={
               <div style={{ background: '#e0edff', borderRadius: '50%', width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -96,15 +96,15 @@ const Dashboard: React.FC = () => {
             <div style={{ display: 'flex', gap: 48, marginTop: 32 }}>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontWeight: 700, fontSize: 32 }}>{stats.totalReceipts}</div>
-                <div style={{ fontSize: 18, color: '#3b82f6' }}>Receipts</div>
+                <div style={{ fontSize: 18, color: '#3b82f6' }}>{t('dashboard.receipts', 'Receipts')}</div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontWeight: 700, fontSize: 32 }}>{stats.uniqueClients}</div>
-                <div style={{ fontSize: 18, color: '#a5b4fc' }}>Unique Clients</div>
+                <div style={{ fontSize: 18, color: '#a5b4fc' }}>{t('dashboard.uniqueClients', 'Unique Clients')}</div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontWeight: 700, fontSize: 32 }}>{stats.totalRevenue}</div>
-                <div style={{ fontSize: 18, color: '#d1d5db' }}>Revenue</div>
+                <div style={{ fontSize: 18, color: '#d1d5db' }}>{t('dashboard.revenue', 'Revenue')}</div>
               </div>
             </div>
           </StatCard>

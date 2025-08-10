@@ -13,6 +13,33 @@ module.exports = (sequelize, DataTypes) => {
         as: 'recordValues'
       });
     }
+
+    // Helper method to get cascading configuration
+    getCascadingConfig() {
+      return this.metadata?.cascadingConfig || null;
+    }
+
+    // Helper method to check if cascading is enabled
+    isCascadingEnabled() {
+      const config = this.getCascadingConfig();
+      return config?.enabled || false;
+    }
+
+    // Helper method to get dependent fields
+    getDependentFields() {
+      const config = this.getCascadingConfig();
+      return config?.dependentFields || [];
+    }
+
+    // Helper method to get parent field value
+    getParentFieldValue() {
+      return this.metadata?.parentFieldValue || null;
+    }
+
+    // Helper method to get parent field ID
+    getParentFieldId() {
+      return this.metadata?.parentFieldId || null;
+    }
   }
 
   DirectoryRecord.init({
@@ -28,6 +55,12 @@ module.exports = (sequelize, DataTypes) => {
         model: 'company_directories',
         key: 'id'
       }
+    },
+    metadata: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {},
+      comment: 'Record metadata such as cascading configurations, parent field info, etc.'
     }
   }, {
     sequelize,

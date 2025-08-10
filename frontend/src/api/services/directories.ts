@@ -8,6 +8,15 @@ export interface DirectoryEntry {
     attribute_id: string;
     value: string | number | boolean;
   }>;
+  recordValues?: Array<{
+    id: string;
+    directory_record_id: string;
+    field_id: string | null;
+    value: string | number | boolean;
+    createdAt: string;
+    updatedAt: string;
+    field: DirectoryField | null;
+  }>;
   created_at: string;
   updated_at: string;
 }
@@ -92,12 +101,25 @@ export const directoriesApi = {
   }>) => 
     api.put<DirectoryEntry>(`/api/directory-records/${entryId}`, { company_directory_id: directoryTypeId, values }),
 
-  // Delete a directory entry
-  deleteDirectoryEntry: (directoryTypeId: string, entryId: string) => 
+    // Delete a directory entry
+  deleteDirectoryEntry: (directoryTypeId: string, entryId: string) =>
     api.delete(`/api/directory-records/${entryId}`),
 
+  // Update directory metadata
+  updateDirectoryMetadata: (directoryId: string, data: {
+    directoryMetadata?: Record<string, unknown>;
+    fieldMetadata?: Record<string, Record<string, unknown>>;
+  }) =>
+    api.put<Directory>(`/api/directories/${directoryId}/metadata`, data),
+
+  // Bulk delete directory entries by group
+  bulkDeleteByGroup: (directory_id: string, company_id: string, groupValue: string) =>
+    api.delete('/api/directory-records/bulk-delete-by-group', {
+      params: { directory_id, company_id, groupValue }
+    }),
+
   // Get full directory data, companyDirectory, and directoryRecords
-  getFullDirectoryData: (directory_id: string, company_id: string) =>
+  getFullDirectoryData: (directory_id: string, company_id: string, params?: URLSearchParams) =>
     api.get<{
       directory: Directory;
       companyDirectory: {
@@ -108,5 +130,12 @@ export const directoriesApi = {
         directory: Directory;
       };
       directoryRecords: DirectoryEntry[];
-    }>(`/api/directory-records/full-data`, { params: { directory_id, company_id } }),
+      fields: DirectoryField[];
+    }>(`/api/directory-records/full-data`, { 
+      params: { 
+        directory_id, 
+        company_id,
+        ...(params ? Object.fromEntries(params) : {})
+      } 
+    }),
 };

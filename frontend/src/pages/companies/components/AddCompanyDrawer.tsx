@@ -114,13 +114,44 @@ const AddCompanyDrawer: React.FC<AddCompanyDrawerProps> = ({ open, onClose }) =>
     });
   };
 
+  // Helper function to validate URLs
+  function isValidUrl(url: string) {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const companyData: Omit<Company, 'id'> = {
+    // Ensure employee_count is always a valid enum string
+    if (!form.employee_count) {
+      alert(t('companies.employeeCountRequired'));
+      return;
+    }
+    // Validate website if present
+    if (form.website && !isValidUrl(form.website)) {
+      alert(t('companies.websiteInvalid'));
+      return;
+    }
+    // Prepare the payload with all fields
+    const companyData = {
       name: form.name,
-      email: form.admin_email,
-      employee_count: parseInt(form.employee_count),
-      status: 'active'
+      admin_email: form.admin_email,
+      employee_count: form.employee_count,
+      status: 'active',
+      logo: form.logo || undefined,
+      address: form.address || undefined,
+      description: form.description || undefined,
+      website: form.website || undefined,
+      phone: form.phone || undefined,
+      tax_id: form.tax_id || undefined,
+      registration_number: form.registration_number || undefined,
+      industry: form.industry || undefined,
+      founded_year: form.founded_year ? Number(form.founded_year) : undefined,
+      contacts: Object.keys(form.contacts).length > 0 ? form.contacts : undefined,
     };
     dispatch(addCompanyStart(companyData));
     onClose();

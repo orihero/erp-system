@@ -1,11 +1,13 @@
 import { Icon } from '@iconify/react';
-import { Avatar, Box, IconButton, Menu, MenuItem, Paper, Typography, Tabs, Tab } from '@mui/material';
+import { Avatar, Box, IconButton, Menu, MenuItem, Paper, Typography, Tabs, Tab, Tooltip } from '@mui/material';
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/store/slices/authSlice';
+import { toggleSidebar } from '@/store/slices/sidebarSlice';
 import type { RootState } from '@/store';
 import type { NavigationModule } from '@/api/services/types';
+import { useTranslation } from 'react-i18next';
 
 export default function DashboardHeader() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -14,12 +16,26 @@ export default function DashboardHeader() {
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const modules: NavigationModule[] = useSelector((state: RootState) => state.navigation.modules) || [];
+  const isCollapsed = useSelector((state: RootState) => state.sidebar.isCollapsed);
+  // Determine if user is super_admin with no company
+  const isSuperAdmin = user && Array.isArray(user.roles) && user.roles.some((role) => role.name === 'super_admin') && (user.company_id === null || user.company_id === undefined);
   const [tabValue, setTabValue] = useState(() => {
     // Find the current module index based on the route
     const currentPath = window.location.pathname;
     const idx = modules.findIndex((mod) => currentPath.startsWith(`/modules/${mod.id}`));
     return idx >= 0 ? idx : 0;
   });
+
+  const { t, i18n } = useTranslation();
+
+  // Language switcher state
+  const [langAnchorEl, setLangAnchorEl] = useState<null | HTMLElement>(null);
+  const langMenuOpen = Boolean(langAnchorEl);
+  const languages = [
+    { code: 'en', name: t('language.english', 'English'), flag: '🇺🇸' },
+    { code: 'ru', name: t('language.russian', 'Русский'), flag: '🇷🇺' },
+    { code: 'uz', name: t('language.uzbek', "O'zbekcha"), flag: '🇺🇿' }
+  ];
 
   React.useEffect(() => {
     // Update tab when route changes
@@ -47,6 +63,18 @@ export default function DashboardHeader() {
     navigate('/login');
   };
 
+  const handleLangClick = (event: React.MouseEvent<HTMLElement>) => {
+    setLangAnchorEl(event.currentTarget);
+  };
+  const handleLangClose = () => {
+    setLangAnchorEl(null);
+  };
+  const handleLangChange = async (code: string) => {
+    await i18n.changeLanguage(code);
+    localStorage.setItem('i18nextLng', code);
+    handleLangClose();
+  };
+
   return (
     <Box sx={{ bgcolor: '#eef2f5', width: '100%', minHeight: 0, pb: 0, display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
       {/* Header Card */}
@@ -71,15 +99,36 @@ export default function DashboardHeader() {
       }}>
         {/* Left: Logo & App Name */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box sx={{ bgcolor: '#3b82f6', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Box component="span" sx={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>+</Box>
-          </Box>
+        <Tooltip title={isCollapsed ? t('sidebar.expand', 'Expand Sidebar') : t('sidebar.collapse', 'Collapse Sidebar')}>
+            <IconButton
+              onClick={() => dispatch(toggleSidebar())}
+              sx={{
+                color: '#64748b',
+                bgcolor: '#f8fafc',
+                borderRadius: '50%',
+                width: 40,
+                height: 40,
+                '&:hover': {
+                  bgcolor: '#e2e8f0',
+                  color: '#475569',
+                },
+              }}
+            >
+              <Icon 
+                icon={!isCollapsed ? 'zondicons:dots-horizontal-triple' : 'ion:list'} 
+                width={20} 
+                height={20} 
+              />
+            </IconButton>
+          </Tooltip>
           <Typography variant="h6" sx={{ fontWeight: 700, fontSize: 22, letterSpacing: 1 }}>
-            OSON ERP
+            {t('app.name', 'OSON ERP')}
           </Typography>
+          {/* Sidebar Toggle Button */}
+          
         </Box>
         {/* Center: Module Tab Bar */}
-        {modules.length > 1 && (
+        {!isSuperAdmin && modules.length > 1 && (
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
@@ -144,23 +193,33 @@ export default function DashboardHeader() {
               <Icon icon="solar:bell-linear" width={24} height={24} />
             </IconButton>
           </Box>
-          <Box sx={{ bgcolor: '#eef2f5', borderRadius: 999, p: 0.5, display: 'flex', alignItems: 'center', mr: 1 }}>
-            <IconButton size="medium" sx={{ color: '#222', bgcolor: 'transparent' }}>
-              <Icon icon="teenyicons:cog-outline" width={24} height={24} />
+          {/* Language Switcher */}
+          <Box sx={{ bgcolor: '#eef2f5', borderRadius: '50%', p: 0.5, display: 'flex', alignItems: 'center', mr: 1 }}>
+            <IconButton size="medium" sx={{ color: '#222', bgcolor: 'transparent', borderRadius: '50%' }} onClick={handleLangClick}>
+              <span style={{ fontSize: 22, borderRadius: '50%', overflow: 'hidden', display: 'inline-block', width: 28, height: 28, background: '#fff', textAlign: 'center', lineHeight: '28px' }}>
+                {languages.find(l => l.code === i18n.language)?.flag || '🌐'}
+              </span>
             </IconButton>
+            <Menu anchorEl={langAnchorEl} open={langMenuOpen} onClose={handleLangClose}>
+              {languages.map(lang => (
+                <MenuItem key={lang.code} selected={i18n.language === lang.code} onClick={() => handleLangChange(lang.code)}>
+                  <span style={{ marginRight: 8 }}>{lang.flag}</span> {lang.name}
+                </MenuItem>
+              ))}
+            </Menu>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 999, px: 2, py: 0.5 }}>
             <Avatar sx={{ width: 40, height: 40, mr: 1 }} />
             <Box sx={{ textAlign: 'right', mr: 1 }}>
-              <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{user ? `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'User' : 'User'}</Typography>
+              <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{user ? `${user.firstname || ''} ${user.lastname || ''}`.trim() || t('common.user', 'User') : t('common.user', 'User')}</Typography>
               <Typography sx={{ fontSize: 12, color: '#888', textAlign: 'left' }}>{user?.email || ''}</Typography>
             </Box>
             <IconButton onClick={handleMenu} size="small" sx={{ color: '#222' }}>
               <Icon icon="mdi:chevron-down" width={24} height={24} />
             </IconButton>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-              <MenuItem onClick={handleClose}>Profile</MenuItem>
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              <MenuItem onClick={handleClose}>{t('common.profile', 'Profile')}</MenuItem>
+              <MenuItem onClick={handleLogout}>{t('common.logout', 'Logout')}</MenuItem>
             </Menu>
           </Box>
         </Box>

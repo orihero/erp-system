@@ -57,11 +57,19 @@ module.exports = {
         defaultValue: Sequelize.fn('NOW')
       }
     });
-    await queryInterface.addConstraint('role_permissions', {
-      fields: ['role_id', 'permission_id'],
-      type: 'unique',
-      name: 'unique_role_permission'
-    });
+    // Add unique constraint if it doesn't already exist
+    try {
+      await queryInterface.addConstraint('role_permissions', {
+        fields: ['role_id', 'permission_id'],
+        type: 'unique',
+        name: 'unique_role_permission'
+      });
+    } catch (error) {
+      // If constraint already exists, ignore the error
+      if (!error.message.includes('уже существует') && !error.message.includes('already exists')) {
+        throw error;
+      }
+    }
   },
 
   down: async (queryInterface, Sequelize) => {

@@ -4,126 +4,43 @@ const CompanyFactory = require("../factories/CompanyFactory");
 const { authenticateUser, checkRole } = require("../middleware/auth");
 const { USER_ROLES, PERMISSION_TYPES, ENTITY_TYPES } = require("../utils/constants");
 const { authorize } = require("../middleware/permissionMiddleware");
+const companiesController = require("../controllers/companies.controller");
 
 // Get companies with pagination
-router.get("/", authenticateUser, authorize(PERMISSION_TYPES.READ, () => ENTITY_TYPES.COMPANY), checkRole([USER_ROLES.SUPER_ADMIN]), async (req, res) => {
-  try {
-    const { page, limit, search } = req.query;
-
-    console.log("GET /api/admin/companies headers:", req.headers);
-    console.log("GET /api/admin/companies cookies:", req.cookies);
-    console.log("GET /api/admin/companies req.user:", req.user);
-    if (!req.user) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-    console.log(`Super admin ${req.user.username} accessed companies list`);
-
-    const result = await CompanyFactory.findAll({
-      page: parseInt(page) || 1,
-      limit: parseInt(limit) || 10,
-      search: search || "",
-    });
-
-    res.json(result);
-  } catch (error) {
-    console.error("Error fetching companies:", error);
-    res.status(500).json({ error: "Failed to fetch companies" });
-  }
-});
+router.get(
+  "/",
+  authenticateUser,
+  authorize(PERMISSION_TYPES.READ, () => ENTITY_TYPES.COMPANY),
+  checkRole([USER_ROLES.SUPER_ADMIN]),
+  companiesController.getAllCompanies
+);
 
 // Create new company
-router.post("/", authenticateUser, authorize(PERMISSION_TYPES.CREATE, () => ENTITY_TYPES.COMPANY), checkRole([USER_ROLES.SUPER_ADMIN]), async (req, res) => {
-  try {
-    const { name, admin_email } = req.body;
-
-    // Validate input
-    if (!name || !admin_email) {
-      return res
-        .status(400)
-        .json({ error: "Name and admin email are required" });
-    }
-
-    console.log("POST /api/admin/companies headers:", req.headers);
-    console.log("POST /api/admin/companies cookies:", req.cookies);
-    console.log("POST /api/admin/companies req.user:", req.user);
-    if (!req.user) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-    const company = await CompanyFactory.create({ name, admin_email });
-
-    console.log(`Super admin ${req.user.username} created company: ${name}`);
-
-    res.status(201).json(company);
-  } catch (error) {
-    console.error("Error creating company:", error);
-    if (error.name === "SequelizeUniqueConstraintError") {
-      return res
-        .status(400)
-        .json({ error: "Company name or email already exists" });
-    }
-    res.status(500).json({ error: "Failed to create company" });
-  }
-});
+router.post(
+  "/",
+  authenticateUser,
+  authorize(PERMISSION_TYPES.CREATE, () => ENTITY_TYPES.COMPANY),
+  checkRole([USER_ROLES.SUPER_ADMIN]),
+  companiesController.createCompany
+);
 
 // Get company details
-router.get("/:company_id", authenticateUser, authorize(PERMISSION_TYPES.READ, () => ENTITY_TYPES.COMPANY), checkRole([USER_ROLES.SUPER_ADMIN]), async (req, res) => {
-  try {
-    const { company_id } = req.params;
-
-    const company = await CompanyFactory.findById(company_id);
-    if (!company) {
-      return res.status(404).json({ error: "Company not found" });
-    }
-
-    const stats = await CompanyFactory.getCompanyStats(company_id);
-    res.json({ ...company.toJSON(), ...stats });
-  } catch (error) {
-    console.error("Error fetching company details:", error);
-    res.status(500).json({ error: "Failed to fetch company details" });
-  }
-});
+router.get(
+  "/:company_id",
+  authenticateUser,
+  authorize(PERMISSION_TYPES.READ, () => ENTITY_TYPES.COMPANY),
+  checkRole([USER_ROLES.SUPER_ADMIN]),
+  companiesController.getCompanyDetails
+);
 
 // Update company
-router.put("/:company_id", authenticateUser, authorize(PERMISSION_TYPES.EDIT, () => ENTITY_TYPES.COMPANY), checkRole([USER_ROLES.SUPER_ADMIN]), async (req, res) => {
-  try {
-    const { company_id } = req.params;
-    const { name, admin_email } = req.body;
-
-    if (!name && !admin_email) {
-      return res
-        .status(400)
-        .json({ error: "At least one field to update is required" });
-    }
-
-    console.log("PUT /api/admin/companies headers:", req.headers);
-    console.log("PUT /api/admin/companies cookies:", req.cookies);
-    console.log("PUT /api/admin/companies req.user:", req.user);
-    if (!req.user) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-    const company = await CompanyFactory.update(company_id, {
-      name,
-      admin_email,
-    });
-
-    console.log(
-      `Super admin ${req.user.username} updated company ${company_id}`
-    );
-
-    res.json(company);
-  } catch (error) {
-    console.error("Error updating company:", error);
-    if (error.message === "Company not found") {
-      return res.status(404).json({ error: error.message });
-    }
-    if (error.name === "SequelizeUniqueConstraintError") {
-      return res
-        .status(400)
-        .json({ error: "Company name or email already exists" });
-    }
-    res.status(500).json({ error: "Failed to update company" });
-  }
-});
+router.put(
+  "/:company_id",
+  authenticateUser,
+  authorize(PERMISSION_TYPES.EDIT, () => ENTITY_TYPES.COMPANY),
+  checkRole([USER_ROLES.SUPER_ADMIN]),
+  companiesController.updateCompany
+);
 
 // Get employees for a company with filters, sorting, and pagination
 router.get(
@@ -131,30 +48,16 @@ router.get(
   authenticateUser,
   authorize(PERMISSION_TYPES.READ, () => ENTITY_TYPES.COMPANY),
   checkRole([USER_ROLES.SUPER_ADMIN]),
-  async (req, res) => {
-    try {
-      const { company_id } = req.params;
-      const {
-        page = 1,
-        limit = 10,
-        sort = "created_at",
-        order = "DESC",
-        ...filters
-      } = req.query;
-      const result = await CompanyFactory.getEmployees({
-        companyId: company_id,
-        filters,
-        sort,
-        order,
-        page: parseInt(page),
-        limit: parseInt(limit),
-      });
-      res.json(result);
-    } catch (error) {
-      console.error("Error fetching company employees:", error);
-      res.status(500).json({ error: "Failed to fetch company employees" });
-    }
-  }
+  companiesController.getCompanyEmployees
+);
+
+// Get company hierarchy (tree)
+router.get(
+  "/hierarchy",
+  authenticateUser,
+  authorize(PERMISSION_TYPES.READ, () => ENTITY_TYPES.COMPANY),
+  checkRole([USER_ROLES.SUPER_ADMIN]),
+  companiesController.getCompanyHierarchy
 );
 
 module.exports = router;

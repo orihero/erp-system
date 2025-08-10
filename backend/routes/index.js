@@ -10,9 +10,10 @@ const modulesRouter = require("./modules");
 const companiesRouter = require("./companies");
 const rolesRouter = require("./roles");
 const permissionsRouter = require("./permissions");
-const reportStructureRoutes = require("./reportStructureRoutes");
+const reportTemplateRoutes = require("./reportTemplates");
 const directoryRecordRoutes = require("./directoryRecord.routes");
 const fileParserRoutes = require("./fileParser.routes");
+const cascadingRoutes = require("./cascading");
 
 // Mount routes 
 router.use("/directories", directoryRoutes);
@@ -25,8 +26,9 @@ router.use("/modules", modulesRouter);
 router.use("/companies", companiesRouter);
 router.use("/roles", rolesRouter);
 router.use("/permissions", permissionsRouter);
-router.use("/report-structures", reportStructureRoutes);
+router.use("/report-templates", reportTemplateRoutes);
 router.use("/directory-records", directoryRecordRoutes);
 router.use("/file-parser", fileParserRoutes);
+router.use("/cascading", cascadingRoutes);
 
 module.exports = router;

@@ -12,5 +12,6 @@ router.get('/:id', authenticateUser, authorize('read', () => ENTITY_TYPES.DIRECT
 router.put('/:id', authenticateUser, authorize('edit', () => ENTITY_TYPES.DIRECTORY), checkRole([USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]), directoryController.update);
 router.delete('/:id', authenticateUser, authorize('delete', () => ENTITY_TYPES.DIRECTORY), checkRole([USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]), directoryController.delete);
 router.get('/:id/fields', authenticateUser, authorize('read', () => ENTITY_TYPES.DIRECTORY), directoryController.getFields);
+router.put('/:id/metadata', authenticateUser, authorize('edit', () => ENTITY_TYPES.DIRECTORY), checkRole([USER_ROLES.SUPER_ADMIN]), directoryController.updateMetadata);
 
 module.exports = router;

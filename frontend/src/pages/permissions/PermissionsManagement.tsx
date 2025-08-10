@@ -1,23 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Box, Tabs, Tab, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, CircularProgress, Tooltip
+  Box, Tabs, Tab, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress, Tooltip
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { permissionsApi, Permission } from '@/api/services/permissions';
 import { rolesApi, UserRole } from '@/api/services/roles';
 import PermissionDrawer from '@/components/PermissionDrawer';
-import { modulesApi } from '@/api/services/modules';
 import { directoriesService } from '@/api/services/directories.service';
+import { useTranslation } from 'react-i18next';
+import { modulesApi } from '@/api/services/modules';
+import type { Module } from '@/api/services/modules';
+import type { Directory } from '@/api/services/directories';
 
 const PermissionsManagement: React.FC = () => {
+  const { t } = useTranslation();
   const [tab, setTab] = useState(0);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
   const [selected, setSelected] = useState<Permission | null>(null);
-  const [form, setForm] = useState<{ name: string; description: string; type: string }>({ name: '', description: '', type: '' });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<string>('');
@@ -30,7 +31,7 @@ const PermissionsManagement: React.FC = () => {
   const [modules, setModules] = useState<Module[]>([]);
   const [directories, setDirectories] = useState<Directory[]>([]);
 
-  const fetchPermissions = async () => {
+  const fetchPermissions = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -41,9 +42,9 @@ const PermissionsManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     try {
       const res = await rolesApi.getAll();
       setRoles(res.data);
@@ -53,12 +54,12 @@ const PermissionsManagement: React.FC = () => {
     } catch (e) {
       setRoleError(getErrorMessage(e));
     }
-  };
+  }, [selectedRoleId]);
 
   useEffect(() => {
     if (tab === 0) fetchPermissions();
     if (tab === 1) fetchRoles();
-  }, [tab]);
+  }, [tab, fetchPermissions, fetchRoles]);
 
   useEffect(() => {
     const fetchRolePermissions = async () => {
@@ -85,6 +86,7 @@ const PermissionsManagement: React.FC = () => {
   }, []);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    console.log('newValue', newValue);
     setTab(newValue);
   };
 
@@ -97,28 +99,6 @@ const PermissionsManagement: React.FC = () => {
     setEditingPermission(perm);
     setPermissionDrawerMode('edit');
     setPermissionDrawerOpen(true);
-  };
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-    setSelected(null);
-    setForm({ name: '', description: '', type: '' });
-  };
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (editMode && selected) {
-        await permissionsApi.update(selected.id, form);
-      } else {
-        await permissionsApi.create(form);
-      }
-      handleCloseDialog();
-      fetchPermissions();
-    } catch (e: unknown) {
-      setError(getErrorMessage(e) || 'Failed to save permission');
-    }
   };
   const handleOpenDelete = (perm: Permission) => {
     setSelected(perm);
@@ -174,20 +154,20 @@ const PermissionsManagement: React.FC = () => {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" fontWeight={700} sx={{ mb: 3 }}>
-        Permissions Management
+        {t('permissions.management', 'Permissions Management')}
       </Typography>
       <Paper sx={{ mb: 2 }}>
-        <Tabs value={tab} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
-          <Tab label="Permissions" />
-          <Tab label="Role Permissions" />
+        <Tabs value={tab}  onChange={handleTabChange} indicatorColor="primary" textColor="primary">
+          <Tab label={t('permissions.permissionsTab', 'Permissions')} />
+          <Tab label={t('permissions.rolePermissionsTab', 'Role Permissions')} />
         </Tabs>
       </Paper>
       {tab === 0 && (
         <Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">Permissions</Typography>
+            <Typography variant="h6">{t('permissions.permissionsTab', 'Permissions')}</Typography>
             <Button variant="contained" onClick={openAddPermissionDrawer} sx={{ borderRadius: 999, textTransform: 'none', bgcolor: '#3b82f6' }}>
-              <Icon icon="ph:plus" style={{ marginRight: 8 }} /> Add Permission
+              <Icon icon="ph:plus" style={{ marginRight: 8 }} /> {t('permissions.addPermission', 'Add Permission')}
             </Button>
           </Box>
           {loading ? (
@@ -198,10 +178,10 @@ const PermissionsManagement: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell>{t('permissions.name', 'Name')}</TableCell>
+                  <TableCell>{t('permissions.description', 'Description')}</TableCell>
+                  <TableCell>{t('permissions.type', 'Type')}</TableCell>
+                  <TableCell align="right">{t('common.actions', 'Actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -247,20 +227,20 @@ const PermissionsManagement: React.FC = () => {
           />
           {/* Delete Dialog */}
           <Dialog open={deleteDialogOpen} onClose={handleCloseDelete} maxWidth="xs" fullWidth>
-            <DialogTitle>Delete Permission</DialogTitle>
+            <DialogTitle>{t('permissions.deletePermission', 'Delete Permission')}</DialogTitle>
             <DialogContent>
-              <Typography>Are you sure you want to delete the permission "{selected?.name}"?</Typography>
+              <Typography>{t('permissions.deleteConfirm', { name: selected?.name })}</Typography>
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleCloseDelete}>Cancel</Button>
-              <Button onClick={handleDelete} color="error" variant="contained">Delete</Button>
+              <Button onClick={handleCloseDelete}>{t('common.cancel', 'Cancel')}</Button>
+              <Button onClick={handleDelete} color="error" variant="contained">{t('common.delete', 'Delete')}</Button>
             </DialogActions>
           </Dialog>
         </Box>
       )}
       {tab === 1 && (
         <Box>
-          <Typography variant="h6" sx={{ mb: 2 }}>Role Permissions</Typography>
+          <Typography variant="h6" sx={{ mb: 2 }}>{t('permissions.rolePermissionsTab', 'Role Permissions')}</Typography>
           {roleError && <Typography color="error">{roleError}</Typography>}
           <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Typography>Select Role:</Typography>
@@ -276,10 +256,10 @@ const PermissionsManagement: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Permission</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell align="right">Assigned</TableCell>
+                  <TableCell>{t('permissions.permission', 'Permission')}</TableCell>
+                  <TableCell>{t('permissions.description', 'Description')}</TableCell>
+                  <TableCell>{t('permissions.type', 'Type')}</TableCell>
+                  <TableCell align="right">{t('permissions.assigned', 'Assigned')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -293,11 +273,11 @@ const PermissionsManagement: React.FC = () => {
                       <TableCell align="right">
                         {assigned ? (
                           <Button color="error" variant="outlined" size="small" onClick={() => handleRemovePermission(perm.id)}>
-                            Remove
+                            {t('permissions.remove', 'Remove')}
                           </Button>
                         ) : (
                           <Button color="primary" variant="outlined" size="small" onClick={() => handleAssignPermission(perm.id)}>
-                            Assign
+                            {t('permissions.assign', 'Assign')}
                           </Button>
                         )}
                       </TableCell>

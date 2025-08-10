@@ -16,17 +16,17 @@ export const reportService = {
   // Template Management
   async createTemplate(config: ReportConfig): Promise<ReportTemplate> {
     const response = await axios.post(`${API_BASE_URL}/templates`, config);
-    return response.data;
+    return response.data as ReportTemplate;
   },
 
   async getTemplate(id: string): Promise<ReportTemplate> {
     const response = await axios.get(`${API_BASE_URL}/templates/${id}`);
-    return response.data;
+    return response.data as ReportTemplate;
   },
 
   async updateTemplate(id: string, config: ReportConfig): Promise<ReportTemplate> {
     const response = await axios.put(`${API_BASE_URL}/templates/${id}`, config);
-    return response.data;
+    return response.data as ReportTemplate;
   },
 
   async deleteTemplate(id: string): Promise<void> {
@@ -34,19 +34,19 @@ export const reportService = {
   },
 
   async listTemplates(): Promise<ReportTemplate[]> {
-    const response = await axios.get(`${API_BASE_URL}/templates`);
-    return response.data;
+    const response = await axios.get('/api/report-structures');
+    return response.data.data as ReportTemplate[];
   },
 
   // Data Source Management
   async testDataSource(dataSource: DataSource): Promise<boolean> {
     const response = await axios.post(`${API_BASE_URL}/datasources/test`, dataSource);
-    return response.data.success;
+    return (response.data as { success: boolean }).success;
   },
 
   async getDataSourceFields(dataSource: DataSource): Promise<string[]> {
     const response = await axios.post(`${API_BASE_URL}/datasources/fields`, dataSource);
-    return response.data.fields;
+    return (response.data as { fields: string[] }).fields;
   },
 
   // Report Generation
@@ -56,23 +56,23 @@ export const reportService = {
       { filters },
       { responseType: 'blob' }
     );
-    return response.data;
+    return response.data as Blob;
   },
 
   async previewReport(templateId: string, filters: Filter[]): Promise<PreviewData> {
     const response = await axios.post(`${API_BASE_URL}/preview/${templateId}`, { filters });
-    return response.data;
+    return response.data as PreviewData;
   },
 
   // Formula Management
   async validateFormula(formula: string): Promise<boolean> {
     const response = await axios.post(`${API_BASE_URL}/formulas/validate`, { formula });
-    return response.data.valid;
+    return (response.data as { valid: boolean }).valid;
   },
 
   async evaluateFormula(formula: string, data: FormulaData): Promise<unknown> {
     const response = await axios.post(`${API_BASE_URL}/formulas/evaluate`, { formula, data });
-    return response.data.result;
+    return (response.data as { result: unknown }).result;
   },
 };
 

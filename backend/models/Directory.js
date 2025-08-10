@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
       });
       Directory.hasMany(models.DirectoryField, {
         foreignKey: 'directory_id',
-        as: 'fields'
+        as: 'fields',
+        onDelete: 'CASCADE'
       });
     }
   }
@@ -66,8 +67,8 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'directories',
     timestamps: true,
     underscored: true,
-    created_at: 'created_at',
-    updated_at: 'updated_at'
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
   });
 
   return Directory;

@@ -1,23 +1,29 @@
 import React from 'react';
 import { Box } from '@mui/material';
+import { useSelector } from 'react-redux';
 import Sidebar from '../Sidebar';
 import DashboardHeader from '../DashboardHeader';
+import type { RootState } from '@/store';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const SIDEBAR_WIDTH = 250;
+const SIDEBAR_COLLAPSED_WIDTH = 80;
 const HEADER_HEIGHT = 80;
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const isCollapsed = useSelector((state: RootState) => state.sidebar.isCollapsed);
+  const sidebarWidth = isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#eef2f5' }}>
       {/* Full width fixed header */}
       <DashboardHeader />
       {/* Sidebar and main content, with top padding for header */}
       <Box sx={{ display: 'flex', pt: `${HEADER_HEIGHT}px` }}>
-        <Box sx={{ width: SIDEBAR_WIDTH, flexShrink: 0 }}>
+        <Box sx={{ width: sidebarWidth, flexShrink: 0, transition: 'width 0.3s ease' }}>
           <Sidebar />
         </Box>
         <Box
@@ -27,6 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
             display: 'flex',
             flexDirection: 'column',
+            transition: 'margin-left 0.3s ease',
           }}
         >
           <Box sx={{ flexGrow: 1, p: 3 }}>
