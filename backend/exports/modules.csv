@@ -1,0 +1,15 @@
+id,name,description,created_at,updated_at,icon_name
+b118f262-02e1-4c30-a243-f14cb0dd79ac,Dashboard,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:dashboard
+cf13980e-13cb-48f1-8079-1c125d00977b,Cashier,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:point-of-sale
+a0358a4a-46b1-47cf-a94f-0cfa544e95bd,Inventory,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:inventory
+a525a5a9-1ce8-4fff-a4d6-0e40f08f09c9,Realization,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:trending-up
+c7056b34-d1f8-47f7-ad8a-eb27019d6984,Accounting,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:account-balance
+d7b2a717-fecc-4378-a799-90802cb16ec4,Purchases,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:shopping-cart
+c9831d04-b603-4939-b8e9-b2311512d3a3,Sales,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:store
+7da82750-2b43-465d-8902-1403a1543f49,Reports,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:assessment
+47d626bd-1334-43f3-a060-08eca1330010,Settings,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:settings
+f69553d7-908e-4e41-8d8b-f2d9f417a008,Companies,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:business
+a9959486-e245-4c89-bb30-3c93ba476331,Users,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:people
+6c465ef3-4c48-46d5-b2e9-126ff8277dff,Roles,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:admin-panel-settings
+befb6cf9-3cf3-4e65-91d4-582eb6caf299,Permissions,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:security
+aaf52d62-cc27-42e5-8bf1-8f47eff7f548,Directories,,2025-08-07 15:43:37.292+05,2025-08-07 15:43:37.292+05,material-symbols:folder

@@ -1,8 +1,15 @@
+require('dotenv').config();
 const { Sequelize } = require("sequelize");
-const config = require("./config.json");
 
-const env = process.env.NODE_ENV || "development";
-const dbConfig = config[env];
+// Database configuration from environment variables
+const dbConfig = {
+  host: process.env.DB_HOST || "127.0.0.1",
+  port: process.env.DB_PORT || 5432,
+  username: process.env.DB_USERNAME || "postgres",
+  password: process.env.DB_PASSWORD || "postgres",
+  database: process.env.DB_NAME || "erp_db",
+  dialect: process.env.DB_DIALECT || "postgres"
+};
 
 const sequelize = new Sequelize(
   dbConfig.database,
@@ -10,7 +17,7 @@ const sequelize = new Sequelize(
   dbConfig.password,
   {
     host: dbConfig.host,
-    port: dbConfig.port || 5432,
+    port: dbConfig.port,
     dialect: dbConfig.dialect,
     logging: console.log,
     pool: {
