@@ -1,4 +1,6 @@
 'use strict';
+const { v4: uuidv4 } = require('uuid');
+
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -7,7 +9,7 @@ module.exports = {
     try {
       // Create Payment Types Directory
       await queryInterface.bulkInsert('directories', [{
-        id: Sequelize.literal('gen_random_uuid()'),
+        id: uuidv4(),
         name: 'Payment Types',
         icon_name: 'ph:credit-card',
         directory_type: 'System',
@@ -28,7 +30,7 @@ module.exports = {
     try {
       // Create Inventory Directory
       await queryInterface.bulkInsert('directories', [{
-        id: Sequelize.literal('gen_random_uuid()'),
+        id: uuidv4(),
         name: 'Inventory',
         icon_name: 'ph:warehouse',
         directory_type: 'System',
@@ -49,7 +51,7 @@ module.exports = {
     try {
       // Create Raw Materials Directory
       await queryInterface.bulkInsert('directories', [{
-        id: Sequelize.literal('gen_random_uuid()'),
+        id: uuidv4(),
         name: 'Raw Materials',
         icon_name: 'ph:package',
         directory_type: 'System',
@@ -70,7 +72,7 @@ module.exports = {
     try {
       // Create Departments Directory
       await queryInterface.bulkInsert('directories', [{
-        id: Sequelize.literal('gen_random_uuid()'),
+        id: uuidv4(),
         name: 'Departments',
         icon_name: 'ph:buildings',
         directory_type: 'System',
@@ -91,7 +93,7 @@ module.exports = {
     try {
       // Create Employees Directory
       await queryInterface.bulkInsert('directories', [{
-        id: Sequelize.literal('gen_random_uuid()'),
+        id: uuidv4(),
         name: 'Employees',
         icon_name: 'ph:users',
         directory_type: 'System',

@@ -1,4 +1,5 @@
 'use strict';
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -20,7 +21,7 @@ module.exports = {
     // Add Payment Type field to Receipts directory
     try {
       await queryInterface.bulkInsert('directory_fields', [{
-        id: Sequelize.literal('gen_random_uuid()'),
+        id: uuidv4(),
         directory_id: receiptsDirId,
         name: 'payment_type',
         type: 'select',

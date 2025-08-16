@@ -2,6 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const { Sequelize, DataTypes } = require('sequelize');
+const { v4: uuidv4 } = require('uuid');
 
 // Create a mock Sequelize instance for migration conversion
 const mockSequelize = new Sequelize('mock', 'mock', 'mock', {
@@ -22,7 +23,7 @@ const mockQueryInterface = {
       if (columnDef.type instanceof DataTypes.UUID) {
         columnSQL += 'UUID';
         if (columnDef.defaultValue === DataTypes.UUIDV4) {
-          columnSQL += ' DEFAULT gen_random_uuid()';
+          columnSQL += ` DEFAULT '${uuidv4()}'`;
         }
       } else if (columnDef.type instanceof DataTypes.STRING) {
         columnSQL += `VARCHAR(${columnDef.type._length || 255})`;
