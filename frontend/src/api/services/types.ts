@@ -44,6 +44,7 @@ export interface NavigationResponse {
   modules: NavigationModule[];
   companyDirectories: Directory[];
   systemDirectories: Directory[];
+  hasExcelReportAccess?: boolean;
 }
 
 export interface User {

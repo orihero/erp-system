@@ -143,6 +143,34 @@ const companiesSlice = createSlice({
       state.companyEmployeesLoading = false;
       state.companyEmployeesError = action.payload;
     },
+    editEmployeeStart(state) {
+      state.companyEmployeesLoading = true;
+      state.companyEmployeesError = null;
+    },
+    editEmployeeSuccess(state, action: PayloadAction<Employee>) {
+      state.companyEmployeesLoading = false;
+      state.companyEmployees = state.companyEmployees.map(emp => 
+        emp.id === action.payload.id ? action.payload : emp
+      );
+      state.companyEmployeesError = null;
+    },
+    editEmployeeFailure(state, action: PayloadAction<string>) {
+      state.companyEmployeesLoading = false;
+      state.companyEmployeesError = action.payload;
+    },
+    deleteEmployeeStart(state) {
+      state.companyEmployeesLoading = true;
+      state.companyEmployeesError = null;
+    },
+    deleteEmployeeSuccess(state, action: PayloadAction<string>) {
+      state.companyEmployeesLoading = false;
+      state.companyEmployees = state.companyEmployees.filter(emp => emp.id !== action.payload);
+      state.companyEmployeesError = null;
+    },
+    deleteEmployeeFailure(state, action: PayloadAction<string>) {
+      state.companyEmployeesLoading = false;
+      state.companyEmployeesError = action.payload;
+    },
   },
 });
 
@@ -153,6 +181,8 @@ export const {
   deleteCompanyStart, deleteCompanySuccess, deleteCompanyFailure,
   setCompaniesPage, setCompaniesLimit,
   fetchCompanyEmployeesStart, fetchCompanyEmployeesSuccess, fetchCompanyEmployeesFailure,
-  setCompanyEmployeesSearch, setCompanyEmployeesPage, setCompanyEmployeesLimit
+  setCompanyEmployeesSearch, setCompanyEmployeesPage, setCompanyEmployeesLimit,
+  editEmployeeStart, editEmployeeSuccess, editEmployeeFailure,
+  deleteEmployeeStart, deleteEmployeeSuccess, deleteEmployeeFailure
 } = companiesSlice.actions;
 export default companiesSlice.reducer; 

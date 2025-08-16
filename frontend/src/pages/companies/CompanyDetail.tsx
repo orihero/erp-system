@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import { Box, Tabs, Tab, Paper } from '@mui/material';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Box, Tabs, Tab, Paper, Typography, CircularProgress, Alert } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import { useAppSelector } from '@/store/hooks';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { fetchCompaniesStart } from '@/store/slices/companiesSlice';
 import type { Company } from '@/api/services/companies';
 import EditCompanyDrawer from './components/EditCompanyDrawer';
 import CompanyEmployeesDrawer from './components/CompanyEmployeesDrawer';
@@ -21,12 +22,54 @@ interface CompanyWithModules extends Company {
 
 const CompanyDetail: React.FC = () => {
   const { t } = useTranslation();
-  const { companyId } = useParams<{ companyId: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { companyId, tab: urlTab } = useParams<{ companyId: string; tab?: string }>();
+  const dispatch = useAppDispatch();
+  
   const companies = useAppSelector(state => state.companies.companies) as CompanyWithModules[];
+  const loading = useAppSelector(state => state.companies.loading);
   const company = useMemo(() => companies.find(c => c.id === companyId), [companies, companyId]);
-  const [tab, setTab] = useState(0);
+  
   const [editOpen, setEditOpen] = useState(false);
   const [employeesOpen, setEmployeesOpen] = useState(false);
+
+  // Load companies if not already loaded
+  useEffect(() => {
+    if (companies.length === 0 && !loading) {
+      dispatch(fetchCompaniesStart());
+    }
+  }, [companies.length, loading, dispatch]);
+
+  // Map tab names to indices
+  const tabMap = {
+    'about': 0,
+    'modules': 1,
+    'directories': 2,
+    'reports': 3
+  };
+
+  // Determine current tab from URL or default to 0
+  const currentTab = useMemo(() => {
+    if (urlTab && tabMap[urlTab as keyof typeof tabMap] !== undefined) {
+      return tabMap[urlTab as keyof typeof tabMap];
+    }
+    return 0;
+  }, [urlTab]);
+
+  // Handle tab change
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    const tabNames = ['about', 'modules', 'directories', 'reports'];
+    const newTabName = tabNames[newValue];
+    navigate(`/companies/${companyId}/${newTabName}`, { replace: true });
+  };
+
+  // Redirect to default tab if no tab is specified
+  useEffect(() => {
+    if (company && !urlTab && location.pathname === `/companies/${companyId}`) {
+      navigate(`/companies/${companyId}/about`, { replace: true });
+    }
+  }, [company, urlTab, companyId, navigate, location.pathname]);
 
   // Tabs: About, Modules, Directories, Reports
   const tabs = [
@@ -48,15 +91,50 @@ const CompanyDetail: React.FC = () => {
     },
   ];
 
+  // Show loading state
+  if (loading) {
+    return (
+      <Box sx={{ 
+        width: '100%', 
+        mt: 4, 
+        mx: { xs: 1, sm: 3, md: 5 },
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '400px'
+      }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Show error if company not found
+  if (!company) {
+    return (
+      <Box sx={{ 
+        width: '100%', 
+        mt: 4, 
+        mx: { xs: 1, sm: 3, md: 5 }
+      }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {t('companies.notFound', 'Company not found')}
+        </Alert>
+        <Typography variant="body1" color="text.secondary">
+          {t('companies.notFoundMessage', 'The company you are looking for does not exist or you do not have permission to view it.')}
+        </Typography>
+      </Box>
+    );
+  }
+
   // Prevent tab index out of range
-  const safeTab = tab >= tabs.length ? 0 : tab;
+  const safeTab = currentTab >= tabs.length ? 0 : currentTab;
 
   return (
     <Box sx={{ width: '100%', mt: 4, mx: { xs: 1, sm: 3, md: 5 } }}>
       <Paper sx={{ borderRadius: 4, mb: 3, boxShadow: 'none', bgcolor: 'transparent' }}>
         <Tabs
           value={safeTab}
-          onChange={(_, newValue) => setTab(newValue)}
+          onChange={handleTabChange}
           TabIndicatorProps={{
             style: {
               backgroundColor: ACTIVE_COLOR,

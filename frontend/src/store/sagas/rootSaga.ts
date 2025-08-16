@@ -5,6 +5,7 @@ import { directoriesSaga } from "./directoriesSaga";
 import { companiesSaga } from "./companiesSaga";
 import { companyDirectoriesSaga } from "./companyDirectoriesSaga";
 import directoryRecordsSaga from "./directoryRecordsSaga";
+import { navigationSaga } from "./navigationSaga";
 
 export function* rootSaga() {
   yield all([
@@ -14,5 +15,6 @@ export function* rootSaga() {
     companiesSaga(),
     companyDirectoriesSaga(),
     directoryRecordsSaga(),
+    navigationSaga(),
   ]);
 }

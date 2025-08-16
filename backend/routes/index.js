@@ -14,6 +14,7 @@ const reportTemplateRoutes = require("./reportTemplates");
 const directoryRecordRoutes = require("./directoryRecord.routes");
 const fileParserRoutes = require("./fileParser.routes");
 const cascadingRoutes = require("./cascading");
+const excelReportTemplateRoutes = require("./excelReportTemplates");
 
 // Mount routes 
 router.use("/directories", directoryRoutes);
@@ -30,5 +31,6 @@ router.use("/report-templates", reportTemplateRoutes);
 router.use("/directory-records", directoryRecordRoutes);
 router.use("/file-parser", fileParserRoutes);
 router.use("/cascading", cascadingRoutes);
+router.use("/excel-report-templates", excelReportTemplateRoutes);
 
 module.exports = router;

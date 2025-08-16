@@ -24,6 +24,7 @@ const Sidebar: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const modules = useSelector((state: RootState) => state.navigation.modules);
   const companyDirectories = useSelector((state: RootState) => state.navigation.companyDirectories);
+  const hasExcelReportAccess = useSelector((state: RootState) => state.navigation.hasExcelReportAccess);
   const isCollapsed = useSelector((state: RootState) => state.sidebar.isCollapsed);
   const { tWithFallback } = useTranslationWithFallback();
 
@@ -113,9 +114,9 @@ const Sidebar: React.FC = () => {
     <Box
       sx={{
         position: 'fixed',
-        top: 80,
+        top: 128, // 80 (header) + 48 (tabbar)
         left: 10,
-        height: 'calc(100vh - 120px)',
+        height: 'calc(100vh - 168px)', // 120 + 48 (tabbar)
         width: isCollapsed ? 80 : 240,
         bgcolor: 'transparent',
         zIndex: 10,
@@ -212,13 +213,51 @@ const Sidebar: React.FC = () => {
                   {renderDirectoryList(companyTypeDirectories, 0)}
                 </>
               )}
+              
             </>
           )}
         </List>
+        
+        {/* Reports menu item for non-super admin users with Excel report access */}
+        {!isSuperAdmin && hasExcelReportAccess && (
+          <>
+            <Divider sx={{ my: 2 }} />
+            <List sx={{ width: '100%', p: 0 }}>
+              <Tooltip title={isCollapsed ? tWithFallback('sidebar.reports', 'Reports') : ''} placement="right">
+                <ListItemButton
+                  sx={{ 
+                    borderRadius: 3, 
+                    my: 1, 
+                    px: isCollapsed ? 1 : 2, 
+                    minHeight: 56, 
+                    justifyContent: isCollapsed ? 'center' : 'flex-start',
+                    '&.Mui-selected': { bgcolor: '#eef2f5' } 
+                  }}
+                  selected={location.pathname === '/reports'}
+                  onClick={() => navigate('/reports')}
+                >
+                  <ListItemIcon sx={{ 
+                    minWidth: isCollapsed ? 0 : 40, 
+                    color: '#1a1e1c',
+                    justifyContent: 'center'
+                  }}>
+                    <Icon icon="streamline-plump:file-report" width={24} height={24} />
+                  </ListItemIcon>
+                  {!isCollapsed && (
+                    <ListItemText
+                      primary={tWithFallback('sidebar.reports', 'Reports')}
+                      primaryTypographyProps={{ fontSize: 15, fontWeight: 500, color: '#1a1e1c' }}
+                    />
+                  )}
+                </ListItemButton>
+              </Tooltip>
+            </List>
+          </>
+        )}
+        
         {/* Settings section at the bottom for non-super_admin */}
         {!isSuperAdmin && (
           <>
-            <Divider sx={{ my: 2 }} />
             <List sx={{ width: '100%', p: 0 }}>
               <Tooltip title={isCollapsed ? settingsItem.label : ''} placement="right">
                 <ListItemButton

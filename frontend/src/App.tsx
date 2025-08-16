@@ -164,6 +164,7 @@ const AppRoutes: React.FC = () => {
             </PrivateRoute>
           }>
             <Route index element={<CompanyDetail />} />
+            <Route path=":tab" element={<CompanyDetail />} />
           </Route>
 
           <Route path="/modules" element={

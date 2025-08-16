@@ -40,8 +40,8 @@ export const usersService = {
     const response = await api.put<UsersResponse['users'][0]>(`/api/users/${id}`, data);
     return response.data;
   },
-  getNavigation: async (): Promise<NavigationResponse> => {
-    const { data } = await api.get<NavigationResponse>('/api/users/navigation');
+  getNavigation: async (params?: { moduleId?: string }): Promise<NavigationResponse> => {
+    const { data } = await api.get<NavigationResponse>('/api/users/navigation', { params });
     return data;
   }
 }; 

@@ -5,7 +5,9 @@ import {
   addCompanyStart, addCompanySuccess, addCompanyFailure,
   editCompanyStart, editCompanySuccess, editCompanyFailure,
   deleteCompanyStart, deleteCompanySuccess, deleteCompanyFailure,
-  fetchCompanyEmployeesStart, fetchCompanyEmployeesSuccess, fetchCompanyEmployeesFailure
+  fetchCompanyEmployeesStart, fetchCompanyEmployeesSuccess, fetchCompanyEmployeesFailure,
+  editEmployeeStart, editEmployeeSuccess, editEmployeeFailure,
+  deleteEmployeeStart, deleteEmployeeSuccess, deleteEmployeeFailure
 } from '../slices/companiesSlice';
 import { showNotification } from '../slices/notificationSlice';
 import { RootState } from '../index';
@@ -75,10 +77,35 @@ function* fetchCompanyEmployeesSaga(action: PayloadAction<{ companyId: string; p
   }
 }
 
+function* editEmployeeSaga(action: PayloadAction<{ id: string; data: Partial<{ firstname: string; lastname: string; email: string; status: string; roles: string[] }> }>) {
+  try {
+    const { id, data } = action.payload;
+    const response = yield call(companiesApi.editEmployee, id, data);
+    yield put(editEmployeeSuccess(response.data));
+    yield put(showNotification({ message: 'Employee updated successfully', type: 'success' }));
+  } catch (error: any) {
+    yield put(editEmployeeFailure(error.message || 'Failed to edit employee'));
+    yield put(showNotification({ message: error.message || 'Failed to edit employee', type: 'error' }));
+  }
+}
+
+function* deleteEmployeeSaga(action: PayloadAction<string>) {
+  try {
+    yield call(companiesApi.deleteEmployee, action.payload);
+    yield put(deleteEmployeeSuccess(action.payload));
+    yield put(showNotification({ message: 'Employee deleted successfully', type: 'success' }));
+  } catch (error: any) {
+    yield put(deleteEmployeeFailure(error.message || 'Failed to delete employee'));
+    yield put(showNotification({ message: error.message || 'Failed to delete employee', type: 'error' }));
+  }
+}
+
 export function* companiesSaga() {
   yield takeLatest(fetchCompaniesStart.type, fetchCompaniesSaga);
   yield takeLatest(addCompanyStart.type, addCompanySaga);
   yield takeLatest(editCompanyStart.type, editCompanySaga);
   yield takeLatest(deleteCompanyStart.type, deleteCompanySaga);
   yield takeLatest(fetchCompanyEmployeesStart.type, fetchCompanyEmployeesSaga);
+  yield takeLatest(editEmployeeStart.type, editEmployeeSaga);
+  yield takeLatest(deleteEmployeeStart.type, deleteEmployeeSaga);
 } 

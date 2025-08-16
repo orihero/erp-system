@@ -2,14 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, Card, CardContent, Typography, IconButton, CircularProgress, Grid } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store';
 import reportService from '../../services/reportService';
 import { ReportTemplate } from '../../types/report';
+import ExcelReports from './ExcelReports';
 
 const Reports: React.FC = () => {
   const { t } = useTranslation();
+  const user = useSelector((state: RootState) => state.auth.user);
   const [reportStructures, setReportStructures] = useState<ReportTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Determine if user is super_admin with no company
+  const isSuperAdmin = user && Array.isArray(user.roles) && user.roles.some((role) => role.name === 'super_admin') && (user.company_id === null || user.company_id === undefined);
 
   const fetchReports = async () => {
     setLoading(true);
@@ -22,8 +29,11 @@ const Reports: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchReports();
-  }, []);
+    // Only fetch super admin reports if user is super admin
+    if (isSuperAdmin) {
+      fetchReports();
+    }
+  }, [isSuperAdmin]);
 
   const handleCreateReport = () => {
     // Open report wizard in a new tab
@@ -45,6 +55,12 @@ const Reports: React.FC = () => {
     }
   };
 
+  // If user is not super admin, show Excel reports
+  if (!isSuperAdmin) {
+    return <ExcelReports />;
+  }
+
+  // Super admin reports view
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
