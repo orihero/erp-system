@@ -7,7 +7,18 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pm2:build": "pm2 start ecosystem.config.js --only erp-frontend-build",
+    "pm2:serve": "pm2 start ecosystem.config.js --only erp-frontend-serve",
+    "pm2:start": "npm run build && pm2 start ecosystem.config.js",
+    "pm2:start:prod": "npm run build && pm2 start ecosystem.config.js --env production",
+    "pm2:stop": "pm2 stop ecosystem.config.js",
+    "pm2:restart": "pm2 restart ecosystem.config.js",
+    "pm2:reload": "pm2 reload ecosystem.config.js",
+    "pm2:delete": "pm2 delete ecosystem.config.js",
+    "pm2:logs": "pm2 logs",
+    "pm2:monit": "pm2 monit",
+    "pm2:status": "pm2 status"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
