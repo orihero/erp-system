@@ -246,18 +246,22 @@ class UserFactory {
 
   static async getUserRoles(userId, companyId = null) {
     try {
-      const { UserRoleAssignment, UserRole, Permission, RolePermission } = require('../models');
-      // Find all role assignments for this user (optionally filtered by company)
-      const where = { user_id: userId };
+      const { User, UserRole, Permission, RolePermission } = require('../models');
+      
+      // Find user with roles using the same pattern as CompanyFactory.getEmployees
+      const where = { id: userId };
       if (companyId) {
         where.company_id = companyId;
       }
-      const assignments = await UserRoleAssignment.findAll({
+      
+      const user = await User.findOne({
         where,
         include: [
           {
             model: UserRole,
-            as: 'role',
+            as: 'roles',
+            attributes: ['id', 'name', 'description'],
+            through: { attributes: [] },
             include: [
               {
                 model: Permission,
@@ -268,8 +272,12 @@ class UserFactory {
           }
         ]
       });
-      const roles = assignments.map(a => a.role).filter(Boolean);
-      return roles;
+      
+      if (!user) {
+        return [];
+      }
+      
+      return user.roles || [];
     } catch (error) {
       console.error('Error getting user roles:', error);
       throw error;

@@ -44,7 +44,7 @@ router.delete(
 router.post(
   "/roles/:roleId/permissions",
   authenticateUser,
-  authorize('create', null, null, null, 'role_permissions.create'),
+  authorize('create', null, null, null, 'roles.manage'),
   checkRole(["super_admin"]),
   permissionsController.assignPermissionToRole
 );
@@ -53,7 +53,7 @@ router.post(
 router.get(
   "/roles/:roleId/permissions",
   authenticateUser,
-  authorize('read', null, null, null, 'role_permissions.view'),
+  authorize('read', null, null, null, 'roles.view'),
   checkRole(["super_admin"]),
   permissionsController.getRolePermissions
 );
@@ -62,7 +62,7 @@ router.get(
 router.delete(
   "/roles/:roleId/permissions/:permissionId",
   authenticateUser,
-  authorize('delete', null, null, null, 'role_permissions.delete'),
+  authorize('delete', null, null, null, 'roles.manage'),
   checkRole(["super_admin"]),
   permissionsController.revokePermissionFromRole
 );

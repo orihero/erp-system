@@ -74,7 +74,7 @@ const CompaniesTable: React.FC = () => {
               <TableRow key={company.id} hover style={{ cursor: 'pointer' }} onClick={e => {
                 // Prevent row click if clicking on an action button
                 if ((e.target as HTMLElement).closest('button')) return;
-                navigate(`/companies/${company.id}`);
+                navigate(`/companies/${company.id}/about`);
               }}>
                 <TableCell>{company.name}</TableCell>
                 <TableCell>{company.email}</TableCell>

@@ -1,14 +1,17 @@
-import React, { useEffect } from 'react';
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Avatar, IconButton, Box, TextField, TableFooter, TablePagination, CircularProgress } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Avatar, IconButton, Box, TextField, TableFooter, TablePagination, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import {
   fetchCompanyEmployeesStart,
   setCompanyEmployeesSearch,
   setCompanyEmployeesPage,
-  setCompanyEmployeesLimit
+  setCompanyEmployeesLimit,
+  editEmployeeStart,
+  deleteEmployeeStart
 } from '../../../store/slices/companiesSlice';
 import { useTranslation } from 'react-i18next';
+import EditEmployeeDrawer from './EditEmployeeDrawer';
 
 interface CompanyEmployeesTableProps {
   companyId: string;
@@ -24,6 +27,11 @@ const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId
   const page = useAppSelector(state => state.companies.companyEmployeesPage);
   const limit = useAppSelector(state => state.companies.companyEmployeesLimit);
   const pagination = useAppSelector(state => state.companies.companyEmployeesPagination);
+  
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<any>(null);
 
   useEffect(() => {
     if (companyId) {
@@ -41,6 +49,53 @@ const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId
 
   const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setCompanyEmployeesLimit(parseInt(event.target.value, 10)));
+  };
+
+  const handleEditEmployee = (employee: any) => {
+    setSelectedEmployee(employee);
+    setEditDrawerOpen(true);
+  };
+
+  const handleDeleteEmployee = (employee: any) => {
+    setEmployeeToDelete(employee);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleEditSave = (id: string, data: any) => {
+    // Format the data for the API
+    const formattedData = {
+      ...data,
+      roles: Array.isArray(data.roles) ? data.roles : []
+    };
+    dispatch(editEmployeeStart({ id, data: formattedData }));
+    setEditDrawerOpen(false);
+    setSelectedEmployee(null);
+    // Refresh the employee list after successful edit
+    setTimeout(() => {
+      dispatch(fetchCompanyEmployeesStart({ companyId, page, limit, search }));
+    }, 1000);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (employeeToDelete) {
+      dispatch(deleteEmployeeStart(employeeToDelete.id));
+      setDeleteDialogOpen(false);
+      setEmployeeToDelete(null);
+      // Refresh the employee list after successful delete
+      setTimeout(() => {
+        dispatch(fetchCompanyEmployeesStart({ companyId, page, limit, search }));
+      }, 1000);
+    }
+  };
+
+  const handleEditClose = () => {
+    setEditDrawerOpen(false);
+    setSelectedEmployee(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setEmployeeToDelete(null);
   };
 
   return (
@@ -101,10 +156,10 @@ const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId
                   <span style={{ color: emp.status && emp.status === 'active' ? '#22c55e' : '#888', fontWeight: 600 }}>{emp.status || '-'}</span>
                 </TableCell>
                 <TableCell align="right">
-                  <IconButton size="small">
+                  <IconButton size="small" onClick={() => handleEditEmployee(emp)}>
                     <Icon icon="ph:pencil-simple" width={20} />
                   </IconButton>
-                  <IconButton size="small">
+                  <IconButton size="small" onClick={() => handleDeleteEmployee(emp)}>
                     <Icon icon="ph:trash" width={20} />
                   </IconButton>
                 </TableCell>
@@ -132,7 +187,32 @@ const CompanyEmployeesTable: React.FC<CompanyEmployeesTableProps> = ({ companyId
           </TableFooter>
         </Table>
       </TableContainer>
-      {/* TODO: EmployeeEditDrawer will be added here */}
+      
+      {/* Edit Employee Drawer */}
+      <EditEmployeeDrawer
+        open={editDrawerOpen}
+        employee={selectedEmployee}
+        onClose={handleEditClose}
+        onSave={handleEditSave}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+        <DialogTitle>{t('companies.deleteEmployee', 'Delete Employee')}</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {t('companies.deleteEmployeeConfirm', 'Are you sure you want to delete')} <strong>{employeeToDelete?.firstname} {employeeToDelete?.lastname}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} variant="outlined">
+            {t('common.cancel', 'Cancel')}
+          </Button>
+          <Button onClick={handleDeleteConfirm} variant="contained" color="error">
+            {t('common.delete', 'Delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

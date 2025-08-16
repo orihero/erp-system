@@ -12,7 +12,6 @@ const api = axios.create({
   },
   // Add response type configuration for proper UTF-8 handling
   responseType: 'json',
-  responseEncoding: 'utf8',
 });
 
 // Add request interceptor to add auth token
@@ -20,12 +19,13 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (token) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
     // Add timestamp to prevent caching for module requests
     if (config.url?.includes('/api/modules')) {
       config.params = {
-        ...config.params,
+        ...(config.params as Record<string, unknown>),
         _t: new Date().getTime(),
       };
     }

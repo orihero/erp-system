@@ -125,21 +125,21 @@ module.exports = {
 
   async getNavigation(req, res) {
     try {
-      const user = await userFactory.findById(req.user.id);
+      // The authenticateUser middleware already loads the user with roles and permissions
+      const user = req.user;
       if (!user) {
         return res.status(404).json({ error: "User not found." });
       }
-      let roles;
-      try {
-        roles = await UserFactory.getUserRoles(user.id, user.company_id);
-      } catch (err) {
-        return res.status(500).json({ error: "Failed to retrieve user roles. Please try again later." });
-      }
+      
+      const roles = user.roles;
       if (!roles || roles.length === 0) {
         return res.status(403).json({ error: "No roles assigned to this user." });
       }
       const isSuperAdmin = roles.some(role => role.is_super_admin);
-      const { CompanyModule, Module, CompanyDirectory, Directory } = require('../models');
+      const { CompanyModule, Module, CompanyDirectory, Directory, ExcelReportTemplate } = require('../models');
+      
+      // Get module ID from query params (for module-specific filtering)
+      const moduleId = req.query.moduleId;
       let enabledCompanyModules, companyDirectories;
       try {
         enabledCompanyModules = await CompanyModule.findAll({
@@ -240,10 +240,50 @@ module.exports = {
       const systemDirectoriesArr = companyDirectories
         .filter(cd => cd.directory && cd.directory.directory_type === 'System')
         .map(cd => ({ ...cd.directory.toJSON() }));
+
+      // Check if user has access to Excel report templates
+      let hasExcelReportAccess = false;
+      if (!isSuperAdmin && user.company_id) {
+        try {
+          // Build userPermissions array for non-super admin users
+          const userPermissions = [];
+          roles.forEach(role => {
+            (role.permissions || []).forEach(permission => {
+              userPermissions.push(permission);
+            });
+          });
+          
+          // Check if user has reports.view permission
+          const hasReportsPermission = userPermissions.some(p => 
+            p.name === 'reports.view' || p.name === 'reports.manage'
+          );
+
+          if (hasReportsPermission) {
+            // Check if there are any Excel report templates for this company and module
+            const whereClause = { company_id: user.company_id };
+            
+            // If moduleId is provided, filter by that specific module
+            if (moduleId) {
+              whereClause.selected_modules = { [require('sequelize').Op.contains]: [moduleId] };
+            }
+            
+            const excelTemplatesCount = await ExcelReportTemplate.count({
+              where: whereClause
+            });
+            hasExcelReportAccess = excelTemplatesCount > 0;
+          }
+        } catch (err) {
+          console.error('Error checking Excel report access:', err);
+          // Don't fail the entire request, just set access to false
+          hasExcelReportAccess = false;
+        }
+      }
+
       res.json({
         modules,
         companyDirectories: companyDirectoriesArr,
-        systemDirectories: systemDirectoriesArr
+        systemDirectories: systemDirectoriesArr,
+        hasExcelReportAccess
       });
     } catch (error) {
       console.error("Error fetching user navigation:", error);
@@ -253,22 +293,19 @@ module.exports = {
 
   async getProfile(req, res) {
     try {
-      const user = await userFactory.findById(req.user.id);
+      // The authenticateUser middleware already loads the user with roles and permissions
+      const user = req.user;
       if (!user) {
         return res.status(404).json({ error: "User not found." });
       }
-      let roles;
-      try {
-        roles = await UserFactory.getUserRoles(user.id, user.company_id);
-      } catch (err) {
-        return res.status(500).json({ error: "Failed to retrieve user roles for profile." });
-      }
-      if (!roles || roles.length === 0) {
+      
+      if (!user.roles || user.roles.length === 0) {
         return res.status(403).json({ error: "No roles assigned to this user." });
       }
+      
       res.json({
         ...user.toJSON(),
-        roles: roles.map(role => ({
+        roles: user.roles.map(role => ({
           id: role.id,
           name: role.name,
           description: role.description,
@@ -324,18 +361,19 @@ module.exports = {
 
   async getMe(req, res) {
     try {
-      const user = await UserFactory.findByEmail(req.user.email);
+      // The authenticateUser middleware already loads the user with roles and permissions
+      const user = req.user;
       if (!user) {
         return res.status(404).json({ message: "User not found." });
       }
-      const roles = await UserFactory.getUserRoles(user.id, user.company_id);
+      
       res.json({
         id: user.id,
         email: user.email,
         firstname: user.firstname,
         lastname: user.lastname,
         company_id: user.company_id,
-        roles: roles.map(role => role.name)
+        roles: user.roles.map(role => role.name)
       });
     } catch (error) {
       console.error("Error getting current user:", error);

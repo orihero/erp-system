@@ -188,7 +188,6 @@
     "editFieldMetadata": "Edit Field Metadata",
     "fieldMetadataDescription": "Configure metadata for field:",
     "fieldMetadataHelp": "Common metadata keys include: fieldOrder, isVisibleOnTable, isRequired, validationRules, etc.",
-    "metadata": "Metadata",
     "metadata": {
       "title": "Directory Metadata Editor",
       "description": "Edit directory and field metadata. Changes will affect how the directory is displayed and behaves.",
@@ -231,6 +230,8 @@
     "bindDirectoryTo": "Bind Directory to {{module}}",
     "noDirectoriesToBind": "No directories available to bind.",
     "bindSelected": "Bind Selected",
+    "addDirectory": "Add Directory",
+    "noDirectoriesFound": "No directories found matching your search.",
     "directories": {
       "title": "Directories",
       "name": "Name",
@@ -280,7 +281,17 @@
     "statusOptions": {
       "active": "Active",
       "inactive": "Inactive"
-    }
+    },
+    "notFound": "Company not found",
+    "notFoundMessage": "The company you are looking for does not exist or you do not have permission to view it.",
+    "editEmployee": "Edit Employee",
+    "deleteEmployee": "Delete Employee",
+    "deleteEmployeeConfirm": "Are you sure you want to delete",
+    "noEmployeeSelected": "No employee selected for editing.",
+    "saveChanges": "Save Changes",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "roles": "Roles"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -555,6 +566,19 @@
     "insertText": "Text",
     "insertTable": "Table",
     "insertChart": "Chart",
+    "excelReports": "Excel Reports",
+    "createExcelTemplate": "Create Excel Template",
+    "noExcelTemplates": "No Excel Report Templates",
+    "noExcelTemplatesDescription": "Create your first Excel report template to get started",
+    "createFirstTemplate": "Create First Template",
+    "statusDraft": "Draft",
+    "statusConfigured": "Configured",
+    "statusCompleted": "Completed",
+    "period": "Period",
+    "directories": "Directories",
+    "modules": "Modules",
+    "generate": "Generate Report",
+    "generating": "Generating...",
     "financial": {
       "title": "Financial Reports",
       "description": "View and analyze financial data, including revenue, expenses, and profit margins."
@@ -589,7 +613,60 @@
       "configurationComingSoon": "Configuration options coming soon...",
       "previewComingSoon": "Preview functionality coming soon...",
       "noDirectories": "No directories available",
-      "noDirectoriesDescription": "This company has no directories bound to it yet."
+      "noDirectoriesDescription": "This company has no directories bound to it yet.",
+      "periodAndDirectorySelection": "Period and Directory Selection",
+      "downloadAndUpload": "Download & Upload Report",
+      "selectPeriod": "Select Report Period",
+      "periodDescription": "Choose the date range for your Excel report. This will filter the data based on the selected period.",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "selectStartDate": "Select start date",
+      "selectEndDate": "Select end date",
+      "invalidDateRange": "End date must be after start date",
+      "validDateRange": "Date range selected: {{startDate}} to {{endDate}}",
+      "quickPeriods": "Quick Period Selection",
+      "lastWeek": "Last Week",
+      "lastMonth": "Last Month",
+      "lastQuarter": "Last Quarter",
+      "lastYear": "Last Year",
+      "selectDirectories": "Select Directories",
+      "directoryDescription": "Choose which directories to include in your Excel report. You can select multiple directories.",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "noDirectories": "No enabled directories available for this company.",
+      "directoriesSelected": "{{count}} directory(ies) selected",
+      "downloadUploadDescription": "Create a draft, download the Excel file with your data, configure it, and upload the completed report.",
+      "reportName": "Report Name",
+      "enterReportName": "Enter report name",
+      "reportNamePlaceholder": "e.g., Monthly Sales Report",
+      "reportSummary": "Report Summary",
+      "company": "Company",
+      "period": "Period",
+      "noPeriodSelected": "No period selected",
+      "selectedDirectories": "Selected Directories",
+      "noDirectoriesSelected": "No directories selected",
+      "directoriesCount": "{{count}} directory(ies) selected",
+      "actions": "Actions",
+      "createDraft": "Create Draft",
+      "createDraftDescription": "Create a draft to save your report configuration",
+      "creatingDraft": "Creating Draft...",
+      "downloadExcel": "Download Excel File",
+      "downloadDescription": "Download Excel file with your data and DynamicReport sheet for configuration",
+      "downloading": "Downloading...",
+      "uploadConfigured": "Upload Configured Report",
+      "selectFile": "Select File",
+      "uploadFile": "Upload File",
+      "uploadDescription": "Upload your configured Excel file to complete the report",
+      "uploading": "Uploading...",
+      "instructions": "1. Create a draft to save your configuration. 2. Download the Excel file which contains your data in separate sheets and a DynamicReport sheet for configuration. 3. Configure your report in the DynamicReport sheet. 4. Upload the completed file to finish the process.",
+      "createDraftFirst": "Please create a draft first",
+      "downloadSuccess": "Excel file downloaded successfully",
+      "downloadError": "Failed to download Excel file",
+      "draftCreated": "Draft created successfully",
+      "draftError": "Failed to create draft",
+      "invalidFileType": "Please select a valid Excel file (.xlsx or .xls)",
+      "uploadSuccess": "File uploaded successfully",
+      "uploadError": "Failed to upload file"
     },
     "common": {
       "loading": "Loading...",
@@ -615,7 +692,10 @@
         "name": "CONCATENATE",
         "description": "Combines values from multiple columns into one string",
         "syntax": "CONCATENATE(column1, separator, column2, ...)",
-        "examples": ["CONCATENATE(\"first_name\", \" \", \"last_name\")", "CONCATENATE(\"name\", \" - \", \"category\")"]
+        "examples": [
+          "CONCATENATE(\"first_name\", \" \", \"last_name\")",
+          "CONCATENATE(\"name\", \" - \", \"category\")"
+        ]
       },
       "LEFT": {
         "name": "LEFT",
@@ -669,7 +749,10 @@
         "name": "SUBSTITUTE",
         "description": "Replaces text in values in a column",
         "syntax": "SUBSTITUTE(column_name, old_text, new_text, instance_num)",
-        "examples": ["SUBSTITUTE(\"name\", \"World\", \"Excel\")", "SUBSTITUTE(\"description\", \"old\", \"new\")"]
+        "examples": [
+          "SUBSTITUTE(\"name\", \"World\", \"Excel\")",
+          "SUBSTITUTE(\"description\", \"old\", \"new\")"
+        ]
       },
       "SUM": {
         "name": "SUM",
@@ -777,73 +860,109 @@
         "name": "IF",
         "description": "Returns one value if a condition is true and another if it is false",
         "syntax": "IF(column_name, operator, value, value_if_true, value_if_false)",
-        "examples": ["IF(\"amount\", \">\", \"100\", \"High\", \"Low\")", "IF(\"status\", \"=\", \"active\", \"Valid\", \"Invalid\")"]
+        "examples": [
+          "IF(\"amount\", \">\", \"100\", \"High\", \"Low\")",
+          "IF(\"status\", \"=\", \"active\", \"Valid\", \"Invalid\")"
+        ]
       },
       "AND": {
         "name": "AND",
         "description": "Returns TRUE if all conditions are TRUE for values in columns",
         "syntax": "AND(column1, operator1, value1, column2, operator2, value2, ...)",
-        "examples": ["AND(\"amount\", \">\", \"0\", \"amount\", \"<\", \"100\")", "AND(\"status\", \"=\", \"active\", \"type\", \"=\", \"premium\")"]
+        "examples": [
+          "AND(\"amount\", \">\", \"0\", \"amount\", \"<\", \"100\")",
+          "AND(\"status\", \"=\", \"active\", \"type\", \"=\", \"premium\")"
+        ]
       },
       "OR": {
         "name": "OR",
         "description": "Returns TRUE if any condition is TRUE for values in columns",
         "syntax": "OR(column1, operator1, value1, column2, operator2, value2, ...)",
-        "examples": ["OR(\"amount\", \">\", \"100\", \"amount\", \"<\", \"0\")", "OR(\"status\", \"=\", \"active\", \"type\", \"=\", \"premium\")"]
+        "examples": [
+          "OR(\"amount\", \">\", \"100\", \"amount\", \"<\", \"0\")",
+          "OR(\"status\", \"=\", \"active\", \"type\", \"=\", \"premium\")"
+        ]
       },
       "NOT": {
         "name": "NOT",
         "description": "Reverses the logic of a condition for values in a column",
         "syntax": "NOT(column_name, operator, value)",
-        "examples": ["NOT(\"amount\", \">\", \"10\")", "NOT(\"status\", \"=\", \"active\")"]
+        "examples": [
+          "NOT(\"amount\", \">\", \"10\")",
+          "NOT(\"status\", \"=\", \"active\")"
+        ]
       },
       "ISBLANK": {
         "name": "ISBLANK",
         "description": "Returns TRUE if values in a column are blank",
         "syntax": "ISBLANK(column_name)",
-        "examples": ["ISBLANK(\"name\")", "IF(ISBLANK(\"email\"), \"Empty\", \"Has Value\")"]
+        "examples": [
+          "ISBLANK(\"name\")",
+          "IF(ISBLANK(\"email\"), \"Empty\", \"Has Value\")"
+        ]
       },
       "ISNUMBER": {
         "name": "ISNUMBER",
         "description": "Returns TRUE if values in a column are numbers",
         "syntax": "ISNUMBER(column_name)",
-        "examples": ["ISNUMBER(\"amount\")", "IF(ISNUMBER(\"price\"), \"Valid\", \"Not a number\")"]
+        "examples": [
+          "ISNUMBER(\"amount\")",
+          "IF(ISNUMBER(\"price\"), \"Valid\", \"Not a number\")"
+        ]
       },
       "ISTEXT": {
         "name": "ISTEXT",
         "description": "Returns TRUE if values in a column are text",
         "syntax": "ISTEXT(column_name)",
-        "examples": ["ISTEXT(\"name\")", "IF(ISTEXT(\"description\"), UPPER(\"description\"), \"description\")"]
+        "examples": [
+          "ISTEXT(\"name\")",
+          "IF(ISTEXT(\"description\"), UPPER(\"description\"), \"description\")"
+        ]
       },
       "VLOOKUP": {
         "name": "VLOOKUP",
         "description": "Looks up a value in the first column of a range and returns a value in the same row",
         "syntax": "VLOOKUP(lookup_value, table_array, col_index_num, range_lookup)",
-        "examples": ["VLOOKUP(\"Apple\", A1:B10, 2, FALSE)", "VLOOKUP(A1, B1:D10, 3, TRUE)"]
+        "examples": [
+          "VLOOKUP(\"Apple\", A1:B10, 2, FALSE)",
+          "VLOOKUP(A1, B1:D10, 3, TRUE)"
+        ]
       },
       "HLOOKUP": {
         "name": "HLOOKUP",
         "description": "Looks up a value in the first row of a range and returns a value in the same column",
         "syntax": "HLOOKUP(lookup_value, table_array, row_index_num, range_lookup)",
-        "examples": ["HLOOKUP(\"Q1\", A1:D3, 2, FALSE)", "HLOOKUP(A1, B1:D3, 3, TRUE)"]
+        "examples": [
+          "HLOOKUP(\"Q1\", A1:D3, 2, FALSE)",
+          "HLOOKUP(A1, B1:D3, 3, TRUE)"
+        ]
       },
       "COUNTIF": {
         "name": "COUNTIF",
         "description": "Counts the number of values in a column that meet a criterion",
         "syntax": "COUNTIF(column_name, operator, value)",
-        "examples": ["COUNTIF(\"amount\", \">\", \"5\")", "COUNTIF(\"status\", \"=\", \"Active\")"]
+        "examples": [
+          "COUNTIF(\"amount\", \">\", \"5\")",
+          "COUNTIF(\"status\", \"=\", \"Active\")"
+        ]
       },
       "SUMIF": {
         "name": "SUMIF",
         "description": "Adds values in a column that meet a given criteria",
         "syntax": "SUMIF(column_name, operator, value)",
-        "examples": ["SUMIF(\"amount\", \">\", \"5\")", "SUMIF(\"amount\", \"=\", \"100\")"]
+        "examples": [
+          "SUMIF(\"amount\", \">\", \"5\")",
+          "SUMIF(\"amount\", \"=\", \"100\")"
+        ]
       },
       "AVERAGEIF": {
         "name": "AVERAGEIF",
         "description": "Returns the average of values in a column that meet a criterion",
         "syntax": "AVERAGEIF(column_name, operator, value)",
-        "examples": ["AVERAGEIF(\"amount\", \">\", \"5\")", "AVERAGEIF(\"amount\", \"=\", \"100\")"]
+        "examples": [
+          "AVERAGEIF(\"amount\", \">\", \"5\")",
+          "AVERAGEIF(\"amount\", \"=\", \"100\")"
+        ]
       }
     },
     "parameters": {

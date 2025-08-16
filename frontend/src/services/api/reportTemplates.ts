@@ -1,203 +1,110 @@
 import { ReportTemplate, TemplateBinding } from '../../types/reportTemplate';
 import { WizardStepData, WizardStepValidation } from '../../types/wizard';
 import { DataSource } from '../../types/report';
+import api from '../../api/config';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+export const reportTemplateAPI = {
 
-class ReportTemplateAPI {
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const token = localStorage.getItem('authToken');
-    
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : '',
-        ...options.headers,
-      },
-      ...options,
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Network error' }));
-      throw new Error(error.message || `HTTP ${response.status}`);
-    }
-
-    return response.json();
-  }
-
-  async listTemplates(params: {
+  // List templates
+  listTemplates: (params: {
     page?: number;
     limit?: number;
     category?: string;
     search?: string;
     companyId?: string;
-  } = {}): Promise<{
-    templates: ReportTemplate[];
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-    };
-  }> {
-    const queryParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        queryParams.append(key, value.toString());
-      }
-    });
+  } = {}) =>
+    api.get<{
+      templates: ReportTemplate[];
+      pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+      };
+    }>('/report-templates', { params }),
 
-    return this.request(`/report-templates?${queryParams}`);
-  }
+  // Get template by ID
+  getTemplate: (id: string) =>
+    api.get<ReportTemplate>(`/report-templates/${id}`),
 
-  async getTemplate(id: string): Promise<ReportTemplate> {
-    return this.request(`/report-templates/${id}`);
-  }
+  // Create template
+  createTemplate: (templateData: Partial<ReportTemplate>) =>
+    api.post<ReportTemplate>('/report-templates', templateData),
 
-  async createTemplate(templateData: Partial<ReportTemplate>): Promise<ReportTemplate> {
-    return this.request('/report-templates', {
-      method: 'POST',
-      body: JSON.stringify(templateData),
-    });
-  }
+  // Update template
+  updateTemplate: (id: string, templateData: Partial<ReportTemplate>) =>
+    api.put<ReportTemplate>(`/report-templates/${id}`, templateData),
 
-  async updateTemplate(id: string, templateData: Partial<ReportTemplate>): Promise<ReportTemplate> {
-    return this.request(`/report-templates/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(templateData),
-    });
-  }
+  // Delete template
+  deleteTemplate: (id: string) =>
+    api.delete<{ message: string }>(`/report-templates/${id}`),
 
-  async deleteTemplate(id: string): Promise<{ message: string }> {
-    return this.request(`/report-templates/${id}`, {
-      method: 'DELETE',
-    });
-  }
+  // Clone template
+  cloneTemplate: (id: string) =>
+    api.post<ReportTemplate>(`/report-templates/${id}/clone`),
 
-  async cloneTemplate(id: string): Promise<ReportTemplate> {
-    return this.request(`/report-templates/${id}/clone`, {
-      method: 'POST',
-    });
-  }
+  // Get template versions
+  getTemplateVersions: (id: string) =>
+    api.get<unknown[]>(`/report-templates/${id}/versions`),
 
-  async getTemplateVersions(id: string): Promise<unknown[]> {
-    return this.request(`/report-templates/${id}/versions`);
-  }
-
-  async restoreVersion(id: string, version: number): Promise<ReportTemplate> {
-    return this.request(`/report-templates/${id}/versions/${version}/restore`, {
-      method: 'POST',
-    });
-  }
+  // Restore version
+  restoreVersion: (id: string, version: number) =>
+    api.post<ReportTemplate>(`/report-templates/${id}/versions/${version}/restore`),
 
   // Binding management
-  async getTemplateBindings(id: string): Promise<TemplateBinding[]> {
-    return this.request(`/report-templates/${id}/bindings`);
-  }
+  getTemplateBindings: (id: string) =>
+    api.get<TemplateBinding[]>(`/report-templates/${id}/bindings`),
 
-  async createBinding(id: string, bindingData: Partial<TemplateBinding>): Promise<TemplateBinding> {
-    return this.request(`/report-templates/${id}/bindings`, {
-      method: 'POST',
-      body: JSON.stringify(bindingData),
-    });
-  }
+  createBinding: (id: string, bindingData: Partial<TemplateBinding>) =>
+    api.post<TemplateBinding>(`/report-templates/${id}/bindings`, bindingData),
 
-  async updateBinding(id: string, bindingId: string, bindingData: Partial<TemplateBinding>): Promise<TemplateBinding> {
-    return this.request(`/report-templates/${id}/bindings/${bindingId}`, {
-      method: 'PUT',
-      body: JSON.stringify(bindingData),
-    });
-  }
+  updateBinding: (id: string, bindingId: string, bindingData: Partial<TemplateBinding>) =>
+    api.put<TemplateBinding>(`/report-templates/${id}/bindings/${bindingId}`, bindingData),
 
-  async deleteBinding(id: string, bindingId: string): Promise<{ message: string }> {
-    return this.request(`/report-templates/${id}/bindings/${bindingId}`, {
-      method: 'DELETE',
-    });
-  }
+  deleteBinding: (id: string, bindingId: string) =>
+    api.delete<{ message: string }>(`/report-templates/${id}/bindings/${bindingId}`),
 
   // Wizard support
-  async getCategories(): Promise<Array<{ id: string; name: string; description: string }>> {
-    return this.request('/report-templates/wizard/categories');
-  }
+  getCategories: () =>
+    api.get<Array<{ id: string; name: string; description: string }>>('/report-templates/wizard/categories'),
 
-  async validateWizardStep(stepId: string, stepData: WizardStepData, allWizardData: Record<string, WizardStepData>): Promise<WizardStepValidation> {
-    return this.request('/report-templates/wizard/validate-step', {
-      method: 'POST',
-      body: JSON.stringify({ stepId, stepData, allWizardData }),
-    });
-  }
+  validateWizardStep: (stepId: string, stepData: WizardStepData, allWizardData: Record<string, WizardStepData>) =>
+    api.post<WizardStepValidation>('/report-templates/wizard/validate-step', { stepId, stepData, allWizardData }),
 
-  async previewTemplate(wizardData: Record<string, WizardStepData>): Promise<Record<string, unknown>> {
-    return this.request('/report-templates/wizard/preview', {
-      method: 'POST',
-      body: JSON.stringify(wizardData),
-    });
-  }
+  previewTemplate: (wizardData: Record<string, WizardStepData>) =>
+    api.post<Record<string, unknown>>('/report-templates/wizard/preview', wizardData),
 
   // Data source endpoints
-  async getDataSources(): Promise<DataSource[]> {
-    return this.request('/report-templates/data-sources');
-  }
+  getDataSources: () =>
+    api.get<DataSource[]>('/report-templates/data-sources'),
 
-  async getDataSourceSchema(id: string): Promise<Record<string, unknown>> {
-    return this.request(`/report-templates/data-sources/${id}/schema`);
-  }
+  getDataSourceSchema: (id: string) =>
+    api.get<Record<string, unknown>>(`/report-templates/data-sources/${id}/schema`),
 
-  async testDataSource(id: string): Promise<{ success: boolean; message: string }> {
-    return this.request(`/report-templates/data-sources/${id}/test`, {
-      method: 'POST',
-    });
-  }
+  testDataSource: (id: string) =>
+    api.post<{ success: boolean; message: string }>(`/report-templates/data-sources/${id}/test`),
 
-  async validateQuery(query: string, dataSourceId: string): Promise<{ isValid: boolean; errors: string[] }> {
-    return this.request('/report-templates/data-sources/validate-query', {
-      method: 'POST',
-      body: JSON.stringify({ query, dataSourceId }),
-    });
-  }
+  validateQuery: (query: string, dataSourceId: string) =>
+    api.post<{ isValid: boolean; errors: string[] }>('/report-templates/data-sources/validate-query', { query, dataSourceId }),
 
   // Report generation
-  async generateReport(id: string, parameters: Record<string, unknown> = {}, format: string = 'pdf'): Promise<{
-    executionId: string;
-    status: string;
-    message: string;
-  }> {
-    return this.request(`/report-templates/${id}/generate`, {
-      method: 'POST',
-      body: JSON.stringify({ parameters, format }),
-    });
-  }
+  generateReport: (id: string, parameters: Record<string, unknown> = {}, format: string = 'pdf') =>
+    api.post<{
+      executionId: string;
+      status: string;
+      message: string;
+    }>(`/report-templates/${id}/generate`, { parameters, format }),
 
-  async getExecutionHistory(params: {
+  getExecutionHistory: (params: {
     page?: number;
     limit?: number;
     templateId?: string;
-  } = {}): Promise<unknown> {
-    const queryParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        queryParams.append(key, value.toString());
-      }
-    });
+  } = {}) =>
+    api.get<unknown>('/report-templates/executions', { params }),
 
-    return this.request(`/report-templates/executions?${queryParams}`);
-  }
-
-  async downloadReport(executionId: string): Promise<Blob> {
-    const token = localStorage.getItem('authToken');
-    
-    const response = await fetch(`${API_BASE_URL}/report-templates/executions/${executionId}/download`, {
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    return response.blob();
-  }
-}
-
-export const reportTemplateAPI = new ReportTemplateAPI(); 
+  // Download report
+  downloadReport: (executionId: string) =>
+    api.get<Blob>(`/report-templates/executions/${executionId}/download`, {
+      responseType: 'blob',
+    }),
+}; 

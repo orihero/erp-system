@@ -42,6 +42,9 @@ export const companiesApi = {
   deleteCompany: (id: string) => api.delete(`/api/admin/companies/${id}`),
   getCompanyEmployees: (companyId: string, params?: { page?: number; limit?: number; search?: string }) =>
     api.get(`/api/companies/${companyId}/employees`, { params }),
+  editEmployee: (employeeId: string, data: Partial<{ firstname: string; lastname: string; email: string; status: string; roles: string[] }>) =>
+    api.put(`/api/users/${employeeId}`, data),
+  deleteEmployee: (employeeId: string) => api.delete(`/api/users/${employeeId}`),
   getCompanyReports: (companyId: string) =>
     api.get<ReportTemplate[]>(`/api/report-templates?companyId=${companyId}`),
   bindReportToCompany: (reportId: string, data: { companyId: string; [key: string]: unknown }) =>
